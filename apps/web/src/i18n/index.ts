@@ -7,7 +7,8 @@ export type Lang = (typeof LANGS)[number]
 type Dictionary = Record<string, string>
 
 // One chunk per language: a visit only downloads the one it uses. `ua` is also the fallback for keys the other
-// languages lack (en has far fewer), so every non-ua language loads it alongside.
+// languages lack (en lacks ~9%: vin.var.*, some plural forms), so every non-ua language loads it too - but for the
+// starting language only in the background (see `loadLang`), so it does not gate the first render.
 const LOADERS: Record<Lang, () => Promise<{ default: Dictionary }>> = {
   ua: () => import('./ua.json'),
   ru: () => import('./ru.json'),
@@ -56,23 +57,33 @@ void i18n.use(initReactI18next).init({
   fallbackLng: FALLBACK_LANG,
   interpolation: { escapeValue: false },
   // Resources arrive asynchronously; the app waits for `i18nReady` before its first render and for `loadLang` before a switch.
-  react: { useSuspense: false }
+  // 'added': components re-render when the background fallback dictionary arrives (default is no re-render).
+  react: { useSuspense: false, bindI18nStore: 'added' }
 })
 
-/** Fetches (once) the dictionary for `lang` plus the fallback, and registers it with i18next. */
-export async function loadLang(lang: Lang): Promise<void> {
-  const wanted = lang === FALLBACK_LANG ? [lang] : [lang, FALLBACK_LANG]
-  await Promise.all(
-    wanted
-      .filter(l => !i18n.hasResourceBundle(l, 'translation'))
-      .map(async l => {
-        const dict = await LOADERS[l]()
-        i18n.addResourceBundle(l, 'translation', dict.default, true, true)
-      })
-  )
+/**
+ * Fetches (once) the dictionary for `lang` and registers it with i18next. The fallback (`ua`) is awaited too unless
+ * `deferFallback`: then it loads in the background once the page has loaded (a failed fetch is ignored: missing keys just show as keys).
+ */
+export async function loadLang(lang: Lang, deferFallback = false): Promise<void> {
+  const load = async (l: Lang): Promise<void> => {
+    if (i18n.hasResourceBundle(l, 'translation')) return
+    const dict = await LOADERS[l]()
+    i18n.addResourceBundle(l, 'translation', dict.default, true, true)
+  }
+  if (lang === FALLBACK_LANG) return load(lang)
+  if (deferFallback) {
+    await load(lang)
+    // After the window `load` event, so the 180 KB does not compete with the first paint and the hero photo.
+    const start = (): void => void load(FALLBACK_LANG).catch(() => undefined)
+    if (document.readyState === 'complete') start()
+    else window.addEventListener('load', start, { once: true })
+    return
+  }
+  await Promise.all([load(lang), load(FALLBACK_LANG)])
 }
 
 /** Resolves when the starting language is loaded — await it before the first render. */
-export const i18nReady = loadLang(initialLang())
+export const i18nReady = loadLang(initialLang(), true)
 
 export default i18n

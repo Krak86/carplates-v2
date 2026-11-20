@@ -18,13 +18,19 @@ const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseI
 export const RELEASES: readonly ReleaseDay[] = [
   {
     date: '2026-11-20',
-    version: 'v2.1420',
+    version: 'v2.1425',
     items: [
       item(
         'improved',
         'Сторінка авто на повільному зв’язку з’являється швидше: службові скрипти моніторингу завантажуються після першого показу.',
         'Страница авто на медленной связи появляется быстрее: служебные скрипты мониторинга загружаются после первого показа.',
         'The vehicle page appears sooner on a slow connection: monitoring scripts now load after the first paint.'
+      ),
+      item(
+        'improved',
+        'Англомовна версія на повільному зв’язку завантажується швидше: резервний словник підтягується після показу сторінки.',
+        'Англоязычная версия на медленной связи загружается быстрее: резервный словарь подгружается после показа страницы.',
+        'The English version loads faster on a slow connection: the fallback dictionary now loads after the page is shown.'
       )
     ]
   },
