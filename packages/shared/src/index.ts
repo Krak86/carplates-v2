@@ -337,6 +337,7 @@ export {
   type WikipediaPage,
   type WikipediaSearch
 } from './wikimedia.js'
+export { commonsThumbUrl, HERO_THUMB_WIDTH, STRIP_THUMB_WIDTH } from './commons-thumb.js'
 export { REVIEW_SITES, reviewLinks, type ReviewSiteId, type ReviewSiteLang, type ReviewLink } from './reviewLinks.js'
 export {
   INFOCAR_TREES,

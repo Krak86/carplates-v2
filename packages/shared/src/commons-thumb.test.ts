@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { commonsThumbUrl } from '@/lib/commons-thumb'
+import { commonsThumbUrl, HERO_THUMB_WIDTH } from './commons-thumb.js'
 
 describe('commonsThumbUrl', () => {
   it('swaps the width of a Commons thumbnail', () => {
@@ -15,6 +15,15 @@ describe('commonsThumbUrl', () => {
     expect(commonsThumbUrl('https://upload.wikimedia.org/wikipedia/en/thumb/1/12/Car.png/960px-Car.png', 120)).toBe(
       'https://upload.wikimedia.org/wikipedia/en/thumb/1/12/Car.png/120px-Car.png'
     )
+  })
+
+  it('renders the hero at its own width', () => {
+    expect(
+      commonsThumbUrl(
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Car.jpg/1280px-Car.jpg',
+        HERO_THUMB_WIDTH
+      )
+    ).toBe('https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Car.jpg/960px-Car.jpg')
   })
 
   it('handles the thumb.wikimedia.org host and a trailing query string', () => {

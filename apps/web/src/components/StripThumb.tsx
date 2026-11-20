@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 
-import { commonsThumbUrl } from '@/lib/commons-thumb'
+import { commonsThumbUrl } from '@carplates/shared'
 
 type Props = {
   url: string
