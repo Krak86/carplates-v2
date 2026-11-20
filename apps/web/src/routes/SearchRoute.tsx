@@ -65,10 +65,16 @@ import HeroSkeleton from '@/components/HeroSkeleton'
 import ResultCardSkeleton from '@/components/ResultCardSkeleton'
 import HomeStatsSkeleton from '@/routes/stats/HomeStatsSkeleton'
 import HomeWantedSection from '@/routes/stats/HomeWantedSection'
+import { loadPacks } from '@/i18n'
+import { lazyWithPacks } from '@/i18n/lazy-with-packs'
 
-const loadResultCard = (): Promise<typeof import('@/components/ResultCard')> => import('@/components/ResultCard')
+// The idle warm-up fetches the card's `vin` pack too, so the first search renders without raw keys.
+const loadResultCard = async (): Promise<typeof import('@/components/ResultCard')> => {
+  const [module] = await Promise.all([import('@/components/ResultCard'), loadPacks(['vin'])])
+  return module
+}
 const ResultCard = lazy(loadResultCard)
-const VinResult = lazy(() => import('@/components/VinResult'))
+const VinResult = lazyWithPacks(() => import('@/components/VinResult'), 'vin', 'safety')
 const TopStatsPanel = lazy(() => import('@/routes/stats/TopStatsPanel'))
 const WeightModelsCards = lazy(() => import('@/routes/stats/WeightModelsCards'))
 

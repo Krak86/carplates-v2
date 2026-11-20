@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import type { Currency } from '@carplates/shared'
 
 import LazySection from '@/components/LazySection'
+import { lazyWithPacks } from '@/i18n/lazy-with-packs'
 
 // The same lazy chunks as ResultCard's model-level sections (Vite shares them); a section that needs a plate, VIN or the
 // car's own figures (history, VIN, wanted, auctions, assists) is not here. A new model-level section goes in both places.
@@ -16,13 +17,13 @@ const VehiclePhotos = lazy(() => import('@/components/VehiclePhotos'))
 const VideoReviews = lazy(() => import('@/components/VideoReviews'))
 const ReviewLinks = lazy(() => import('@/components/ReviewLinks'))
 const FuelEconomy = lazy(() => import('@/components/FuelEconomy'))
-const EstimatedValueSection = lazy(() => import('@/components/EstimatedValueSection'))
-const RdwSpecs = lazy(() => import('@/components/RdwSpecs'))
-const RdwRecalls = lazy(() => import('@/components/RdwRecalls'))
-const MotFaults = lazy(() => import('@/components/MotFaults'))
+const EstimatedValueSection = lazyWithPacks(() => import('@/components/EstimatedValueSection'), 'vin')
+const RdwSpecs = lazyWithPacks(() => import('@/components/RdwSpecs'), 'vin')
+const RdwRecalls = lazyWithPacks(() => import('@/components/RdwRecalls'), 'vin')
+const MotFaults = lazyWithPacks(() => import('@/components/MotFaults'), 'vin')
 const OpenEv = lazy(() => import('@/components/OpenEv'))
-const WikiSpecs = lazy(() => import('@/components/WikiSpecs'))
-const SafetyRatings = lazy(() => import('@/components/SafetyRatings'))
+const WikiSpecs = lazyWithPacks(() => import('@/components/WikiSpecs'), 'vin')
+const SafetyRatings = lazyWithPacks(() => import('@/components/SafetyRatings'), 'safety')
 const VehicleSizeSection = lazy(() => import('@/components/size/VehicleSizeSection'))
 
 type Props = {

@@ -1,12 +1,12 @@
-import { lazy } from 'react'
 import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 
 import LoadErrorBoundary from '@/components/LoadErrorBoundary'
 import { safetyStatsQuery } from '@/lib/queries'
 import HomeStatsSkeleton from '@/routes/stats/HomeStatsSkeleton'
+import { lazyWithPacks } from '@/i18n/lazy-with-packs'
 
-const SafetyModelsPanel = lazy(() => import('@/routes/safety/SafetyModelsPanel'))
+const SafetyModelsPanel = lazyWithPacks(() => import('@/routes/safety/SafetyModelsPanel'), 'safety')
 
 /** Mounted by `LazySection`, so its query and chunk start only once the section nears the viewport. */
 export default function HomeSafetySection(): ReactNode {

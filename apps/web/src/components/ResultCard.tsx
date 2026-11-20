@@ -103,6 +103,7 @@ import { bodyGuideShape, FLEET_PATH, readHref } from '@/routes/read/links'
 import ReadGuideLink from '@/components/ReadGuideLink'
 import { useUiStore } from '@/store/ui-store'
 import SectionSkeleton from '@/components/ui/SectionSkeleton'
+import { lazyWithPacks } from '@/i18n/lazy-with-packs'
 
 // Everything below the fold loads on demand (near the viewport, or a `?section=` share link): see LazySection.
 const FavoriteButton = lazy(() => import('@/components/FavoriteButton'))
@@ -129,7 +130,7 @@ const RdwRecalls = lazy(() => import('@/components/RdwRecalls'))
 const MotFaults = lazy(() => import('@/components/MotFaults'))
 const OpenEv = lazy(() => import('@/components/OpenEv'))
 const WikiSpecs = lazy(() => import('@/components/WikiSpecs'))
-const SafetyRatings = lazy(() => import('@/components/SafetyRatings'))
+const SafetyRatings = lazyWithPacks(() => import('@/components/SafetyRatings'), 'safety')
 const VehicleSizeSection = lazy(() => import('@/components/size/VehicleSizeSection'))
 
 type Props = {

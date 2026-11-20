@@ -42,6 +42,7 @@ import {
 } from '@/lib/queries'
 import { countryIso } from '@/components/vin/helpers'
 import { copyToClipboard } from '@/lib/share-section'
+import { loadPacks } from '@/i18n'
 
 export type CopyAllInfoParams = {
   vehicle: ExportVehicleInfo
@@ -268,7 +269,7 @@ export function useCopyAllInfoActions(params: CopyAllInfoParams): UseCopyAllInfo
   async function run(format: ExportFormat): Promise<boolean> {
     setPending(true)
     try {
-      const input = await gather()
+      const [input] = await Promise.all([gather(), loadPacks(['safety', 'vin'])])
       const report = buildExportReport(input, t)
       const stem = vehicleFileStem({ ...params.vehicle, plate: params.plate, vin: params.vin })
 
