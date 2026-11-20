@@ -1,3 +1,4 @@
+- [ ] Missing-key handler for the pack dictionaries (2026-11-20): `packs.test.ts` cannot see a pack key used through a shared / eager importer of an owner file (the prod trace found `stats.top.*` / `stats.weight.*` raw on the home page and `stats.spec.*` on `/read/extremes` this way). Add an i18next `missingKeyHandler` (`saveMissing: true`) that logs once per key in dev and adds a Sentry breadcrumb once per key in prod (skip keys of a pack that is still loading; `loadPacks` / `await i18nReady` must not trigger it). Read `i18n/` and the "Language dictionaries" section first; tests: Vitest, colocated.
 # carplates-v2 — roadmap
 
 Rebuild of `carsua.app`. The 2019 app was a GitHub-Pages SPA reading Azure Cosmos
