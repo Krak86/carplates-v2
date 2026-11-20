@@ -17,6 +17,16 @@ describe('commonsThumbUrl', () => {
     )
   })
 
+  it('handles the thumb.wikimedia.org host and a trailing query string', () => {
+    expect(
+      commonsThumbUrl(
+        'https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e7/Kia_Front.jpg/1280px-Kia_Front.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo'
+      )
+    ).toBe(
+      'https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e7/Kia_Front.jpg/250px-Kia_Front.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo'
+    )
+  })
+
   it('leaves other URLs untouched', () => {
     const own = 'https://carsua.app/photos/abc.avif'
     expect(commonsThumbUrl(own)).toBe(own)
