@@ -4923,3 +4923,15 @@ Trigger: Lighthouse on `/BC6743PH` (mobile, slow 4G): performance 42, FCP 7.0 s,
 - **Decision:** `staleTime: Infinity` stays, so an embedded page makes no mount fetch (HTML edge-cached at most a day, catalog rebuilt monthly; a refetch would only reintroduce the render-time failure). Pages without a usable embed (in-app navigation, parse failure) fetch as before. For a refresh on mount, set `staleTime: 0` when seeded from the embed.
 - **`/news`:** `NOINDEX` set in `apps/api/src/spa/sitemap.ts` (known page, `noindex`, no `alternates`, out of `sitemapPaths`); `/api/news*` stays blocked in robots (third-party headlines).
 - Tests: `sitemap.test.ts`, `spa.controller.test.ts` (news noindex, embed per page type), `catalog-text.test.ts` (escaping), `lib/catalog-embed.test.ts`. Version `v2.1414`.
+
+## Dictionary step 1: delta fallback (2026-11-20) ✅
+
+- Non-ua visitors no longer download the full `ua` (137 KB br) as the i18next fallback. `apps/web/i18n-fallback-plugin.ts` serves `src/i18n/<lang>.fallback.json` as a virtual module (the `ua` keys that language lacks; en 516 keys, 8.6 KB br; ru none), also registered in `vitest.config.ts`. The three language JSONs stay the only source.
+- `i18n/index.ts`: `FALLBACKS` (en only), `loadLang(lang, true)` loads the language and after window `load` merges the delta into the `ua` bundle (no overwrite). `loaded` set tracks full dictionaries (`hasResourceBundle('ua')` is true after a delta merge, so it cannot be used).
+- `lang-preload` and `meta.ts` unchanged. Test `i18n/fallback.test.ts`: en + delta and ru cover every `ua` key. Version `v2.1440`. Prod re-trace is an "After deploy" box in PLAN.md; step 2 (core + per-feature packs) is still open.
+
+## Dictionary step 2a, slice 1: route packs (2026-11-20) ✅
+
+- `apps/web/src/i18n/packs.ts` (`PACKS`: prefixes + `owners`), `i18n-fallback-plugin.ts` now serves `<lang>.<slice>.pack.json` / `<lang>.<slice>.delta.pack.json` (core = every key outside a pack), `i18n/index.ts` `SLICES`/`DELTAS`, `loadPacks`, `requestedPacks` (a language switch reloads the packs of the open route), `i18n/lazy-with-packs.ts` (`lazyWithPacks`, route chunk + pack in parallel).
+- Packs: about, admin, profile, settings, sitemap, alternatives, discuss, relax (only route-exclusive prefixes; ~14% of the dictionary). `ua` core 120 KB br (was 137), en core 95 KB br. `lang-preload` matches the `\0i18n:<lang>-core` chunk.
+- Tests: `fallback.test.ts` (slices partition each language, only en/core has gaps), `packs.test.ts` (owners guard). `i18nReady` loads all packs in test mode. Version `v2.1441`. CLAUDE.md i18n convention and features-reference updated.

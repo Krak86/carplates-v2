@@ -11,6 +11,8 @@ import type { HtmlTagDescriptor, Plugin } from 'vite'
 import { imagetools } from 'vite-imagetools'
 import { VitePWA } from 'vite-plugin-pwa'
 
+import { i18nFallback } from './i18n-fallback-plugin'
+
 const DAY_S = 24 * 60 * 60
 const BRAND_COLOR = '#1d4ed8'
 
@@ -87,7 +89,7 @@ function preloadHints(): Plugin {
         const langUrls: Record<string, string> = {}
         for (const lang of LANG_CHUNKS) {
           const chunk = Object.values(bundle).find(
-            f => f.type === 'chunk' && f.facadeModuleId?.replaceAll('\\', '/').endsWith(`/src/i18n/${lang}.json`)
+            f => f.type === 'chunk' && f.facadeModuleId === `\0i18n:${lang}-core`
           )
           if (chunk) langUrls[lang] = `/${chunk.fileName}`
         }
@@ -143,6 +145,7 @@ export default defineConfig({
     react(),
     tailwindcss(),
     imagetools(),
+    i18nFallback(),
     preloadHints(),
     VitePWA({
       registerType: 'prompt',

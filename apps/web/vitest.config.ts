@@ -3,8 +3,10 @@ import { fileURLToPath } from 'node:url'
 import react from '@vitejs/plugin-react'
 import { defineProject } from 'vitest/config'
 
+import { i18nFallback } from './i18n-fallback-plugin'
+
 export default defineProject({
-  plugins: [react()],
+  plugins: [react(), i18nFallback()],
   resolve: {
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) }
   },

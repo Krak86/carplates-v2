@@ -102,5 +102,15 @@ export function injectMeta(html: string, metaBlock: string): string {
  * `<link rel="preload" as="image">` of a plate page's hero photo, so the browser fetches it while the JS bundle loads instead of
  * after the plate request resolves. `crossorigin` matches the hero `<img crossOrigin="anonymous">` (else the preload is not reused).
  */
-export const renderHeroPreload = (url: string): string =>
-  `<link rel="preload" as="image" href="${esc(url)}" crossorigin="anonymous" ${HERO_PRELOAD_MARK}>`
+export const renderHeroPreload = (url: string): string => {
+  // `preconnect` (same `crossorigin` mode as the image) opens the DNS + TCP + TLS to the photo host right away: the low-priority
+  // preload may wait behind the JS bundle, but the handshake itself costs no bandwidth and is then ready when the image is sent.
+  let origin = ''
+  try {
+    origin = new URL(url).origin
+  } catch {
+    /* not an absolute URL: preload only */
+  }
+  const preload = `<link rel="preload" as="image" href="${esc(url)}" crossorigin="anonymous" ${HERO_PRELOAD_MARK}>`
+  return origin ? `<link rel="preconnect" href="${esc(origin)}" crossorigin>\n    ${preload}` : preload
+}
