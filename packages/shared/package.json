@@ -13,6 +13,10 @@
     "./releases": {
       "types": "./dist/releases.d.ts",
       "default": "./dist/releases.js"
+    },
+    "./releases/*": {
+      "types": "./dist/releases/*.d.ts",
+      "default": "./dist/releases/*.js"
     }
   },
   "files": [

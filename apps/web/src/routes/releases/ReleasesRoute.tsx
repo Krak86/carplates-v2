@@ -1,20 +1,20 @@
+import { useQueries, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { RELEASES } from '@carplates/shared/releases'
 
 import Card from '@/components/ui/Card'
 import type { Lang } from '@/i18n'
 import { cn } from '@/lib/cn'
 import { LATEST_RELEASE_DATE } from '@/routes/releases/latest'
+import { RELEASE_MONTHS, releaseMonthQuery } from '@/routes/releases/months'
 import { RELEASE_GROUPS, RELEASE_GROUP_ICON } from '@/routes/releases/types'
 import type { ReleaseGroup } from '@/routes/releases/types'
 
 const DATE_LOCALE: Record<Lang, string> = { ua: 'uk-UA', ru: 'ru-RU', en: 'en-GB' }
 
-const SORTED_RELEASES = [...RELEASES].sort((a, b) => b.date.localeCompare(a.date))
-
-// Lazy-loaded (see App.tsx). Public, no sign-in.
+// Lazy-loaded (see App.tsx). Public, no sign-in. Each month is its own chunk, fetched when opened (all of them while a
+// tag filter is on, so months without a match can be hidden).
 export default function ReleasesRoute(): ReactNode {
   const { t, i18n } = useTranslation()
   const lang = (i18n.language in DATE_LOCALE ? i18n.language : 'ua') as Lang
@@ -34,21 +34,25 @@ export default function ReleasesRoute(): ReactNode {
     timeZone: 'UTC'
   })
 
-  const days = SORTED_RELEASES.map(day => ({
-    ...day,
-    items: day.items.filter(i => !group || i.group === group)
-  })).filter(day => day.items.length > 0)
-
   const formatMonth = new Intl.DateTimeFormat(DATE_LOCALE[lang], { month: 'long', year: 'numeric', timeZone: 'UTC' })
 
-  // Days are already newest-first, so months come out newest-first too; only the first stays open.
-  const months: { month: string; days: typeof days }[] = []
-  for (const day of days) {
-    const month = day.date.slice(0, 7)
-    const last = months.at(-1)
-    if (last?.month === month) last.days.push(day)
-    else months.push({ month, days: [day] })
-  }
+  const queryClient = useQueryClient()
+  const results = useQueries({
+    queries: RELEASE_MONTHS.map((month, idx) => ({
+      ...releaseMonthQuery(month),
+      enabled: !!group || (toggled[month] ?? idx === 0)
+    }))
+  })
+
+  // Months are newest-first; a month still loading keeps its header (no count yet), a loaded empty one is hidden.
+  const months = RELEASE_MONTHS.map((month, idx) => {
+    const loaded = results[idx]?.data
+    const days = loaded
+      ?.map(day => ({ ...day, items: day.items.filter(i => !group || i.group === group) }))
+      .filter(day => day.items.length > 0)
+
+    return { month, idx, days }
+  }).filter(m => !m.days || m.days.length > 0)
 
   return (
     <div className="mx-auto w-full max-w-6xl">
@@ -86,14 +90,14 @@ export default function ReleasesRoute(): ReactNode {
         </div>
       </Card>
 
-      {months.map((m, idx) => {
-        const isOpen = toggled[m.month] ?? idx === 0
+      {months.map((m, pos) => {
+        const isOpen = toggled[m.month] ?? m.idx === 0
 
         return (
           // Keyed by filter so the sections ease in again when the tag filter changes.
           <section
             key={`${m.month}-${group}`}
-            style={{ '--row-i': idx } as React.CSSProperties}
+            style={{ '--row-i': pos } as React.CSSProperties}
             className="mb-3 animate-row-in will-change-[transform,opacity]"
           >
             <h2>
@@ -101,6 +105,8 @@ export default function ReleasesRoute(): ReactNode {
                 type="button"
                 aria-expanded={isOpen}
                 aria-controls={`releases-${m.month}`}
+                onPointerEnter={() => void queryClient.prefetchQuery(releaseMonthQuery(m.month))}
+                onFocus={() => void queryClient.prefetchQuery(releaseMonthQuery(m.month))}
                 onClick={() => setToggled(s => ({ ...s, [m.month]: !isOpen }))}
                 className="flex w-full cursor-pointer items-center gap-2 rounded-lg bg-[var(--color-surface)] px-3 py-2 text-left text-lg font-semibold capitalize"
               >
@@ -121,9 +127,11 @@ export default function ReleasesRoute(): ReactNode {
                 </svg>
                 <span>
                   {formatMonth.format(new Date(`${m.month}-01`))}{' '}
-                  <span className="text-sm font-normal text-[var(--color-muted)]">
-                    ({m.days.reduce((n, d) => n + d.items.length, 0)})
-                  </span>
+                  {!!m.days && (
+                    <span className="text-sm font-normal text-[var(--color-muted)]">
+                      ({m.days.reduce((n, d) => n + d.items.length, 0)})
+                    </span>
+                  )}
                 </span>
               </button>
             </h2>
@@ -138,7 +146,7 @@ export default function ReleasesRoute(): ReactNode {
             >
               <div className="min-h-0 overflow-hidden">
                 <div className="pt-2">
-                  {m.days.map(day => (
+                  {m.days?.map(day => (
                     <Card key={day.date} className="mb-3 last:mb-0">
                       <h3 className="mb-2 text-lg font-semibold">
                         <time dateTime={day.date}>{formatDate.format(new Date(day.date))}</time>
