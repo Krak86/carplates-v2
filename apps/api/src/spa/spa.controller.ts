@@ -13,7 +13,9 @@ import {
   shareTokenSchema,
   type CatalogEmbed,
   type CatalogMake,
-  type CatalogModel
+  type CatalogModel,
+  commonsThumbUrl,
+  HERO_THUMB_WIDTH
 } from '@carplates/shared'
 import type { FastifyReply, FastifyRequest } from 'fastify'
 
@@ -338,7 +340,7 @@ export class SpaController {
     const v = preview.vehicle
     if (!v) return ''
     const stored = await this.wiki.peekImage(v.brand, v.model, v.year).catch(() => null)
-    return stored?.image?.url ? renderHeroPreload(stored.image.url) : ''
+    return stored?.image?.url ? renderHeroPreload(commonsThumbUrl(stored.image.url, HERO_THUMB_WIDTH)) : ''
   }
 
   /**

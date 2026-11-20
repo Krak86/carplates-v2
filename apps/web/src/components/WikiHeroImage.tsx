@@ -1,6 +1,6 @@
 import { useRef, useState, type PointerEvent, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { PAINT_HEX, resolveVehicleKind } from '@carplates/shared'
+import { commonsThumbUrl, HERO_THUMB_WIDTH, PAINT_HEX, resolveVehicleKind } from '@carplates/shared'
 
 import PhotoZoomDialog from '@/components/PhotoZoomDialog'
 import VehicleKindPlaceholder from '@/components/VehicleKindPlaceholder'
@@ -160,7 +160,7 @@ export default function WikiHeroImage({
         )}
         {image && (
           <img
-            src={image.url}
+            src={commonsThumbUrl(image.url, HERO_THUMB_WIDTH)}
             alt={[brand, model].filter(Boolean).join(' ')}
             crossOrigin="anonymous"
             fetchPriority="high"
