@@ -50,7 +50,7 @@ export const PACKS = {
       'stats.map.fuel.',
       'stats.map.mode',
       'stats.view.',
-      // Home panels (SearchRoute) and /read/extremes render TopStatsPanel / WeightModelsPanel outside the stats route.
+      // Home panels (SearchRoute) and /read/extremes render TopStatsPanel / WeightModelsPanel outside the stats route (/read/extremes loads the whole pack).
       'stats.top.',
       'stats.weight.'
     ]
