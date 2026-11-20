@@ -30,9 +30,16 @@ describe('dictionary packs', () => {
 
   // A file outside the owners would render the raw key until the pack happens to be loaded.
   it.each(PACK_NAMES)('only the owners of the %s pack reference its keys', name => {
-    const { prefixes, owners } = PACKS[name]
+    const {
+      prefixes,
+      owners,
+      keep = []
+    } = PACKS[name] as { prefixes: readonly string[]; owners: readonly string[]; keep?: readonly string[] }
     const re = new RegExp(`['"\`](${prefixes.join('|')})\\.`)
-    const strangers = FILES.filter(f => re.test(f.text) && !owners.some(o => f.path === o || f.path.startsWith(o)))
+    const strip = (text: string) => keep.reduce((acc, k) => acc.split(k).join(''), text)
+    const strangers = FILES.filter(
+      f => re.test(strip(f.text)) && !owners.some(o => f.path === o || f.path.startsWith(o))
+    )
     expect(strangers.map(f => f.path)).toEqual([])
   })
 })

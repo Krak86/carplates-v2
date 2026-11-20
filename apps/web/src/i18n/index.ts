@@ -25,7 +25,11 @@ const SLICES: Record<Lang, Record<SliceKind, Loader>> = {
     sitemap: () => import('./ua.sitemap.pack.json'),
     alternatives: () => import('./ua.alternatives.pack.json'),
     discuss: () => import('./ua.discuss.pack.json'),
-    relax: () => import('./ua.relax.pack.json')
+    relax: () => import('./ua.relax.pack.json'),
+    install: () => import('./ua.install.pack.json'),
+    legal: () => import('./ua.legal.pack.json'),
+    roadSafety: () => import('./ua.roadSafety.pack.json'),
+    alarms: () => import('./ua.alarms.pack.json')
   },
   ru: {
     core: () => import('./ru.core.pack.json'),
@@ -36,7 +40,11 @@ const SLICES: Record<Lang, Record<SliceKind, Loader>> = {
     sitemap: () => import('./ru.sitemap.pack.json'),
     alternatives: () => import('./ru.alternatives.pack.json'),
     discuss: () => import('./ru.discuss.pack.json'),
-    relax: () => import('./ru.relax.pack.json')
+    relax: () => import('./ru.relax.pack.json'),
+    install: () => import('./ru.install.pack.json'),
+    legal: () => import('./ru.legal.pack.json'),
+    roadSafety: () => import('./ru.roadSafety.pack.json'),
+    alarms: () => import('./ru.alarms.pack.json')
   },
   en: {
     core: () => import('./en.core.pack.json'),
@@ -47,7 +55,11 @@ const SLICES: Record<Lang, Record<SliceKind, Loader>> = {
     sitemap: () => import('./en.sitemap.pack.json'),
     alternatives: () => import('./en.alternatives.pack.json'),
     discuss: () => import('./en.discuss.pack.json'),
-    relax: () => import('./en.relax.pack.json')
+    relax: () => import('./en.relax.pack.json'),
+    install: () => import('./en.install.pack.json'),
+    legal: () => import('./en.legal.pack.json'),
+    roadSafety: () => import('./en.roadSafety.pack.json'),
+    alarms: () => import('./en.alarms.pack.json')
   }
 }
 const DELTAS: Partial<Record<Lang, Partial<Record<SliceKind, Loader>>>> = {
