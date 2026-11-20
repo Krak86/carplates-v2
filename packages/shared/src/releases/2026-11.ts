@@ -5,8 +5,14 @@ import type { ReleaseDay } from './core.js'
 export const DAYS: readonly ReleaseDay[] = [
   {
     date: '2026-11-20',
-    version: 'v2.1442',
+    version: 'v2.1443',
     items: [
+      item(
+        'improved',
+        'Путівники «Читати», порівняння авто та статистика завантажують свої тексти лише коли ви на них заходите, а вкладки розмірів - коли їх відкриваєте, тож словник першого екрана ще менший',
+        'Путеводители «Читать», сравнение авто и статистика загружают свои тексты только когда вы на них заходите, а вкладки размеров - когда их открываете, поэтому словарь первого экрана ещё меньше',
+        'The Read guides, the car comparison and the statistics load their texts only when you open them, and the size tabs when you open a tab, so the first screen dictionary is smaller still'
+      ),
       item(
         'improved',
         'Сторінки «Про сервіс», налаштувань, профілю, карти сайту та кілька інших завантажують свої тексти лише коли ви на них заходите, тож перший екран отримує менший словник',
