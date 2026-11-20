@@ -5,8 +5,14 @@ import type { ReleaseDay } from './core.js'
 export const DAYS: readonly ReleaseDay[] = [
   {
     date: '2026-11-20',
-    version: 'v2.1428',
+    version: 'v2.1431',
     items: [
+      item(
+        'improved',
+        'Сторінка авто економить близько 2 МБ трафіку: мініатюри фото під головним знімком більше не завантажуються у повному розмірі.',
+        'Страница авто экономит около 2 МБ трафика: миниатюры фото под главным снимком больше не загружаются в полном размере.',
+        'The vehicle page saves about 2 MB of data: the photo thumbnails under the main picture no longer download at full size.'
+      ),
       item(
         'improved',
         'Сторінка «Що нового» відкривається швидше: історія змін завантажується по місяцях, лише коли ви розгортаєте місяць.',

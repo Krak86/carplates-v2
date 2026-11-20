@@ -1,5 +1,5 @@
 /** Standard Wikimedia thumbnail widths; other sizes are rejected on hotlinks, so only these are ever requested. */
-const THUMB_PATH = /^(https:\/\/upload\.wikimedia\.org\/.*\/thumb\/.+\/)\d+px-([^/]+)$/
+const THUMB_PATH = /^(https:\/\/(?:upload|thumb)\.wikimedia\.org\/.*\/thumb\/.+\/)\d+px-([^/?]+)(\?.*)?$/
 
 /** Width of the small strip thumbnails (shown at 64 px, so 250 covers a 3x screen). */
 export const STRIP_THUMB_WIDTH = 250
@@ -10,5 +10,5 @@ export const STRIP_THUMB_WIDTH = 250
  */
 export function commonsThumbUrl(url: string, width: number = STRIP_THUMB_WIDTH): string {
   const match = THUMB_PATH.exec(url)
-  return match ? `${match[1]}${width}px-${match[2]}` : url
+  return match ? `${match[1]}${width}px-${match[2]}${match[3] ?? ''}` : url
 }
