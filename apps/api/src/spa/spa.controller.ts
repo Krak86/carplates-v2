@@ -8,6 +8,8 @@ import {
   CATALOG_INDEX_PATH,
   catalogMakePath,
   catalogPath,
+  sectionAliasOfPath,
+  sectionAliasPath,
   shareAliasOfPath,
   shareAliasPath,
   shareTokenSchema,
@@ -47,6 +49,7 @@ import {
   catalogPageSlug,
   catalogSlugsOfPath,
   isCatalogIndexPath,
+  PAGE_IMAGES,
   pageCardSlug,
   shareAliasCardSlug
 } from './page-card.js'
@@ -314,7 +317,12 @@ export class SpaController {
    * `/alarms?section=losses|map` share links: the losses card (day count, headline counters) or the live alert-map card, each with
    * its own `og:url` so Telegram / Facebook cache them apart from the page itself. Never indexed.
    */
-  private async alarmsSectionMeta(section: 'losses' | 'map', lang: Lang, langQuery: string): Promise<string> {
+  private async alarmsSectionMeta(
+    section: 'losses' | 'map',
+    lang: Lang,
+    langQuery: string,
+    aliasPath?: string
+  ): Promise<string> {
     const siteUrl = this.env.PUBLIC_SITE_URL
     const base = STATIC_PAGES['/alarms']?.[lang] as PageText
     let text: PageText = base
@@ -326,7 +334,7 @@ export class SpaController {
     return renderMetaTags({
       siteUrl,
       path: '/alarms',
-      ogUrl: `${siteUrl}/alarms${tail}`,
+      ogUrl: aliasPath ? `${siteUrl}${aliasPath}${langQuery}` : `${siteUrl}/alarms${tail}`,
       lang,
       title: text.title,
       description: text.description,
@@ -351,11 +359,20 @@ export class SpaController {
     pathname: string,
     lang: Lang,
     section?: string,
-    pair?: { a?: string; b?: string }
+    pair?: { a?: string; b?: string },
+    aliasPath?: string
   ): Promise<string> {
     const segments = pathname.split('/').filter(Boolean)
     const siteUrl = this.env.PUBLIC_SITE_URL
     const langQuery = lang === DEFAULT_LANG ? '' : `?lang=${lang}`
+
+    // Section share link `/s/<plate|vin|alarms>/<section>`: the target's section preview, with the alias itself as og:url
+    // (its own preview-cache key), then the SPA redirects to `/<target>?section=<section>`. Other static targets are unknown paths.
+    const sectionAlias = aliasPath ? null : sectionAliasOfPath(pathname)
+    if (sectionAlias && (sectionAlias.target === 'alarms' || !(`/${sectionAlias.target}` in STATIC_PAGES))) {
+      const { target, section: id } = sectionAlias
+      return this.metaFor(`/${encodeURIComponent(target)}`, lang, id, pair, sectionAliasPath(target, id))
+    }
 
     // Share/campaign link: its own preview here (scrapers do not run JS), then the SPA sends the visitor to the home page.
     // og:url stays the alias itself - pointing it at `/` would make Facebook re-scrape the home page's tags instead.
@@ -388,9 +405,11 @@ export class SpaController {
         const tags = renderMetaTags({
           siteUrl,
           path: platePath,
-          ogUrl: isShareSection(section)
-            ? `${siteUrl}${platePath}?section=${encodeURIComponent(section)}${lang === DEFAULT_LANG ? '' : `&lang=${lang}`}`
-            : undefined,
+          ogUrl: aliasPath
+            ? `${siteUrl}${aliasPath}${langQuery}`
+            : isShareSection(section)
+              ? `${siteUrl}${platePath}?section=${encodeURIComponent(section)}${lang === DEFAULT_LANG ? '' : `&lang=${lang}`}`
+              : undefined,
           lang,
           title: text.title,
           description: text.description,
@@ -430,7 +449,7 @@ export class SpaController {
 
     const path = `/${segments.join('/')}`
     if (path === '/alarms' && (section === 'losses' || section === 'map')) {
-      return await this.alarmsSectionMeta(section, lang, langQuery)
+      return await this.alarmsSectionMeta(section, lang, langQuery, aliasPath)
     }
     const known = path in STATIC_PAGES
     const cacheKey = `${known ? path : '*'}:${lang}`
@@ -442,7 +461,9 @@ export class SpaController {
         path: known && path !== '/' ? path : '',
         lang,
         ...page,
-        image: `${siteUrl}/og/${path === '/alarms' ? 'alarms' : known && pageCardSlug(path) ? `page/${pageCardSlug(path)}` : 'default'}.png${langQuery}`,
+        image: PAGE_IMAGES[path]
+          ? `${siteUrl}${PAGE_IMAGES[path]}`
+          : `${siteUrl}/og/${path === '/alarms' ? 'alarms' : known && pageCardSlug(path) ? `page/${pageCardSlug(path)}` : 'default'}.png${langQuery}`,
         // Unknown paths (typos, not-found plates) shouldn't be indexed under the home page's tags.
         noindex: !known || NOINDEX.has(path),
         alternates: known && sitemapPaths().includes(path)

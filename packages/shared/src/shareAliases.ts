@@ -12,6 +12,32 @@ export const isShareAlias = (value: unknown): value is ShareAlias =>
 
 export const shareAliasPath = (alias: ShareAlias): string => `${SHARE_ALIAS_PREFIX}/${alias}`
 
+/**
+ * Section share links: `/s/<plate|vin|alarms>/<section>`. Some unfurlers (Telegram) treat `/x?section=a` and `/x?section=b` as one
+ * page, so a section link is a path of its own: the API serves it with the section's preview, the web then redirects to
+ * `/<target>?section=<section>` (query kept).
+ */
+export const SECTION_ALIAS_PREFIX = '/s'
+
+const SECTION_ID = /^[a-z0-9][a-z0-9-]{0,31}$/
+
+export const sectionAliasPath = (target: string, section: string): string =>
+  `${SECTION_ALIAS_PREFIX}/${encodeURIComponent(target)}/${section}`
+
+/** The target and section of a `/s/<target>/<section>` path (a trailing slash is fine), or null for any other path. */
+export function sectionAliasOfPath(pathname: string): { target: string; section: string } | null {
+  const [root, rawTarget, section, ...rest] = pathname.split('/').filter(Boolean)
+  if (`/${root}` !== SECTION_ALIAS_PREFIX || !rawTarget || !section || rest.length > 0 || !SECTION_ID.test(section)) {
+    return null
+  }
+  try {
+    const target = decodeURIComponent(rawTarget)
+    return target && !target.includes('/') ? { target, section } : null
+  } catch {
+    return null
+  }
+}
+
 /** The alias a `/go/<alias>` path names (a trailing slash is fine), or null for any other path or an unknown alias. */
 export function shareAliasOfPath(pathname: string): ShareAlias | null {
   const [root, alias, ...rest] = pathname.split('/').filter(Boolean)

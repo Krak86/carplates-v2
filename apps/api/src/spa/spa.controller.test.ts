@@ -193,6 +193,52 @@ describe('SpaController meta injection', () => {
     expect(await get('/AA1234BB?section=bogus')).toContain('og:url" content="https://carsua.app/AA1234BB"')
   })
 
+  it('serves a plate section alias with the section text and the alias as og:url', async () => {
+    const html = await get('/s/AA1234BB/recalls?lang=en&tab=x')
+    expect(html).toContain('<title>Cars UA - AA1234BB - Toyota Camry 2015 - Recalls</title>')
+    expect(html).toContain('og:url" content="https://carsua.app/s/AA1234BB/recalls?lang=en"')
+    expect(html).toContain('og:image" content="https://carsua.app/og/AA1234BB.png?lang=en"')
+    expect(html).toContain('rel="canonical" href="https://carsua.app/AA1234BB"')
+    expect(html).toContain('noindex')
+    // every section of one plate is a distinct preview-cache key
+    expect(await get('/s/AA1234BB/vin')).toContain('og:url" content="https://carsua.app/s/AA1234BB/vin"')
+  })
+
+  it('serves /s/alarms/<section> with the section card and the alias as og:url', async () => {
+    const losses = await get('/s/alarms/losses?lang=en')
+    expect(losses).toContain('og:image" content="https://carsua.app/og/losses.png?lang=en"')
+    expect(losses).toContain('og:url" content="https://carsua.app/s/alarms/losses?lang=en"')
+    const map = await get('/s/alarms/map')
+    expect(map).toContain('og:image" content="https://carsua.app/og/alarms.png"')
+    expect(map).toContain('og:url" content="https://carsua.app/s/alarms/map"')
+  })
+
+  it('treats a section alias of another static page or an unknown plate as an unknown path', async () => {
+    for (const url of ['/s/about/vin', '/s/ZZ0000ZZ/vin']) {
+      const html = await get(url)
+      expect(html).not.toContain('/s/about/vin"')
+      expect(html).not.toContain('og/ZZ0000ZZ')
+      expect(html).toContain('noindex')
+    }
+  })
+
+  it('gives /race its committed screenshot as the share image', async () => {
+    const html = await get('/race?lang=en')
+    expect(html).toContain('og:image" content="https://carsua.app/og-race.png"')
+  })
+
+  it('gives every sitemap page an og:image (its own card, never the home default)', async () => {
+    const { sitemapPaths } = await import('./sitemap.js')
+    const images = new Map<string, string>()
+    for (const path of sitemapPaths().filter(p => p !== '/')) {
+      const html = await get(path)
+      const image = /og:image" content="([^"]+)"/.exec(html)?.[1] ?? ''
+      expect(image, path).not.toContain('/og/default.png')
+      expect(images.get(image), `${path} shares an image with ${images.get(image)}`).toBeUndefined()
+      images.set(image, path)
+    }
+  })
+
   it('serves static page tags without noindex', async () => {
     const html = await get('/about')
     expect(html).toContain('og:image" content="https://carsua.app/og/page/about.png"')

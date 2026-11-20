@@ -5,8 +5,14 @@ import type { ReleaseDay } from './core.js'
 export const DAYS: readonly ReleaseDay[] = [
   {
     date: '2026-11-20',
-    version: 'v2.1450',
+    version: 'v2.1451',
     items: [
+      item(
+        'improved',
+        'Посилання на розділи (номер, VIN, тривоги) тепер мають власну адресу виду /s/номер/розділ, тож Telegram та інші месенджери показують для кожного розділу своє превʼю; сторінка «Тест-драйв» має скріншот гри замість текстової картки',
+        'Ссылки на разделы (номер, VIN, тревоги) теперь имеют собственный адрес вида /s/номер/раздел, поэтому Telegram и другие мессенджеры показывают для каждого раздела своё превью; у страницы «Тест-драйв» скриншот игры вместо текстовой карточки',
+        'Section links (plate, VIN, alerts) now have their own address like /s/plate/section, so Telegram and other messengers show a separate preview for each section; the Test drive page has a game screenshot instead of a text card'
+      ),
       item(
         'fix',
         'На головній сторінці та в розділі «Читати: рекорди» знову відображаються підписи статистики замість службових ключів',
