@@ -4,6 +4,8 @@
  * of the main bundle when telemetry is off (the default, and always in dev).
  */
 const env = import.meta.env
+// A local dev server / preview build with the prod .env must not report (CARSUA-3: Vite HMR import errors from localhost).
+const isLocalHost = ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname)
 const enabled = env.VITE_ENABLE_TELEMETRY === 'true'
 
 let posthogRef: typeof import('posthog-js').default | null = null
@@ -15,7 +17,7 @@ export async function initTelemetry(): Promise<void> {
   // The SDKs (Sentry core alone is ~147 KB) must not share the link with the bytes that gate the first paint.
   await afterFirstPaint()
 
-  if (env.VITE_SENTRY_DSN) {
+  if (env.VITE_SENTRY_DSN && !isLocalHost) {
     const Sentry = await import('@sentry/react')
     Sentry.init({
       dsn: env.VITE_SENTRY_DSN,

@@ -13,8 +13,9 @@ if (telemetryEnabled(env)) {
     environment: env.NODE_ENV,
     release: env.GIT_SHA,
     tracesSampleRate: env.SENTRY_TRACES_SAMPLE_RATE,
-    // expected 503 (alarm poller has no fresh snapshot, e.g. upstream rate limit): the service already logs a warning
-    ignoreErrors: ['no alarm data'],
+    // expected 503 (alarm poller has no fresh snapshot, e.g. upstream rate limit): the service already logs a warning.
+    // NHTSA vPIC down / rate-limited (CARSUA-2S): an upstream outage, not our bug; the client already shows a retry state.
+    ignoreErrors: ['no alarm data', /NHTSA decode failed: (status 5\d\d|fetch failed)/],
     // scrub request bodies / query strings before they leave the process
     beforeSend(event) {
       if (event.request) {
