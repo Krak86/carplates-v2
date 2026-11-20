@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { UseQueryResult } from '@tanstack/react-query'
-import type { WikiImageResponse } from '@carplates/shared'
+import { commonsThumbUrl, HERO_THUMB_WIDTH, type WikiImageResponse } from '@carplates/shared'
 
 import { getWikiImage } from '@/lib/api'
 import { wikiImageQuery } from '@/lib/queries'
@@ -48,7 +48,12 @@ export function useCarHeroImageActions({ brand, model, year, key }: Params): {
 
   useEffect(() => {
     if (!key || !image) return
-    setHeroOverride({ key, css: `url(${image.url})`, sourceUrl: null, attribution: image.attribution })
+    setHeroOverride({
+      key,
+      css: `url(${commonsThumbUrl(image.url, HERO_THUMB_WIDTH)})`,
+      sourceUrl: null,
+      attribution: image.attribution
+    })
     return (): void => clearHeroOverride(key)
   }, [key, image, setHeroOverride, clearHeroOverride])
 
