@@ -39,6 +39,6 @@ Version pins (PLAN.md "Version pins"): never use `latest`.
 - After a big update suggest a commit message (subject + bullet per change; **no `Co-Authored-By` / agent attribution line**). Never `git commit` / `git push` unless asked.
 - Seed CSVs mirror scraped tables: after changing one, re-run its `pnpm export:*:csv`.
 - `pnpm format` first (not `scripts/src/fixtures`). Tests: Vitest, colocated `*.test.ts(x)`.
-- Any web app change: bump the day's `version` in `releases.ts`; docs after a feature: both in `docs/checklists.md`.
+- Any web app change: bump the day's `version` in `packages/shared/src/releases/<yyyy-mm>.ts`; docs after a feature: both in `docs/checklists.md`.
 
 @CLAUDE_RULES.md

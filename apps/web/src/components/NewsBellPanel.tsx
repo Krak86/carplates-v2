@@ -1,18 +1,14 @@
+import { useSuspenseQuery } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 
 import type { Lang } from '@/i18n'
-import { RELEASES } from '@carplates/shared/releases'
+import { latestReleaseItemsQuery } from '@/routes/releases/months'
 import { RELEASE_GROUP_ICON } from '@/routes/releases/types'
 
 const DATE_LOCALE: Record<Lang, string> = { ua: 'uk-UA', ru: 'ru-RU', en: 'en-GB' }
 const MAX_ITEMS = 5
-
-const NEWEST_FIRST = [...RELEASES].sort((a, b) => b.date.localeCompare(a.date))
-
-// The newest few items across days, newest day first.
-const LATEST_ITEMS = NEWEST_FIRST.flatMap(day => day.items.map(item => ({ date: day.date, item }))).slice(0, MAX_ITEMS)
 
 type Props = {
   /** Date the visitor has already seen; items from later days get a dot. */
@@ -20,10 +16,11 @@ type Props = {
   onNavigate: () => void
 }
 
-// Lazy-loaded (see NewsBell.tsx): it drags the whole release log along.
+// Lazy-loaded (see NewsBell.tsx); reads only the newest month chunk (the newest few items, newest day first).
 export default function NewsBellPanel({ seen, onNavigate }: Props): ReactNode {
   const { t, i18n } = useTranslation()
   const lang = (i18n.language in DATE_LOCALE ? i18n.language : 'ua') as Lang
+  const { data: latestItems } = useSuspenseQuery(latestReleaseItemsQuery(MAX_ITEMS))
   const formatDate = new Intl.DateTimeFormat(DATE_LOCALE[lang], { day: 'numeric', month: 'short', timeZone: 'UTC' })
 
   return (
@@ -31,7 +28,7 @@ export default function NewsBellPanel({ seen, onNavigate }: Props): ReactNode {
       <h2 className="mb-2 text-sm font-semibold">{t('nav.releases')}</h2>
 
       <ul className="space-y-2 text-sm">
-        {LATEST_ITEMS.map(({ date, item }) => (
+        {latestItems.map(({ date, item }) => (
           <li key={item.en} className="flex gap-2">
             <span aria-hidden title={t(`releases.group.${item.group}`)}>
               {RELEASE_GROUP_ICON[item.group]}
