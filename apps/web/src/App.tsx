@@ -42,7 +42,7 @@ const ImportsRoute = lazyWithPacks(() => import('@/routes/read/imports/ImportsRo
 const SafetyRoute = lazyWithPacks(() => import('@/routes/read/safety/SafetyRoute'), 'roadSafety', 'read', 'safety')
 const FuelRoute = lazyWithPacks(() => import('@/routes/read/fuel/FuelRoute'), 'read')
 const VinRoute = lazyWithPacks(() => import('@/routes/read/vin/VinRoute'), 'read', 'vin')
-const ExtremesRoute = lazyWithPacks(() => import('@/routes/read/extremes/ExtremesRoute'), 'read')
+const ExtremesRoute = lazyWithPacks(() => import('@/routes/read/extremes/ExtremesRoute'), 'read', 'stats')
 const RecallsRoute = lazyWithPacks(() => import('@/routes/read/recalls/RecallsRoute'), 'read')
 const AuctionsGuideRoute = lazyWithPacks(() => import('@/routes/read/auctions/AuctionsGuideRoute'), 'read')
 const CatalogIndexRoute = lazy(() => import('@/routes/catalog/CatalogIndexRoute'))

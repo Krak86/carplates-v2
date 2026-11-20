@@ -5,7 +5,7 @@ import type { ReleaseDay } from './core.js'
 export const DAYS: readonly ReleaseDay[] = [
   {
     date: '2026-11-20',
-    version: 'v2.1449',
+    version: 'v2.1450',
     items: [
       item(
         'fix',
