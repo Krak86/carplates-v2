@@ -1,8 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-const { init, capture } = vi.hoisted(() => ({ init: vi.fn(), capture: vi.fn() }))
+const { init, capture, sentryInit } = vi.hoisted(() => ({ init: vi.fn(), capture: vi.fn(), sentryInit: vi.fn() }))
 
 vi.mock('posthog-js', () => ({ default: { init, capture } }))
+vi.mock('@sentry/react', () => ({ init: sentryInit }))
 
 async function load(): Promise<typeof import('./telemetry')> {
   vi.resetModules()
@@ -12,6 +13,7 @@ async function load(): Promise<typeof import('./telemetry')> {
 describe('telemetry', () => {
   beforeEach(() => {
     init.mockClear()
+    sentryInit.mockClear()
     capture.mockClear()
     vi.stubEnv('VITE_ENABLE_TELEMETRY', 'true')
     vi.stubEnv('VITE_POSTHOG_KEY', 'phc_test')
@@ -20,6 +22,16 @@ describe('telemetry', () => {
 
   afterEach(() => {
     vi.unstubAllEnvs()
+  })
+
+  it('does not start Sentry on a local host (CARSUA-3: dev HMR errors)', async () => {
+    vi.stubEnv('VITE_SENTRY_DSN', 'https://k@o0.ingest.sentry.io/1')
+    const { initTelemetry } = await load()
+    const started = initTelemetry()
+    window.dispatchEvent(new Event('pointerdown'))
+    await started
+
+    expect(sentryInit).not.toHaveBeenCalled()
   })
 
   it('starts PostHog cookieless with no autocapture, replay or surveys', async () => {
