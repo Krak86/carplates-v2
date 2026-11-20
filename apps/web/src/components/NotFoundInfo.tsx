@@ -4,6 +4,7 @@ import { Link } from 'react-router'
 import { isShortSeriesPlate, isSovietPlate, isUaPlate, normalizePlate } from '@carplates/shared'
 
 import FavoriteButton from '@/components/FavoriteButton'
+import NotFoundWhy from '@/components/NotFoundWhy'
 import OtherSourcesFound from '@/components/OtherSourcesFound'
 import RiaCheckLink from '@/components/RiaCheckLink'
 import { PLATES_PATH } from '@/routes/read/links'
@@ -36,9 +37,11 @@ export default function NotFoundInfo({ value, hasAttachedPhoto = false }: Props)
         <OtherSourcesFound plate={plate} showPlate={isPlate} hasAttachedPhoto={hasAttachedPhoto} />
       )}
 
-      <p className="mt-2 text-sm text-[var(--color-muted)]">
-        {isPlate ? t('result.notFound.hintPlate') : t('result.notFound.hintFormat')}
-      </p>
+      {isPlate ? (
+        <NotFoundWhy />
+      ) : (
+        <p className="mt-2 text-sm text-[var(--color-muted)]">{t('result.notFound.hintFormat')}</p>
+      )}
 
       {isSoviet && (
         <p className="mt-2 text-sm">
