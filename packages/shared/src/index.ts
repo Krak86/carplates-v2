@@ -1068,7 +1068,10 @@ export { localizeRegistryRows, registryLabel, type RegistryLabelKind } from './r
 export {
   SHARE_ALIASES,
   SHARE_ALIAS_PREFIX,
+  SECTION_ALIAS_PREFIX,
   isShareAlias,
+  sectionAliasOfPath,
+  sectionAliasPath,
   shareAliasOfPath,
   shareAliasPath,
   type ShareAlias

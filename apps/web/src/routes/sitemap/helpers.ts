@@ -124,6 +124,7 @@ export const SITEMAP_TIPS: readonly SitemapTip[] = [
 export const HIDDEN_ROUTES: readonly string[] = [
   '/:query',
   '/go/:alias',
+  '/s/:target/:section',
   '/auth/email',
   '/unsubscribe',
   '/login',

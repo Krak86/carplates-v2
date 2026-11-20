@@ -50,6 +50,7 @@ const CatalogMakeRoute = lazy(() => import('@/routes/catalog/CatalogMakeRoute'))
 const CatalogModelRoute = lazy(() => import('@/routes/catalog/CatalogModelRoute'))
 const CompareRoute = lazyWithPacks(() => import('@/routes/compare/CompareRoute'), 'compare')
 const GoRoute = lazy(() => import('@/routes/go/GoRoute'))
+const SectionAliasRoute = lazy(() => import('@/routes/go/SectionAliasRoute'))
 const SitemapRoute = lazyWithPacks(() => import('@/routes/sitemap/SitemapRoute'), 'sitemap')
 const CustomsRoute = lazy(() => import('@/routes/customs/CustomsRoute'))
 const ShowroomRoute = lazy(() => import('@/routes/showroom/ShowroomRoute'))
@@ -142,6 +143,7 @@ export default function App(): ReactNode {
             <Route path="/data-status" element={<DataStatusRoute />} />
             <Route path="/share" element={<ShareRoute />} />
             <Route path="/go/:alias" element={<GoRoute />} />
+            <Route path="/s/:target/:section" element={<SectionAliasRoute />} />
             <Route path="/features" element={<FeaturesRoute />} />
             <Route path="/settings" element={<SettingsRoute />} />
             <Route path="/auth/email" element={<EmailLinkRoute />} />
