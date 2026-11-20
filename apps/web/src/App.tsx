@@ -6,13 +6,14 @@ import { Route, Routes, useLocation } from 'react-router'
 import Layout from '@/components/Layout'
 import LoadErrorBoundary from '@/components/LoadErrorBoundary'
 import RouteFallback from '@/components/RouteFallback'
+import { lazyWithPacks } from '@/i18n/lazy-with-packs'
 import { routeTitleKey, useDocumentTitle } from '@/hooks/useDocumentTitle'
 import PageShareButton from '@/components/PageShareButton'
 import { isCatalogPath, NO_SHARE_PATHS } from '@/components/use-page-share-actions'
 import SearchRoute from '@/routes/SearchRoute'
 import { useUiStore } from '@/store/ui-store'
 
-const AboutRoute = lazy(() => import('@/routes/AboutRoute'))
+const AboutRoute = lazyWithPacks(() => import('@/routes/AboutRoute'), 'about')
 const LegalRoute = lazy(() => import('@/routes/LegalRoute'))
 const ContactRoute = lazy(() => import('@/routes/ContactRoute'))
 const InstallRoute = lazy(() => import('@/routes/install/InstallRoute'))
@@ -26,10 +27,10 @@ const SafetyStatsRoute = lazy(() => import('@/routes/safety/SafetyStatsRoute'))
 const AlarmsRoute = lazy(() => import('@/routes/alarms/AlarmsRoute'))
 const RoadSafetyRoute = lazy(() => import('@/routes/road-safety/RoadSafetyRoute'))
 const NewsRoute = lazy(() => import('@/routes/news/NewsRoute'))
-const DiscussRoute = lazy(() => import('@/routes/DiscussRoute'))
-const RelaxRoute = lazy(() => import('@/routes/RelaxRoute'))
+const DiscussRoute = lazyWithPacks(() => import('@/routes/DiscussRoute'), 'discuss')
+const RelaxRoute = lazyWithPacks(() => import('@/routes/RelaxRoute'), 'relax')
 const ReleasesRoute = lazy(() => import('@/routes/releases/ReleasesRoute'))
-const AlternativesRoute = lazy(() => import('@/routes/alternatives/AlternativesRoute'))
+const AlternativesRoute = lazyWithPacks(() => import('@/routes/alternatives/AlternativesRoute'), 'alternatives')
 const ReadHubRoute = lazy(() => import('@/routes/read/ReadHubRoute'))
 const BodyTypesRoute = lazy(() => import('@/routes/read/body-types/BodyTypesRoute'))
 const SizesRoute = lazy(() => import('@/routes/read/sizes/SizesRoute'))
@@ -49,19 +50,19 @@ const CatalogMakeRoute = lazy(() => import('@/routes/catalog/CatalogMakeRoute'))
 const CatalogModelRoute = lazy(() => import('@/routes/catalog/CatalogModelRoute'))
 const CompareRoute = lazy(() => import('@/routes/compare/CompareRoute'))
 const GoRoute = lazy(() => import('@/routes/go/GoRoute'))
-const SitemapRoute = lazy(() => import('@/routes/sitemap/SitemapRoute'))
+const SitemapRoute = lazyWithPacks(() => import('@/routes/sitemap/SitemapRoute'), 'sitemap')
 const CustomsRoute = lazy(() => import('@/routes/customs/CustomsRoute'))
 const ShowroomRoute = lazy(() => import('@/routes/showroom/ShowroomRoute'))
 const DataStatusRoute = lazy(() => import('@/routes/data-status/DataStatusRoute'))
 const ShareRoute = lazy(() => import('@/routes/share/ShareRoute'))
 const FeaturesRoute = lazy(() => import('@/routes/features/FeaturesRoute'))
-const SettingsRoute = lazy(() => import('@/routes/settings/SettingsRoute'))
+const SettingsRoute = lazyWithPacks(() => import('@/routes/settings/SettingsRoute'), 'settings')
 const EmailLinkRoute = lazy(() => import('@/routes/auth/EmailLinkRoute'))
 const UnsubscribeRoute = lazy(() => import('@/routes/auth/UnsubscribeRoute'))
 const LoginRoute = lazy(() => import('@/routes/auth/LoginRoute'))
 const LogoutRoute = lazy(() => import('@/routes/auth/LogoutRoute'))
-const ProfileRoute = lazy(() => import('@/routes/profile/ProfileRoute'))
-const AdminRoute = lazy(() => import('@/routes/admin/AdminRoute'))
+const ProfileRoute = lazyWithPacks(() => import('@/routes/profile/ProfileRoute'), 'profile')
+const AdminRoute = lazyWithPacks(() => import('@/routes/admin/AdminRoute'), 'admin')
 const AdvancedSearchRoute = lazy(() => import('@/routes/advanced-search/AdvancedSearchRoute'))
 const RaceRoute = lazy(() => import('@/routes/RaceRoute'))
 const PlayRoute = lazy(() => import('@/routes/play/PlayRoute'))

@@ -89,7 +89,7 @@ function preloadHints(): Plugin {
         const langUrls: Record<string, string> = {}
         for (const lang of LANG_CHUNKS) {
           const chunk = Object.values(bundle).find(
-            f => f.type === 'chunk' && f.facadeModuleId?.replaceAll('\\', '/').endsWith(`/src/i18n/${lang}.json`)
+            f => f.type === 'chunk' && f.facadeModuleId === `\0i18n:${lang}-core`
           )
           if (chunk) langUrls[lang] = `/${chunk.fileName}`
         }
