@@ -5,8 +5,14 @@ import type { ReleaseDay } from './core.js'
 export const DAYS: readonly ReleaseDay[] = [
   {
     date: '2026-11-20',
-    version: 'v2.1448',
+    version: 'v2.1449',
     items: [
+      item(
+        'fix',
+        'На головній сторінці та в розділі «Читати: рекорди» знову відображаються підписи статистики замість службових ключів',
+        'На главной странице и в разделе «Читать: рекорды» снова отображаются подписи статистики вместо служебных ключей',
+        'The home page and the Read extremes guide show the statistics labels again instead of raw keys'
+      ),
       item(
         'improved',
         'Тексти розшифровки VIN, картки авто та рейтингів безпеки завантажуються лише коли вони потрібні, тож решта сторінок відкривається легше',

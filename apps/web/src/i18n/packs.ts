@@ -49,7 +49,10 @@ export const PACKS = {
       'stats.map.noData',
       'stats.map.fuel.',
       'stats.map.mode',
-      'stats.view.'
+      'stats.view.',
+      // Home panels (SearchRoute) and /read/extremes render TopStatsPanel / WeightModelsPanel outside the stats route.
+      'stats.top.',
+      'stats.weight.'
     ]
   },
   read: {
