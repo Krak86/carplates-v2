@@ -29,7 +29,11 @@ const SLICES: Record<Lang, Record<SliceKind, Loader>> = {
     install: () => import('./ua.install.pack.json'),
     legal: () => import('./ua.legal.pack.json'),
     roadSafety: () => import('./ua.roadSafety.pack.json'),
-    alarms: () => import('./ua.alarms.pack.json')
+    alarms: () => import('./ua.alarms.pack.json'),
+    compare: () => import('./ua.compare.pack.json'),
+    stats: () => import('./ua.stats.pack.json'),
+    read: () => import('./ua.read.pack.json'),
+    size: () => import('./ua.size.pack.json')
   },
   ru: {
     core: () => import('./ru.core.pack.json'),
@@ -44,7 +48,11 @@ const SLICES: Record<Lang, Record<SliceKind, Loader>> = {
     install: () => import('./ru.install.pack.json'),
     legal: () => import('./ru.legal.pack.json'),
     roadSafety: () => import('./ru.roadSafety.pack.json'),
-    alarms: () => import('./ru.alarms.pack.json')
+    alarms: () => import('./ru.alarms.pack.json'),
+    compare: () => import('./ru.compare.pack.json'),
+    stats: () => import('./ru.stats.pack.json'),
+    read: () => import('./ru.read.pack.json'),
+    size: () => import('./ru.size.pack.json')
   },
   en: {
     core: () => import('./en.core.pack.json'),
@@ -59,7 +67,11 @@ const SLICES: Record<Lang, Record<SliceKind, Loader>> = {
     install: () => import('./en.install.pack.json'),
     legal: () => import('./en.legal.pack.json'),
     roadSafety: () => import('./en.roadSafety.pack.json'),
-    alarms: () => import('./en.alarms.pack.json')
+    alarms: () => import('./en.alarms.pack.json'),
+    compare: () => import('./en.compare.pack.json'),
+    stats: () => import('./en.stats.pack.json'),
+    read: () => import('./en.read.pack.json'),
+    size: () => import('./en.size.pack.json')
   }
 }
 const DELTAS: Partial<Record<Lang, Partial<Record<SliceKind, Loader>>>> = {

@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react'
+import { Suspense, useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
@@ -14,6 +14,7 @@ import { leadParts, parseSizeTab, SIZE_TABS, type SizeTab } from '@/components/s
 import { useVehicleSize, type VehicleSizeInput } from '@/components/size/use-vehicle-size'
 import SectionSkeleton from '@/components/ui/SectionSkeleton'
 import { toFieldMap } from '@/components/vin/helpers'
+import { lazyWithPacks } from '@/i18n/lazy-with-packs'
 import { cn } from '@/lib/cn'
 import { upperBrand } from '@/lib/display-brand'
 import { vinQuery } from '@/lib/queries'
@@ -21,11 +22,11 @@ import { scrollElementIntoView } from '@/lib/share-section'
 import ReadGuideLink from '@/components/ReadGuideLink'
 import { readHref, SIZES_PATH } from '@/routes/read/links'
 
-// Each tab is its own chunk, fetched the first time it opens; the silhouette paths ride along with the schema tab only.
-const SizeSchemaTab = lazy(() => import('@/components/size/SizeSchemaTab'))
-const SizeParkingTab = lazy(() => import('@/components/size/SizeParkingTab'))
-const SizeGarageTab = lazy(() => import('@/components/size/SizeGarageTab'))
-const SizeNormsTab = lazy(() => import('@/components/size/SizeNormsTab'))
+// Each tab is its own chunk (with the `size` dictionary pack), fetched the first time it opens; the silhouette paths ride along with the schema tab only.
+const SizeSchemaTab = lazyWithPacks(() => import('@/components/size/SizeSchemaTab'), 'size')
+const SizeParkingTab = lazyWithPacks(() => import('@/components/size/SizeParkingTab'), 'size')
+const SizeGarageTab = lazyWithPacks(() => import('@/components/size/SizeGarageTab'), 'size')
+const SizeNormsTab = lazyWithPacks(() => import('@/components/size/SizeNormsTab'), 'size')
 
 type Props = Omit<VehicleSizeInput, 'vinFields'> & {
   /** The car's VIN: decoded only once the section is open, for the wheelbase and a body-class hint. */

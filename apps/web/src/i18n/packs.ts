@@ -33,6 +33,64 @@ export const PACKS = {
     prefixes: ['alarms'],
     owners: ['src/routes/alarms/'],
     keep: ['alarms.noData', 'alarms.count', 'alarms.updated', 'alarms.status.']
+  },
+  compare: {
+    prefixes: ['compare'],
+    owners: ['src/routes/compare/', 'src/components/compare/', 'src/lib/export-compare.ts'],
+    keep: ['compare.title', 'compare.chip', 'compare.tray.']
+  },
+  stats: {
+    prefixes: ['stats'],
+    owners: ['src/routes/stats/'],
+    keep: [
+      'stats.viewLink',
+      'stats.noRows',
+      'stats.filterPlaceholder',
+      'stats.map.noData',
+      'stats.map.fuel.',
+      'stats.map.mode',
+      'stats.view.'
+    ]
+  },
+  read: {
+    prefixes: ['read'],
+    owners: ['src/routes/read/'],
+    // `read.card.*` / `read.cost.*`: ResultCard, AuctionCheck, ReadGuideLink; `ExamplePlates` also renders on the catalog model page.
+    keep: [
+      'read.card.',
+      'read.cost.',
+      'read.showPlates',
+      'read.hidePlates',
+      'read.plates.loading',
+      'read.plates.error',
+      'read.plates.empty'
+    ]
+  },
+  size: {
+    prefixes: ['size'],
+    // CompareRanges builds `size.<bay|garage>.*` / `size.verdict.*` (all kept in core); the scan only sees the template literal.
+    owners: ['src/components/size/', 'src/routes/read/', 'src/components/compare/CompareRanges.tsx'],
+    // Everything the always-rendered section, ResultCard, compare and the exports use; the tabs' texts (about, tips, links,
+    // norms, road signs, mirrors) load with the lazy tab chunks.
+    keep: [
+      'size.title',
+      'size.show',
+      'size.hide',
+      'size.lead',
+      'size.typicalOnly',
+      'size.estimatedNote',
+      'size.tab.',
+      'size.shape.',
+      'size.chip.',
+      'size.class.',
+      'size.field.',
+      'size.verdict.',
+      'size.bay.',
+      'size.garage.',
+      'size.schema.',
+      'size.range',
+      'size.source'
+    ]
   }
 } as const satisfies Record<string, PackDef>
 
