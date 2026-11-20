@@ -5,8 +5,14 @@ import type { ReleaseDay } from './core.js'
 export const DAYS: readonly ReleaseDay[] = [
   {
     date: '2026-11-20',
-    version: 'v2.1435',
+    version: 'v2.1437',
     items: [
+      item(
+        'improved',
+        'Якщо номера немає в реєстрі, тепер пояснюємо чому: до якої дати в даних є номери, дата останнього запису реєстру, можливі причини (авто до 2013 року, після прибирання номерів, відновлення номера за VIN, розшук і аукціони) та посилання на розділи, де можна прочитати більше.',
+        'Если номера нет в реестре, теперь объясняем почему: до какой даты в данных есть номера, дата последней записи реестра, возможные причины (авто до 2013 года, после удаления номеров, восстановление номера по VIN, розыск и аукционы) и ссылки на разделы, где можно прочитать больше.',
+        'When a plate is not in the registry we now explain why: the date up to which plates are in the data, the date of the registry last record, the likely reasons (a vehicle from before 2013, registered after plates were removed, restoring a plate from the VIN, wanted lists and auctions) and links to the sections where you can read more.'
+      ),
       item(
         'improved',
         'Головне фото авто на повільному зв’язку з’являється швидше: воно завантажується у розмірі, що відповідає екрану телефона, а не у найбільшому.',
