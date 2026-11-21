@@ -1669,3 +1669,31 @@ Done: `/s/<plate|vin|alarms>/<section>` aliases (own preview + `og:url`, then SP
 - [x] Decided 2026-11-21: aliases stay for plate, VIN and `/alarms` sections only; catalog modals (3D, 360, MOT, race) keep `?section=`, no multi-segment alias
 - [ ] After deploy v2.1456 (owner): alarms links are now `/s/losses` and `/s/map` (old `/s/alarms/<section>` still served); share a fresh `/s/losses` in Telegram. A `/s/alarms/losses` that unfurled as the map was Telegram's own cache: prod returned the losses tags for it (checked with a Telegram UA)
 - [ ] Optional: per-section og cards for plate sections (today they reuse the plate card; a render per section multiplies the expensive card work)
+
+## Atom feed (idea 2026-11-21, plan only, nothing built)
+
+Research result: worth it only as one small feed. The release log (`packages/shared/src/releases/<yyyy-mm>.ts`, ua/ru/en, tagged `new|improved|data|fix`) is already feed-shaped and `SeoController` (`apps/api/src/spa/`) already serves `/sitemap.xml` + `/robots.txt`, so no migration, ingest or seed CSV. Weakness: a releases-only feed goes quiet whenever no features ship, so it needs content that changes without a release.
+
+**Item types (one feed per language, `?lang=`, default ua):**
+1. Releases: `new` items per day (irregular).
+2. Read guides: `ARTICLES` entries by `published` date (rare).
+3. Monthly stats post on the 1st (guaranteed pulse; from `/stats`, can also feed the digest mail).
+4. Fresh SETAM auction lots, **batched** one item per day or week, not per lot (continuous; links to SETAM).
+5. Optional heartbeat: data refresh events from `job_runs` / `/data-status` (thin items, maybe a separate feed).
+
+**Out on purpose:** wanted / Garpun records (property of individuals, abuse risk), car news and stock news (third-party headlines, `/api/news*` is blocked in robots and `/news` is `noindex`; Yahoo endpoint is unofficial), per-plate / per-VIN feeds (enumerable, `noindex`).
+
+**Decisions to keep:**
+- Path must NOT be under `/api/` (`robots.txt` has `Disallow: /api/`): e.g. `/feed.xml`, served by `SeoController`.
+- Atom, with a stable `id` per item; releases need a per-day anchor (`/releases#<date>`) and the page must scroll to it.
+- `<link rel="alternate" type="application/atom+xml">` in the page head per language; list it in the "Agent discovery" section.
+- Cache-Control + Cloudflare rule (see `docs/checklists.md` "new `/api/*` endpoint (edge cache)", adapt for a non-`/api` route).
+- UI-visible strings: "-" not an em dash.
+
+**Steps:**
+- [ ] 1. Pure serializer (`apps/api/src/feed/`): releases + guides, XML escaping, `new`-items-only filter, tests
+- [ ] 2. Route in `SeoController`, per-language feeds, head `<link>`, release-day anchor on `/releases`
+- [ ] 3. Edge cache + docs (`features-reference.md` "Sitemap, robots and rate limits", `checklists.md` docs-after-feature, release entry + `LATEST_RELEASE_DATE`)
+- [ ] 4. Monthly stats post (generator shared with the digest mail if it fits)
+- [ ] 5. Optional: batched auction-lots item (own caching) and a data-freshness feed
+- [ ] After deploy (owner): validate the feed (W3C feed validator), subscribe in one reader, check `robots.txt` does not block it
