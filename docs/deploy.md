@@ -87,6 +87,16 @@ web/       releases/<git-sha>/ (5 kept) and `current` → the live release (a sy
 pgdata/    Postgres data (the ~23 GB DB)        backups/  staging for dumps before upload        archive/  data.gov.ua source ZIPs
 ```
 
+### Disk usage and image cleanup (checked 2026-11-21)
+
+Disk is 193 GB. On 2026-11-21 it was 82% full: **131.7 GB of Docker images** (259 images, only 5 in use), 23 GB Postgres, 3.3 GB under `/opt/carsua` (archive 1.2 GB, web releases 1.1 GB, ingest-data 1.2 GB), logs and journal under 40 MB, Docker volumes 0.5 GB. Nothing else is temp data.
+
+- **Cause:** every deploy pulls a new sha-tagged `carsua-*` image; the old `docker image prune -f` only removes untagged layers, so the tagged ones piled up.
+- **Fix:** `prune_images [KEEP]` in `infra/vps/lib.sh`, called at the end of `deploy-api.sh`, `deploy-ingest.sh` and `deploy-alpr.sh` (after the new version is healthy). It keeps the 3 newest tags per `ghcr.io/*/carsua-*` repository and anything a container still uses (`docker rmi` refuses in-use images, so the idle blue/green colour's image, the rollback target, always stays). `postgres` and `caddy` are never touched. Do not switch to `docker image prune -a`: the ingest container runs with `run --rm`, so its image is unused between cron runs and would be deleted.
+- **One-off cleanup on the VPS** (the same logic by hand): `docker image ls --filter 'reference=ghcr.io/*/carsua-*' --format '{{.Repository}}:{{.Tag}}' | awk -F: '++n[$1] > 3' | xargs -r docker rmi`.
+- **Check the disk:** `df -h /`, `docker system df`, `du -xh --max-depth=2 /opt/carsua | sort -rh | head`. The admin Server tab shows the same used figure (reload the page; the history chart adds one point per minute).
+- **Postgres:** no scheduled `VACUUM`; autovacuum is enough. Dead tuples are about 7% of `registry.registrations` (1.8M of ~25M, under the 20% autovacuum threshold). Do not run `VACUUM FULL` or `REINDEX` without a reason: it locks the table for a long time and needs free space of about the table size. Check `n_dead_tup` in `pg_stat_user_tables` after a monthly ingest.
+
 ## Where to get what
 
 **Contabo** — order _Cloud VPS 6_, EU (Germany), image **Ubuntu 24.04**, "No Data Protection" (backups go to R2). The order form only asks for a root

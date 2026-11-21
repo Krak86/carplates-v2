@@ -52,5 +52,5 @@ sleep 6
 # Pick up Caddyfile / maintenance.html changes (the files were rsynced with --inplace so the bind mounts see them).
 docker compose exec -T caddy caddy reload --config /etc/caddy/Caddyfile >/dev/null </dev/null
 
-docker image prune -f >/dev/null
+prune_images
 echo "api-$NEW is live ($TAG)"

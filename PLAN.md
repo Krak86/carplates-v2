@@ -1652,6 +1652,13 @@ trigger above · NestJS 12 bump when `nestjs-zod` supports it · TypeScript 7 wh
 
 ✅ 2026-11-21: hero photos page with arrows/dots/swipe, thumbnail strip no longer scrolls (fixed height, skeleton in step), "Save as image" moved into the chips list. Write-up `docs/plan-done.md` "Hero photo carousel without a scrolling strip".
 
+## VPS disk: old Docker images pruned on every deploy (2026-11-21, awaiting deploy)
+
+Admin Server tab showed 157.5 GB of 192.7 GB used. Found: 131.7 GB of Docker images (259, tagged sha images never pruned), DB 23 GB, `/opt/carsua` 3.3 GB. `prune_images` in `infra/vps/lib.sh` now keeps the 3 newest tags per `carsua-*` repo plus anything in use (details: `docs/deploy.md` "Disk usage and image cleanup").
+
+- [ ] After deploy (owner): `df -h /` on the VPS shows about 45 GB used (before: 157 GB; if it did not drop, run the one-off `docker rmi` line from `docs/deploy.md`); `docker image ls --filter 'reference=ghcr.io/*/carsua-*'` lists at most 3 tags each for api, alpr, ingest; reload the admin Server tab and the Disk card matches. Rollback target still present: the idle api colour's container image.
+- [ ] After the next monthly ingest: `n_dead_tup` of `registry.registrations` stays well under 20% of the rows; the DB does not grow beyond the new data (23 GB on 2026-11-21).
+
 ## Section share aliases `/s/...` + `/race` screenshot card (2026-11-20, deployed 2026-11-21)
 
 Done: `/s/<plate|vin|alarms>/<section>` aliases (own preview + `og:url`, then SPA redirect), `PAGE_IMAGES` (`/race` → `/og-race.png`), sitemap-wide distinct `og:image` test. Conventions: `docs/features-reference.md` "Link previews".
