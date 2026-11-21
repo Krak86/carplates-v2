@@ -1,4 +1,4 @@
-import { denormalizePlate, isUaPlate, SECTION_ALIAS_PREFIX } from '@carplates/shared'
+import { denormalizePlate, isUaPlate, sectionAliasPath } from '@carplates/shared'
 
 import i18n from '@/i18n'
 import { setFontParam } from '@/store/ui-store'
@@ -59,7 +59,7 @@ export function shareBaseUrl(): string {
 
 /**
  * The shared link carries the sharer's language so its link preview (and the opened app) match it. A section of a single-segment
- * page (a plate, a VIN, `/alarms`) is the path alias `/s/<page>/<section>`: Telegram and others treat `?section=` variants of one
+ * page (a plate, a VIN, `/alarms`) is the path alias `/s/<page>/<section>` (`/s/<section>` for the `/alarms` ones): Telegram and others treat `?section=` variants of one
  * path as the same preview, a path of its own gets its own (the app redirects to `/<page>?section=…`).
  */
 export function buildShareUrl(section: ShareSection, tab?: string): string {
@@ -70,7 +70,7 @@ export function buildShareUrl(section: ShareSection, tab?: string): string {
   const base = shareBaseUrl()
   const { origin } = window.location
   const page = base.slice(origin.length + 1)
-  if (page && !page.includes('/')) return `${origin}${SECTION_ALIAS_PREFIX}/${page}/${section}?${params.toString()}`
+  if (page && !page.includes('/')) return `${origin}${sectionAliasPath(page, section)}?${params.toString()}`
   return `${base}?section=${section}&${params.toString()}`
 }
 

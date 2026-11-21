@@ -1,4 +1,5 @@
 - [ ] Missing-key handler for the pack dictionaries (2026-11-20): `packs.test.ts` cannot see a pack key used through a shared / eager importer of an owner file (the prod trace found `stats.top.*` / `stats.weight.*` raw on the home page and `stats.spec.*` on `/read/extremes` this way). Add an i18next `missingKeyHandler` (`saveMissing: true`) that logs once per key in dev and adds a Sentry breadcrumb once per key in prod (skip keys of a pack that is still loading; `loadPacks` / `await i18nReady` must not trigger it). Read `i18n/` and the "Language dictionaries" section first; tests: Vitest, colocated.
+
 # carplates-v2 — roadmap
 
 Rebuild of `carsua.app`. The 2019 app was a GitHub-Pages SPA reading Azure Cosmos
@@ -1651,10 +1652,11 @@ trigger above · NestJS 12 bump when `nestjs-zod` supports it · TypeScript 7 wh
 
 ✅ 2026-11-21: hero photos page with arrows/dots/swipe, thumbnail strip no longer scrolls (fixed height, skeleton in step), "Save as image" moved into the chips list. Write-up `docs/plan-done.md` "Hero photo carousel without a scrolling strip".
 
-## Section share aliases `/s/...` + `/race` screenshot card (2026-11-20, built, not deployed)
+## Section share aliases `/s/...` + `/race` screenshot card (2026-11-20, deployed 2026-11-21)
 
 Done: `/s/<plate|vin|alarms>/<section>` aliases (own preview + `og:url`, then SPA redirect), `PAGE_IMAGES` (`/race` → `/og-race.png`), sitemap-wide distinct `og:image` test. Conventions: `docs/features-reference.md` "Link previews".
 
 - [ ] After deploy (owner): purge Cloudflare `/og-race.png` and plate pages; in Telegram share a **fresh** `https://carsua.app/s/<plate>/vin` and `/s/alarms/losses` and confirm they unfurl as separate previews (Telegram keeps its own cache, old `?section=` URLs may stay stale); check `/race` shows the game screenshot
-- [ ] Decide: aliases for the other `?section=` shares (stats / fuel / safety panels, compare `?section=`, `/showroom`)? Today only single-segment pages (plate, VIN, `/alarms`) get one
+- [x] Decided 2026-11-21: aliases stay for plate, VIN and `/alarms` sections only; catalog modals (3D, 360, MOT, race) keep `?section=`, no multi-segment alias
+- [ ] After deploy v2.1456 (owner): alarms links are now `/s/losses` and `/s/map` (old `/s/alarms/<section>` still served); share a fresh `/s/losses` in Telegram. A `/s/alarms/losses` that unfurled as the map was Telegram's own cache: prod returned the losses tags for it (checked with a Telegram UA)
 - [ ] Optional: per-section og cards for plate sections (today they reuse the plate card; a render per section multiplies the expensive card work)

@@ -204,13 +204,14 @@ describe('SpaController meta injection', () => {
     expect(await get('/s/AA1234BB/vin')).toContain('og:url" content="https://carsua.app/s/AA1234BB/vin"')
   })
 
-  it('serves /s/alarms/<section> with the section card and the alias as og:url', async () => {
-    const losses = await get('/s/alarms/losses?lang=en')
+  it('serves /s/<alarms section> (and the long /s/alarms/<section>) with the section card and the alias as og:url', async () => {
+    const losses = await get('/s/losses?lang=en')
     expect(losses).toContain('og:image" content="https://carsua.app/og/losses.png?lang=en"')
-    expect(losses).toContain('og:url" content="https://carsua.app/s/alarms/losses?lang=en"')
-    const map = await get('/s/alarms/map')
+    expect(losses).toContain('og:url" content="https://carsua.app/s/losses?lang=en"')
+    const map = await get('/s/map')
     expect(map).toContain('og:image" content="https://carsua.app/og/alarms.png"')
-    expect(map).toContain('og:url" content="https://carsua.app/s/alarms/map"')
+    expect(map).toContain('og:url" content="https://carsua.app/s/map"')
+    expect(await get('/s/alarms/map')).toContain('og:url" content="https://carsua.app/s/map"')
   })
 
   it('treats a section alias of another static page or an unknown plate as an unknown path', async () => {

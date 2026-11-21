@@ -144,6 +144,7 @@ export default function App(): ReactNode {
             <Route path="/share" element={<ShareRoute />} />
             <Route path="/go/:alias" element={<GoRoute />} />
             <Route path="/s/:target/:section" element={<SectionAliasRoute />} />
+            <Route path="/s/:section" element={<SectionAliasRoute />} />
             <Route path="/features" element={<FeaturesRoute />} />
             <Route path="/settings" element={<SettingsRoute />} />
             <Route path="/auth/email" element={<EmailLinkRoute />} />

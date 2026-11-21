@@ -1066,6 +1066,7 @@ export {
 export { localizeRegion } from './regionLabels.js'
 export { localizeRegistryRows, registryLabel, type RegistryLabelKind } from './registryLabels.js'
 export {
+  ALARM_SECTIONS,
   SHARE_ALIASES,
   SHARE_ALIAS_PREFIX,
   SECTION_ALIAS_PREFIX,

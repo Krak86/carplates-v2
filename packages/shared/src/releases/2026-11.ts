@@ -5,8 +5,14 @@ import type { ReleaseDay } from './core.js'
 export const DAYS: readonly ReleaseDay[] = [
   {
     date: '2026-11-21',
-    version: 'v2.1455',
+    version: 'v2.1456',
     items: [
+      item(
+        'improved',
+        'Посилання на розділи тривог тепер короткі: /s/losses та /s/map (без слова alarms), старі адреси працюють як раніше',
+        'Ссылки на разделы тревог теперь короткие: /s/losses и /s/map (без слова alarms), старые адреса работают как раньше',
+        'Alerts section links are now short: /s/losses and /s/map (no "alarms" in the address); the old addresses keep working'
+      ),
       item(
         'improved',
         'Кнопка «Зберегти як картинку» тепер у кінці списку позначок картки авто (видно після «Показати більше»)',
