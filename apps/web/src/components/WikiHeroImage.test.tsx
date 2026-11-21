@@ -281,6 +281,46 @@ describe('WikiHeroImage extra photos', () => {
     )
   })
 
+  it('Left / Right arrow keys page through the photos, but not while typing in a field', async () => {
+    api.getWikiPhotos.mockResolvedValue({ photos: [1, 2, 3].map(n => photo(n, false)) })
+    renderWithPhotos(null)
+    const heroImg = await screen.findByAltText('KIA CEED')
+    act(() => {
+      fireEvent.load(heroImg)
+    })
+    await screen.findByRole('button', { name: 'Next photo' })
+    fireEvent.keyDown(window, { key: 'ArrowRight' })
+    await waitFor(() =>
+      expect(screen.getByAltText('KIA CEED').getAttribute('src')).toBe('https://upload.example/p1.jpg')
+    )
+    fireEvent.keyDown(window, { key: 'ArrowRight' })
+    await waitFor(() =>
+      expect(screen.getByAltText('KIA CEED').getAttribute('src')).toBe('https://upload.example/p2.jpg')
+    )
+    fireEvent.keyDown(window, { key: 'ArrowLeft' })
+    await waitFor(() =>
+      expect(screen.getByAltText('KIA CEED').getAttribute('src')).toBe('https://upload.example/p1.jpg')
+    )
+    const input = document.body.appendChild(document.createElement('input'))
+    fireEvent.keyDown(input, { key: 'ArrowRight', bubbles: true })
+    expect(screen.getByAltText('KIA CEED').getAttribute('src')).toBe('https://upload.example/p1.jpg')
+    input.remove()
+  })
+
+  it('the zoomed photo pages with the arrow keys too, with a position counter', async () => {
+    api.getWikiPhotos.mockResolvedValue({ photos: [1, 2].map(n => photo(n, false)) })
+    renderWithPhotos(null)
+    const heroImg = await screen.findByAltText('KIA CEED')
+    act(() => {
+      fireEvent.load(heroImg)
+    })
+    fireEvent.click(await screen.findByRole('button', { name: 'Open photo and zoom' }))
+    const dialog = await screen.findByRole('dialog')
+    expect(dialog.textContent).toContain('1 / 3')
+    fireEvent.keyDown(dialog.firstElementChild!, { key: 'ArrowRight' })
+    await waitFor(() => expect(screen.getByRole('dialog').textContent).toContain('2 / 3'))
+  })
+
   it('with a single photo: one selected thumbnail, no arrows and no dots', async () => {
     api.getWikiPhotos.mockResolvedValue({ photos: [] })
     renderWithPhotos(null)

@@ -21,9 +21,9 @@ export const DAYS: readonly ReleaseDay[] = [
       ),
       item(
         'improved',
-        'Фото авто на сторінці результату тепер гортаються стрілками, крапками та свайпом на самому фото, а стрічка мініатюр більше не скролиться вручну і не змінює висоту, тож макет не стрибає',
-        'Фото авто на странице результата теперь листаются стрелками, точками и свайпом на самом фото, а лента миниатюр больше не скроллится вручную и не меняет высоту, поэтому макет не прыгает',
-        'Car photos on the result page now page through with arrows, dots and a swipe on the photo itself, and the thumbnail strip no longer scrolls by hand or changes height, so the layout does not shift'
+        'Фото авто на сторінці результату тепер гортаються стрілками, клавішами ← →, крапками та свайпом на самому фото, а стрічка мініатюр більше не скролиться вручну і не змінює висоту, тож макет не стрибає',
+        'Фото авто на странице результата теперь листаются стрелками, клавишами ← →, точками и свайпом на самом фото, а лента миниатюр больше не скроллится вручную и не меняет высоту, поэтому макет не прыгает',
+        'Car photos on the result page now page through with arrows, the Left/Right keys, dots and a swipe on the photo itself, and the thumbnail strip no longer scrolls by hand or changes height, so the layout does not shift'
       )
     ]
   },

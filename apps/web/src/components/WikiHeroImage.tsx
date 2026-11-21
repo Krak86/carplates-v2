@@ -2,6 +2,7 @@ import { useRef, useState, type PointerEvent, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { commonsThumbUrl, HERO_THUMB_WIDTH, PAINT_HEX, resolveVehicleKind } from '@carplates/shared'
 
+import ArrowKeyNav from '@/components/ArrowKeyNav'
 import PhotoZoomDialog from '@/components/PhotoZoomDialog'
 import VehicleKindPlaceholder from '@/components/VehicleKindPlaceholder'
 import StripThumb from '@/components/StripThumb'
@@ -304,8 +305,17 @@ export default function WikiHeroImage({
           </div>
         )}
       </div>
+      <ArrowKeyNav enabled={slides.length > 1 && !zoomed} onStep={goStep} />
       {zoomed && image && (
-        <PhotoZoomDialog url={image.url} candidates={[]} active={null} onClose={() => setZoomed(false)} />
+        <PhotoZoomDialog
+          url={image.url}
+          candidates={[]}
+          active={null}
+          onClose={() => setZoomed(false)}
+          onPrev={slides.length > 1 ? (): void => goStep(-1) : undefined}
+          onNext={slides.length > 1 ? (): void => goStep(1) : undefined}
+          position={slides.length > 1 ? { n: active + 1, total: slides.length } : undefined}
+        />
       )}
       {/* One fixed-height row that never scrolls by hand (no scrollbar, no layout shift): the arrows, dots and swipe on the
           hero move through the photos and the row follows the active thumbnail. Same-size placeholders until the hero has
