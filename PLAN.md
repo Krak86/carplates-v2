@@ -1555,7 +1555,7 @@ Deploy Web #111 is green (349 test files, 2581 tests); nothing blocks a deploy. 
 
 ## Build order: Twelve-Factor quick items → Redis → microservices subset (decided 2026-11-19)
 
-1. **Twelve-Factor P2/P3 items first** (section below, about half a day): they edit `infra/docker-compose.prod.yml`, the deploy workflow and
+1. ✅ **Built 2026-11-21, awaiting deploy (owner "After deploy" boxes in the section below).** **Twelve-Factor P2/P3 items first** (section below, about half a day): they edit `infra/docker-compose.prod.yml`, the deploy workflow and
    `main.ts`, which Redis and every new service then reuse (pinned tags, `stop_grace_period`, JSON logs, rollback by tag).
 2. **Redis** (item "Redis-backed throttler storage" in the deploy-time security list): throttler store first, also the base for BullMQ.
 3. **Microservices, a subset only**: BullMQ mail queue → RabbitMQ `mail-service` → Kafka `alarm-service` only if still wanted. Skip
