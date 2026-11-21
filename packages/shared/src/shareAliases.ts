@@ -21,15 +21,25 @@ export const SECTION_ALIAS_PREFIX = '/s'
 
 const SECTION_ID = /^[a-z0-9][a-z0-9-]{0,31}$/
 
-export const sectionAliasPath = (target: string, section: string): string =>
-  `${SECTION_ALIAS_PREFIX}/${encodeURIComponent(target)}/${section}`
+/** `/alarms` sections: their alias carries no target, `/s/<section>` (the section id alone names the whole link). */
+export const ALARM_SECTIONS = ['losses', 'map'] as const
 
-/** The target and section of a `/s/<target>/<section>` path (a trailing slash is fine), or null for any other path. */
+const isAlarmSection = (value: string): boolean => (ALARM_SECTIONS as readonly string[]).includes(value)
+
+export const sectionAliasPath = (target: string, section: string): string =>
+  target === 'alarms' && isAlarmSection(section)
+    ? `${SECTION_ALIAS_PREFIX}/${section}`
+    : `${SECTION_ALIAS_PREFIX}/${encodeURIComponent(target)}/${section}`
+
+/**
+ * The target and section of a `/s/<target>/<section>` or `/s/<alarms section>` path (a trailing slash is fine), or null for any
+ * other path. The long `/s/alarms/<section>` form of the first alarms links keeps working.
+ */
 export function sectionAliasOfPath(pathname: string): { target: string; section: string } | null {
   const [root, rawTarget, section, ...rest] = pathname.split('/').filter(Boolean)
-  if (`/${root}` !== SECTION_ALIAS_PREFIX || !rawTarget || !section || rest.length > 0 || !SECTION_ID.test(section)) {
-    return null
-  }
+  if (`/${root}` !== SECTION_ALIAS_PREFIX || !rawTarget || rest.length > 0) return null
+  if (!section) return isAlarmSection(rawTarget) ? { target: 'alarms', section: rawTarget } : null
+  if (!SECTION_ID.test(section)) return null
   try {
     const target = decodeURIComponent(rawTarget)
     return target && !target.includes('/') ? { target, section } : null

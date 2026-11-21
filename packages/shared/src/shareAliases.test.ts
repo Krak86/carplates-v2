@@ -20,6 +20,14 @@ describe('sectionAlias', () => {
     })
   })
 
+  it('names an /alarms section by itself: /s/<section>, the long form still reads', () => {
+    expect(sectionAliasPath('alarms', 'losses')).toBe('/s/losses')
+    expect(sectionAliasPath('alarms', 'map')).toBe('/s/map')
+    expect(sectionAliasOfPath('/s/losses')).toEqual({ target: 'alarms', section: 'losses' })
+    expect(sectionAliasOfPath('/s/alarms/map')).toEqual({ target: 'alarms', section: 'map' })
+    expect(sectionAliasOfPath('/s/vin')).toBeNull()
+  })
+
   it('rejects other prefixes, missing or extra segments and odd section ids', () => {
     for (const p of [
       '/s',
