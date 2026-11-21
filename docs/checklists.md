@@ -13,6 +13,7 @@ Below-the-fold sections are `LazySection`s; a new shareable one must list its id
 ## Deploy
 
 - Blue/green ⇒ backward-compatible migrations.
+- Prod compose images need an exact tag, never `latest` / a floating major (`${X_TAG:?…}` + the key in the `lib.sh` seed loop; rollback = "Deploy API" with `image_tag`, `docs/deploy.md` "Rollback"). Long-running services also get `stop_grace_period`.
 - New VPS image (a new `carsua-*` service) ⇒ call `prune_images` from its deploy script (`lib.sh`), otherwise old sha-tagged images fill the disk.
 - New env var ⇒ `env.ts` + `deploy-api.yml` + `docs/deploy.md`.
 - New VPS deploy step ⇒ a script in `infra/vps/` that sources `/opt/carsua/compose/lib.sh` (`set_env`, `wait_healthy`); rsync `lib.sh` first and add the script to the workflow `paths`. Shared CI bits: `.github/actions/` (`ssh-setup`, `build-image`, `cf-purge`), `infra/ci/lib.sh` (`emit`, `push_env`).

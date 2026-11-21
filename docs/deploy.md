@@ -201,6 +201,24 @@ variables: `BACKUP_BUCKET` … `VPS_USER`); `VITE_API_BASE` and `VITE_GOOGLE_MAP
    check `journalctl -u cf-firewall.service -b`. Undo: `rm /opt/carsua/env/cf-firewall.enabled; bash /opt/carsua/compose/cf-firewall.sh remove`.
 8. Pre-deploy gate: [security-checklist.md §7](security-checklist.md); submit `sitemap.xml`.
 
+## Rollback
+
+Migrations are backward compatible (blue/green rule), so the previous image runs against the current schema.
+
+- **API, by tag (no revert commit, no CI, no build):** GitHub Actions → "Deploy API" → Run workflow, set `image_tag` to the full 40-character commit SHA of the
+  last good deploy (the sha-tagged image is in `ghcr.io/<owner>/carsua-api`; `git log` or an earlier "Deploy API" run shows it). It rewrites the env files
+  (`GIT_SHA` = that tag), runs the normal blue/green switch with that image, and purges the Cloudflare cache. A bad tag fails the pull and the live colour keeps serving.
+  Afterwards the live commit differs from `main`: fix forward, or run the workflow again with an empty `image_tag` to redeploy `main`.
+  Compose files and the Caddyfile still come from the commit you run it on (`main`), only the image is old.
+- **API, by hand on the VPS:** the idle colour usually still holds the previous image (`docker compose ps -a`), but `deploy-api.sh <sha>` is the safe path:
+  `ssh deploy@vps 'bash -s -- <sha>' < infra/vps/deploy-api.sh` (needs `lib.sh` in `/opt/carsua/compose/`).
+- **Web:** `cd /opt/carsua/web && ln -sfn releases/<id> current.tmp && mv -T current.tmp current` (atomic; the 5 newest releases are kept, `ls -t releases`).
+  The api re-reads `index.html` by mtime, no restart.
+- **Image tags:** `docker-compose.prod.yml` has no `latest` fallback (`${API_TAG_BLUE:?…}`); `lib.sh` seeds a never-deployed tag with the placeholder `unset`.
+  `caddy` is pinned to an exact `2.x.y` (PLAN.md "Version pins"); bump it deliberately.
+- **Stop window:** api containers get `stop_grace_period: 30s` (Fastify `requestTimeout` is 60 s for 4 MB uploads, Docker's default is 10 s).
+- **Logs:** in production the api writes one JSON object per line (`{"level":"log","context":…,"message":…}`): `docker compose logs api-<colour> | jq -c 'select(.level=="error")'`.
+
 ## Backups (free, only what cannot be rebuilt)
 
 | Data                                                                                                                                                                    | Backup                                                                                                                                                                                                                                  |
