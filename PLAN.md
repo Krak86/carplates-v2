@@ -1676,6 +1676,7 @@ Done: `/s/<plate|vin|alarms>/<section>` aliases (own preview + `og:url`, then SP
 Research result: worth it only as one small feed. The release log (`packages/shared/src/releases/<yyyy-mm>.ts`, ua/ru/en, tagged `new|improved|data|fix`) is already feed-shaped and `SeoController` (`apps/api/src/spa/`) already serves `/sitemap.xml` + `/robots.txt`, so no migration, ingest or seed CSV. Weakness: a releases-only feed goes quiet whenever no features ship, so it needs content that changes without a release.
 
 **Item types (one feed per language, `?lang=`, default ua):**
+
 1. Releases: `new` items per day (irregular).
 2. Read guides: `ARTICLES` entries by `published` date (rare).
 3. Monthly stats post on the 1st (guaranteed pulse; from `/stats`, can also feed the digest mail).
@@ -1685,6 +1686,7 @@ Research result: worth it only as one small feed. The release log (`packages/sha
 **Out on purpose:** wanted / Garpun records (property of individuals, abuse risk), car news and stock news (third-party headlines, `/api/news*` is blocked in robots and `/news` is `noindex`; Yahoo endpoint is unofficial), per-plate / per-VIN feeds (enumerable, `noindex`).
 
 **Decisions to keep:**
+
 - Path must NOT be under `/api/` (`robots.txt` has `Disallow: /api/`): e.g. `/feed.xml`, served by `SeoController`.
 - Atom, with a stable `id` per item; releases need a per-day anchor (`/releases#<date>`) and the page must scroll to it.
 - `<link rel="alternate" type="application/atom+xml">` in the page head per language; list it in the "Agent discovery" section.
@@ -1692,6 +1694,7 @@ Research result: worth it only as one small feed. The release log (`packages/sha
 - UI-visible strings: "-" not an em dash.
 
 **Steps:**
+
 - [ ] 1. Pure serializer (`apps/api/src/feed/`): releases + guides, XML escaping, `new`-items-only filter, tests
 - [ ] 2. Route in `SeoController`, per-language feeds, head `<link>`, release-day anchor on `/releases`
 - [ ] 3. Edge cache + docs (`features-reference.md` "Sitemap, robots and rate limits", `checklists.md` docs-after-feature, release entry + `LATEST_RELEASE_DATE`)

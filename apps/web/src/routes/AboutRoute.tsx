@@ -337,6 +337,8 @@ function SourceAvatar({ source }: { source: Source }): ReactNode {
 
 const FEATURES = [
   'lookup',
+  'notFound',
+  'speed',
   'wanted',
   'otherSources',
   'vin',

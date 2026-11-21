@@ -5,8 +5,20 @@ import type { ReleaseDay } from './core.js'
 export const DAYS: readonly ReleaseDay[] = [
   {
     date: '2026-11-21',
-    version: 'v2.1460',
+    version: 'v2.1468',
     items: [
+      item(
+        'improved',
+        'Безпека: політика CSP тепер діє (браузер блокує все, що не дозволено), а небезпечні http-запити автоматично переходять на https.',
+        'Безопасность: политика CSP теперь действует (браузер блокирует всё, что не разрешено), а небезопасные http-запросы автоматически переходят на https.',
+        'Security: the CSP is now enforced (the browser blocks anything not allowed) and insecure http requests are upgraded to https automatically.'
+      ),
+      item(
+        'improved',
+        'Сторінка «Про сервіс» доповнена: нові короткі пункти про пояснення, чому номера немає, та швидке завантаження, оновлені описи фото, посилань, акаунта та безпеки',
+        'Страница «О сервисе» дополнена: новые короткие пункты про объяснение, почему номера нет, и быструю загрузку, обновлены описания фото, ссылок, аккаунта и безопасности',
+        'The About page is updated: new brief entries on why a plate is missing and fast loading, and refreshed descriptions of photos, links, the account and security'
+      ),
       item(
         'improved',
         'Вихід з акаунта тепер просить підтвердження, щоб випадковий клік не розлогінив вас: коротко пояснюємо, що ви матимете, якщо залишитесь в акаунті',
