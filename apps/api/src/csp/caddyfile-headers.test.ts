@@ -44,8 +44,15 @@ describe('infra/Caddyfile security headers', () => {
     for (const name of varRows.keys()) expect(joined, name).toContain(`{vars.${name}}`)
   })
 
-  it('Report-Only has no upgrade-insecure-requests (ignored there, one console error per frame)', () => {
-    for (const row of varRows.values()) expect(row).not.toMatch(/upgrade-insecure-requests/)
+  it('both CSP headers are enforced, not Report-Only', () => {
+    for (const h of cspHeaders) expect(h.name).toBe('Content-Security-Policy')
+  })
+
+  it('upgrade-insecure-requests is in the enforced site policy only (a Report-Only header would log a console error per frame)', () => {
+    const [site, frame] = cspHeaders
+    expect(site?.value).toContain('{vars.csp_site_upgrade_insecure}')
+    expect(varRows.get('csp_site_upgrade_insecure')).toBe('upgrade-insecure-requests')
+    expect(frame?.value).not.toMatch(/upgrade/)
     for (const h of cspHeaders.filter(h => h.name.endsWith('Report-Only')))
       expect(h.value).not.toMatch(/upgrade-insecure-requests/)
   })
