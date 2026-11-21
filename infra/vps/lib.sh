@@ -12,6 +12,17 @@ touch .env
 # set_env KEY VALUE: replace (or add) one line in compose/.env, which holds the image tags and the colour tags.
 set_env() { { grep -v "^$1=" .env || true; echo "$1=$2"; } > .env.tmp && mv .env.tmp .env; }
 
+# prune_images [KEEP]: drop old carsua images, keeping the KEEP newest tags per repository (default 3) plus anything a container
+# (even a stopped one, like the idle blue/green colour = the rollback target) still uses: `docker rmi` refuses in-use images.
+# Plain `docker image prune -f` only removes untagged layers; every deploy adds a new sha tag, so those piled up (~130 GB).
+# Scoped to ghcr.io/*/carsua-*: postgres and caddy are never touched. `docker image ls` lists newest first. Never fails a deploy.
+prune_images() {
+  docker image prune -f >/dev/null </dev/null || true
+  docker image ls --filter 'reference=ghcr.io/*/carsua-*' --format '{{.Repository}}:{{.Tag}}' </dev/null \
+    | awk -F: -v keep="${1:-3}" '++n[$1] > keep' \
+    | xargs -r docker rmi >/dev/null 2>&1 || true
+}
+
 # wait_healthy SERVICE: poll the container health check for up to ~90 s. Returns 1 on timeout and leaves the last status in
 # HEALTH_STATUS. </dev/null on every docker call: the callers are piped into `bash -s`, and a command reading stdin would eat the script.
 wait_healthy() {

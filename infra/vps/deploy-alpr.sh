@@ -11,6 +11,7 @@ docker compose pull alpr </dev/null
 docker compose up -d --no-deps alpr </dev/null
 if wait_healthy alpr; then
   echo "alpr healthy"
+  prune_images
   exit 0
 fi
 docker compose logs --tail 50 alpr >&2 </dev/null

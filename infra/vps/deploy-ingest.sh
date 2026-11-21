@@ -10,7 +10,7 @@ set_env INGEST_TAG "$TAG"
 install -d /opt/carsua/archive /opt/carsua/ingest-data
 docker compose pull ingest </dev/null
 crontab ingest.cron
-docker image prune -f >/dev/null </dev/null
+prune_images
 echo "ingest image $TAG ready; crontab installed"
 # Load the one-off seed CSVs into tables that are still empty (skips filled ones); non-fatal: a table may not exist until the api deploy migrates.
 bash ./run-ingest.sh seed-if-empty </dev/null || echo "warn: seed-if-empty failed (non-fatal)"
