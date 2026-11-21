@@ -5,8 +5,14 @@ import type { ReleaseDay } from './core.js'
 export const DAYS: readonly ReleaseDay[] = [
   {
     date: '2026-11-21',
-    version: 'v2.1456',
+    version: 'v2.1459',
     items: [
+      item(
+        'improved',
+        'Вихід з акаунта тепер просить підтвердження, щоб випадковий клік не розлогінив вас: коротко пояснюємо, що ви матимете, якщо залишитесь в акаунті',
+        'Выход из аккаунта теперь просит подтверждение, чтобы случайный клик не разлогинил вас: коротко объясняем, что вы получите, если останетесь в аккаунте',
+        'Signing out now asks for confirmation so an accidental click does not log you out, with a short note on what you keep by staying signed in'
+      ),
       item(
         'improved',
         'Посилання на розділи тривог тепер короткі: /s/losses та /s/map (без слова alarms), старі адреси працюють як раніше',

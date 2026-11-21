@@ -1,8 +1,10 @@
+import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import type { SessionUser } from '@carplates/shared'
 
+import SignOutDialog from '@/components/auth/SignOutDialog'
 import { useAuthActions } from '@/components/auth/use-auth-actions'
 
 type Props = {
@@ -15,6 +17,7 @@ const linkClass = 'block rounded-lg px-3 py-2 text-sm hover:bg-[var(--color-surf
 export default function AccountMenu({ user, onNavigate }: Props): ReactNode {
   const { t } = useTranslation()
   const { signOut } = useAuthActions()
+  const [confirmOpen, setConfirmOpen] = useState(false)
 
   return (
     <div className="w-64 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-2 shadow-lg">
@@ -49,14 +52,18 @@ export default function AccountMenu({ user, onNavigate }: Props): ReactNode {
 
       <div className="my-1 border-t border-[var(--color-border)]" />
 
-      <button
-        type="button"
-        disabled={signOut.isPending}
-        onClick={() => signOut.mutate(undefined, { onSuccess: onNavigate })}
-        className={`${linkClass} w-full text-left`}
-      >
+      <button type="button" onClick={() => setConfirmOpen(true)} className={`${linkClass} w-full text-left`}>
         <span aria-hidden>🚪</span> {t('auth.signOut')}
       </button>
+
+      {confirmOpen && (
+        <SignOutDialog
+          pending={signOut.isPending}
+          failed={signOut.isError}
+          onConfirm={() => signOut.mutate(undefined, { onSuccess: onNavigate })}
+          onClose={() => setConfirmOpen(false)}
+        />
+      )}
     </div>
   )
 }
