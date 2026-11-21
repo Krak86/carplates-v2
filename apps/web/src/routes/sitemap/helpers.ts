@@ -125,6 +125,7 @@ export const HIDDEN_ROUTES: readonly string[] = [
   '/:query',
   '/go/:alias',
   '/s/:target/:section',
+  '/s/:section',
   '/auth/email',
   '/unsubscribe',
   '/login',
