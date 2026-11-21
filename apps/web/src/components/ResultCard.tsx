@@ -446,11 +446,6 @@ export default function ResultCard({ data }: Props): ReactNode {
                 <TuningChip brand={c.brand} model={c.model} year={c.makeYear} body={c.body} />
                 <PartsCatalogChip vin={hasVin ? c.vin : null} brand={c.brand} />
                 <RaceTestDriveChip onOpen={() => setRaceOpenSignal(n => n + 1)} />
-              </CollapsibleChips>
-              <div className="mt-2 flex flex-wrap items-center gap-2 empty:hidden">
-                <NewCarsLink brand={c.brand} />
-                {brandDealerUrl && <BrandSiteChip url={brandDealerUrl} />}
-                <PageShareButton title={data.plate ?? c.vin} />
                 {data.plate && (
                   <PlateCardButton
                     plate={data.plate}
@@ -463,6 +458,11 @@ export default function ResultCard({ data }: Props): ReactNode {
                     kind={c.kind}
                   />
                 )}
+              </CollapsibleChips>
+              <div className="mt-2 flex flex-wrap items-center gap-2 empty:hidden">
+                <NewCarsLink brand={c.brand} />
+                {brandDealerUrl && <BrandSiteChip url={brandDealerUrl} />}
+                <PageShareButton title={data.plate ?? c.vin} />
               </div>
             </div>
             <Suspense fallback={<div aria-hidden className="aspect-square max-h-20 shrink-0 max-md:hidden" />}>

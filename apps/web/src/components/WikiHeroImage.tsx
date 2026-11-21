@@ -15,6 +15,8 @@ import { useUiStore } from '@/store/ui-store'
 
 const SWIPE_MIN_PX = 40
 
+type Slide = { key: string; url?: string }
+
 type Props = {
   brand: string | null
   model: string | null
@@ -124,17 +126,42 @@ export default function WikiHeroImage({
   const heroReady = loadedUrl !== null
   const hasSlides = isLoaded && !!recolor.target
   const viewOriginal = hasSlides && originalUrl === image?.url
-  const goSlide = (): void => setOriginalUrl(viewOriginal ? null : (image?.url ?? null))
+  // One flat slide list drives the arrows, dots and swipe: the repainted + original pair (filter applicable), the stored photo, the scanned photos.
+  const slides: Slide[] = [
+    ...(hasSlides ? [{ key: 'filtered' }, { key: 'original' }] : []),
+    ...(storedImage && !autoMatched && !hasSlides ? [{ key: 'stored' }] : []),
+    ...usablePhotos.map(photo => ({ key: photo.url, url: photo.url }))
+  ]
+  const foundActive = slides.findIndex(slide =>
+    matched
+      ? slide.url === matched.url
+      : slide.key === (hasSlides ? (viewOriginal ? 'original' : 'filtered') : 'stored')
+  )
+  const active = Math.max(foundActive, 0)
+  const select = (slide: Slide): void => {
+    setPickedUrl(slide.url ?? null)
+    setOriginalUrl(slide.key === 'original' ? (image?.url ?? null) : null)
+  }
+  const goStep = (step: -1 | 1): void => {
+    const next = slides[(active + step + slides.length) % slides.length]
+    if (next) select(next)
+  }
+  // Keeps the active thumbnail centred in the (hand-unscrollable) strip; it runs on commit, never during render.
+  const centerInStrip = (li: HTMLLIElement | null): void => {
+    const strip = li?.parentElement
+    if (!li || !strip) return
+    strip.scrollLeft = li.offsetLeft - (strip.clientWidth - li.offsetWidth) / 2
+  }
   const onPointerDown = (e: PointerEvent<HTMLDivElement>): void => {
     swipe.current = e.pointerType === 'mouse' ? null : { x: e.clientX, y: e.clientY, moved: false }
   }
   const onPointerUp = (e: PointerEvent<HTMLDivElement>): void => {
     const start = swipe.current
-    if (!start || !hasSlides) return
+    if (!start || slides.length < 2) return
     const dx = e.clientX - start.x
     if (Math.abs(dx) > SWIPE_MIN_PX && Math.abs(dx) > Math.abs(e.clientY - start.y)) {
       start.moved = true
-      goSlide()
+      goStep(dx < 0 ? 1 : -1)
     }
   }
 
@@ -197,13 +224,13 @@ export default function WikiHeroImage({
           </div>
         )}
 
-        {hasSlides && (
+        {slides.length > 1 && (
           <>
             {([-1, 1] as const).map(step => (
               <button
                 key={step}
                 type="button"
-                onClick={goSlide}
+                onClick={() => goStep(step)}
                 aria-label={t(step < 0 ? 'uaAuctions.hero.prev' : 'uaAuctions.hero.next')}
                 className={cn(
                   'absolute top-1/2 -translate-y-1/2 rounded-full bg-black/55 px-2.5 py-1 text-lg leading-none text-white hover:bg-black/75',
@@ -213,18 +240,23 @@ export default function WikiHeroImage({
                 {step < 0 ? '‹' : '›'}
               </button>
             ))}
-            <div className="pointer-events-none absolute bottom-9 left-1/2 flex -translate-x-1/2 gap-1.5">
-              {[false, true].map(isOriginal => (
-                <span
-                  key={String(isOriginal)}
-                  role="img"
-                  aria-label={t('wiki.slideDot', { n: isOriginal ? 2 : 1, total: 2 })}
-                  aria-current={isOriginal === viewOriginal}
-                  className={cn(
-                    'size-1.5 rounded-full bg-white',
-                    isOriginal === viewOriginal ? 'opacity-100' : 'opacity-40'
-                  )}
-                />
+            <div className="absolute bottom-9 left-1/2 flex max-w-[70%] -translate-x-1/2 flex-wrap justify-center">
+              {slides.map((slide, i) => (
+                <button
+                  key={slide.key}
+                  type="button"
+                  onClick={() => select(slide)}
+                  aria-label={t('wiki.slideDot', { n: i + 1, total: slides.length })}
+                  aria-current={i === active}
+                  className="group p-1"
+                >
+                  <span
+                    className={cn(
+                      'block size-1.5 rounded-full bg-white group-hover:opacity-100',
+                      i === active ? 'opacity-100' : 'opacity-40'
+                    )}
+                  />
+                </button>
               ))}
             </div>
           </>
@@ -275,82 +307,48 @@ export default function WikiHeroImage({
       {zoomed && image && (
         <PhotoZoomDialog url={image.url} candidates={[]} active={null} onClose={() => setZoomed(false)} />
       )}
-      {/* The strip is always there once there is a hero (one photo = one selected thumbnail), and a same-size placeholder
-          until the hero has painted: its thumbnails (small Commons renditions, low priority) are fetched only then. */}
+      {/* One fixed-height row that never scrolls by hand (no scrollbar, no layout shift): the arrows, dots and swipe on the
+          hero move through the photos and the row follows the active thumbnail. Same-size placeholders until the hero has
+          painted (its thumbnails are fetched only then, so they never compete with the LCP image). */}
       {(image || isPending) && (
-        <ul className="mt-4 flex w-full max-w-content gap-1.5 overflow-x-auto pb-1">
+        <ul className="relative mt-4 flex h-13 w-full max-w-content gap-1.5 overflow-hidden pb-1">
           {!image || !heroReady
             ? [0, 1, 2].map(n => (
                 <li key={n} aria-hidden className="shrink-0">
                   <div className="h-12 w-16 animate-pulse rounded-md border-2 border-transparent bg-border" />
                 </li>
               ))
-            : null}
-          {image && heroReady && (
-            <>
-              {(hasSlides ? [false, true] : []).map(isOriginal => (
-                <li key={String(isOriginal)} className="shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setPickedUrl(null)
-                      setOriginalUrl(isOriginal ? image.url : null)
-                    }}
-                    aria-label={t('wiki.slideDot', { n: isOriginal ? 2 : 1, total: 2 })}
-                    aria-current={isOriginal === viewOriginal}
-                    className={cn(
-                      'relative block h-12 w-16 overflow-hidden rounded-md border-2 transition-opacity',
-                      isOriginal === viewOriginal ? 'border-primary' : 'border-transparent opacity-70 hover:opacity-100'
-                    )}
-                  >
-                    <StripThumb url={image.url} />
-                    {!isOriginal && recolor.mask && recolor.target && (
-                      <WikiRecolorCanvas
-                        mask={recolor.mask}
-                        color={recolor.target}
-                        testId="wiki-recolor-canvas-thumb"
-                      />
-                    )}
-                  </button>
-                </li>
-              ))}
-              {storedImage && !autoMatched && !hasSlides && (
-                <li className="shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => setPickedUrl(null)}
-                    aria-label={t('wiki.photoStored')}
-                    aria-current={!matched}
-                    className={cn(
-                      'block h-12 w-16 overflow-hidden rounded-md border-2 transition-opacity',
-                      matched ? 'border-transparent opacity-70 hover:opacity-100' : 'border-primary'
-                    )}
-                  >
-                    <StripThumb url={storedImage.url} />
-                  </button>
-                </li>
-              )}
-              {usablePhotos.map((photo, i) => {
-                const isActive = matched?.url === photo.url
+            : slides.map((slide, i) => {
+                const isActive = i === active
                 return (
-                  <li key={photo.url} className="shrink-0">
+                  <li key={slide.key} ref={isActive ? centerInStrip : undefined} className="shrink-0">
                     <button
                       type="button"
-                      onClick={() => setPickedUrl(photo.url)}
-                      aria-label={t('wiki.photoOpen', { n: i + 1, total: usablePhotos.length })}
+                      onClick={() => select(slide)}
+                      aria-label={t('wiki.photoOpen', { n: i + 1, total: slides.length })}
                       aria-current={isActive}
                       className={cn(
-                        'block h-12 w-16 overflow-hidden rounded-md border-2 transition-opacity',
+                        'relative block h-12 w-16 overflow-hidden rounded-md border-2 transition-opacity',
                         isActive ? 'border-primary' : 'border-transparent opacity-70 hover:opacity-100'
                       )}
                     >
-                      <StripThumb url={photo.url} onError={() => setFailedUrls(prev => new Set(prev).add(photo.url))} />
+                      <StripThumb
+                        url={slide.url ?? image.url}
+                        onError={
+                          slide.url ? (): void => setFailedUrls(prev => new Set(prev).add(slide.url!)) : undefined
+                        }
+                      />
+                      {slide.key === 'filtered' && recolor.mask && recolor.target && (
+                        <WikiRecolorCanvas
+                          mask={recolor.mask}
+                          color={recolor.target}
+                          testId="wiki-recolor-canvas-thumb"
+                        />
+                      )}
                     </button>
                   </li>
                 )
               })}
-            </>
-          )}
         </ul>
       )}
     </>

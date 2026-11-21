@@ -4935,3 +4935,10 @@ Trigger: Lighthouse on `/BC6743PH` (mobile, slow 4G): performance 42, FCP 7.0 s,
 - `apps/web/src/i18n/packs.ts` (`PACKS`: prefixes + `owners`), `i18n-fallback-plugin.ts` now serves `<lang>.<slice>.pack.json` / `<lang>.<slice>.delta.pack.json` (core = every key outside a pack), `i18n/index.ts` `SLICES`/`DELTAS`, `loadPacks`, `requestedPacks` (a language switch reloads the packs of the open route), `i18n/lazy-with-packs.ts` (`lazyWithPacks`, route chunk + pack in parallel).
 - Packs: about, admin, profile, settings, sitemap, alternatives, discuss, relax (only route-exclusive prefixes; ~14% of the dictionary). `ua` core 120 KB br (was 137), en core 95 KB br. `lang-preload` matches the `\0i18n:<lang>-core` chunk.
 - Tests: `fallback.test.ts` (slices partition each language, only en/core has gaps), `packs.test.ts` (owners guard). `i18nReady` loads all packs in test mode. Version `v2.1441`. CLAUDE.md i18n convention and features-reference updated.
+
+## Hero photo carousel without a scrolling strip, save-as-image chip (2026-11-21) ✅
+
+- `WikiHeroImage`: one flat `slides` list (filtered + original pair when the colour filter applies, the stored photo, the scanned photos) drives the hero arrows (wrap around), clickable dots and a touch swipe (any slide, not only the filter pair). The thumbnail strip stays but is a fixed-height `h-13` `overflow-hidden` row that never scrolls by hand (no scrollbar, no layout shift); the active thumbnail is centred through a ref callback. Dot labels use `wiki.slideDot`, thumbnail labels `wiki.photoOpen`; a thumbnail that fails to load drops its photo from the list.
+- `HeroSkeleton` mirrors the strip (`mt-4 h-13`, three placeholders) so the loading swap moves nothing; keep both in step.
+- `PlateCardButton` ("Save as image") moved from the links row into the end of `CollapsibleChips` in `ResultCard` (hidden until "Show more").
+- Tests: `WikiHeroImage.test.tsx` (dots, thumbnails, arrows, swipe, single photo). Version `v2.1455`.

@@ -4,6 +4,24 @@ import type { ReleaseDay } from './core.js'
 /** 2026-11: newest day first. */
 export const DAYS: readonly ReleaseDay[] = [
   {
+    date: '2026-11-21',
+    version: 'v2.1455',
+    items: [
+      item(
+        'improved',
+        'Кнопка «Зберегти як картинку» тепер у кінці списку позначок картки авто (видно після «Показати більше»)',
+        'Кнопка «Сохранить как картинку» теперь в конце списка отметок карточки авто (видна после «Показать больше»)',
+        'The "Save as image" button now sits at the end of the car card chips (visible after "Show more")'
+      ),
+      item(
+        'improved',
+        'Фото авто на сторінці результату тепер гортаються стрілками, крапками та свайпом на самому фото, а стрічка мініатюр більше не скролиться вручну і не змінює висоту, тож макет не стрибає',
+        'Фото авто на странице результата теперь листаются стрелками, точками и свайпом на самом фото, а лента миниатюр больше не скроллится вручную и не меняет высоту, поэтому макет не прыгает',
+        'Car photos on the result page now page through with arrows, dots and a swipe on the photo itself, and the thumbnail strip no longer scrolls by hand or changes height, so the layout does not shift'
+      )
+    ]
+  },
+  {
     date: '2026-11-20',
     version: 'v2.1451',
     items: [

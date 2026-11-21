@@ -1648,3 +1648,13 @@ SSR for `/:plate` only if organic search traffic matters · region as a real
 indexed column if region filtering is needed · Drizzle v1 upgrade per the
 trigger above · NestJS 12 bump when `nestjs-zod` supports it · TypeScript 7 when
 `typescript-eslint` supports it · self-hosted GlitchTip if Sentry's free tier is outgrown.
+
+✅ 2026-11-21: hero photos page with arrows/dots/swipe, thumbnail strip no longer scrolls (fixed height, skeleton in step), "Save as image" moved into the chips list. Write-up `docs/plan-done.md` "Hero photo carousel without a scrolling strip".
+
+## Section share aliases `/s/...` + `/race` screenshot card (2026-11-20, built, not deployed)
+
+Done: `/s/<plate|vin|alarms>/<section>` aliases (own preview + `og:url`, then SPA redirect), `PAGE_IMAGES` (`/race` → `/og-race.png`), sitemap-wide distinct `og:image` test. Conventions: `docs/features-reference.md` "Link previews".
+
+- [ ] After deploy (owner): purge Cloudflare `/og-race.png` and plate pages; in Telegram share a **fresh** `https://carsua.app/s/<plate>/vin` and `/s/alarms/losses` and confirm they unfurl as separate previews (Telegram keeps its own cache, old `?section=` URLs may stay stale); check `/race` shows the game screenshot
+- [ ] Decide: aliases for the other `?section=` shares (stats / fuel / safety panels, compare `?section=`, `/showroom`)? Today only single-segment pages (plate, VIN, `/alarms`) get one
+- [ ] Optional: per-section og cards for plate sections (today they reuse the plate card; a render per section multiplies the expensive card work)
