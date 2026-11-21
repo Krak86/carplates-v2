@@ -1649,6 +1649,8 @@ indexed column if region filtering is needed · Drizzle v1 upgrade per the
 trigger above · NestJS 12 bump when `nestjs-zod` supports it · TypeScript 7 when
 `typescript-eslint` supports it · self-hosted GlitchTip if Sentry's free tier is outgrown.
 
+✅ 2026-11-21: hero photos page with arrows/dots/swipe, thumbnail strip no longer scrolls (fixed height, skeleton in step), "Save as image" moved into the chips list. Write-up `docs/plan-done.md` "Hero photo carousel without a scrolling strip".
+
 ## Section share aliases `/s/...` + `/race` screenshot card (2026-11-20, built, not deployed)
 
 Done: `/s/<plate|vin|alarms>/<section>` aliases (own preview + `og:url`, then SPA redirect), `PAGE_IMAGES` (`/race` → `/og-race.png`), sitemap-wide distinct `og:image` test. Conventions: `docs/features-reference.md` "Link previews".
