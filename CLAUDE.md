@@ -4,7 +4,7 @@
 
 `carsua.app` v2 — Ukrainian vehicle lookup by plate or VIN (pnpm monorepo, Postgres, NHTSA). v1 is `../carplates/` (do not modify).
 
-Docs are huge: **grep `^## ` headings, never read whole**. `PLAN.md` backlog + pins · `docs/plan-done.md` · `README.md` setup/env ·
+Docs are huge: **grep `^## ` headings, never read whole**. `PLAN.md` backlog + pins · `docs/plan-done.md` · `README.md` · `docs/features-reference.md` (**read the matching section before touching a feature**) · `docs/commands-reference.md` · other `docs/*.md` on request.
 `docs/features-reference.md` (**read the matching section before touching a feature**) · `docs/commands-reference.md` · other `docs/*.md` on request.
 
 ## Layout
@@ -29,9 +29,9 @@ Version pins (PLAN.md "Version pins"): never use `latest`.
   don't — new fields there are `.nullable().optional()`. A new offline-capable `/api/*` query goes into `lib/offline-cache.ts`.
 - **NestJS**: Zod-validated inputs, no logic in controllers, never `@Res()` (except SPA catch-all). Link previews
   come from the API, never Vite.
-- **i18n is per-language, per-slice lazy chunks** (`i18n/packs.ts`: `core` + route packs, one source JSON per language, virtual `<lang>.<slice>.pack.json` from `i18n-fallback-plugin.ts`; non-ua adds only its delta vs `ua` after window `load`; routes load their pack via `lazyWithPacks`; a pack's prefix may only be used by its `owners` (shared users' keys go in the pack's `keep`, staying core), `packs.test.ts`; a language with gaps needs a `DELTAS` entry). Tests rendering text `await i18nReady` (loads all packs); never `import '@/i18n'`.
+- **i18n: per-language, per-slice lazy packs** (`i18n/packs.ts`; read `docs/features-reference.md` "Language dictionaries" before touching it). Rules: a pack's prefix may only be used by its `owners` (shared users' keys go in its `keep`, staying core; `packs.test.ts`); routes load packs via `lazyWithPacks`; a language with gaps needs a `DELTAS` entry; tests `await i18nReady`, never `import '@/i18n'`.
 - **Zod `jitless`**: `@/lib/zod-config` stays the first import of `main.tsx`; `vendor-zod` / `zod-config` stay separate chunks (else CSP `eval`).
-- **Checklists** (`docs/checklists.md`, read the item before the change): new `/api/*` endpoint (edge cache), `LazySection`s, deploy, new public route, docs after a feature, app version.
+- **Checklists** (`docs/checklists.md`, read the item first): new `/api/*` endpoint, `LazySection`s, deploy, new public route, docs after a feature, app version.
 
 ## Workflow
 

@@ -1170,7 +1170,8 @@ Code-level audit findings and the full pre-deploy gate: [docs/security-checklist
 - [ ] HSTS `includeSubDomains; preload` in `infra/Caddyfile` once all subdomains are confirmed HTTPS.
 - [ ] Helmet header review (2026-11-17, research only, nothing changed; no `@fastify/helmet` dependency, it would duplicate Caddy + the `onSend` hook). Already covered: `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy` (better than Helmet's blanket `no-referrer`: share links override it), `Permissions-Policy`, HSTS (partial), CSP (Report-Only).
   - [x] `script-src-attr 'none'` is in the Report-Only CSP (deployed 2026-11-19, no new inline reports seen). `upgrade-insecure-requests` is left out of the Report-Only header on purpose (browsers ignore it there and log a console error per frame, 17 in one session): [ ] add it to `csp_site_*` in `infra/Caddyfile` when renaming the header to `Content-Security-Policy`.
-  - [ ] **CSP ENFORCED in code 2026-11-21 (`infra/Caddyfile`: both headers renamed to `Content-Security-Policy`, `upgrade-insecure-requests` added to the site policy via `csp_site_upgrade_insecure`; guard test flipped; all 2685 tests pass). After deploy (Caddy reload only):** `curl -sI https://carsua.app/ | grep -i content-security` shows an enforced header with `upgrade-insecure-requests`, same for `/telegram-frame.html`; walk (browser console, no blocked request): plate + VIN lookup, email / Google / Telegram sign-in, Turnstile, Maps / YouTube / Sketchfab / carshow360 / Winner 360, Disqus, translation download, Wipeout on /play, image export, share, phone width, Firefox / Safari. **Rollback:** rename the header back to `Content-Security-Policy-Report-Only` (drop `csp_site_upgrade_insecure`) and reload Caddy. Then update `docs/security-checklist.md` §7 + finding #2.
+  - [x] **CSP ENFORCED, deployed and curl-verified 2026-11-21; owner walked everything in Chrome except Safari (open: Safari desktop + iPhone, Sentry 2A/29 quiet check then resolve the old CSP issues)** — **CSP ENFORCED in code 2026-11-21 (`infra/Caddyfile`: both headers renamed to `Content-Security-Policy`, `upgrade-insecure-requests` added to the site policy via `csp_site_upgrade_insecure`; guard test flipped; all 2685 tests pass). After deploy (Caddy reload only):** `curl -sI https://carsua.app/ | grep -i content-security` shows an enforced header with `upgrade-insecure-requests`, same for `/telegram-frame.html`; walk (browser console, no blocked request): plate + VIN lookup, email / Google / Telegram sign-in, Turnstile, Maps / YouTube / Sketchfab / carshow360 / Winner 360, Disqus, translation download, Wipeout on /play, image export, share, phone width, Firefox / Safari. **Rollback:** rename the header back to `Content-Security-Policy-Report-Only` (drop `csp_site_upgrade_insecure`) and reload Caddy. Then update `docs/security-checklist.md` §7 + finding #2.
+    - [ ] Safari (desktop + iPhone) walk under the enforced CSP (sign-in popups, 360 / 3D / YouTube modals, Maps, Disqus); then resolve CARSUA-2A/29/1S/27/28/2B/2P/2Q/2R in Sentry once nothing new arrives for a day.
   - [x] `Cross-Origin-Opener-Policy: same-origin-allow-popups` deployed 2026-11-19 (Caddy only; one value, an `onSend` copy sent it twice, which is invalid, and was reverted). Sign-in walked in incognito: email code and Telegram OK. [x] Google sign-in popup walked the same night in incognito Chrome and Firefox (see `docs/plan-done.md` "Helmet-style headers"). [ ] Safari (desktop + iPhone): Google and Telegram popup sign-in still to walk; a normal (non-incognito) Chrome profile and a real phone are not recorded either.
   - [x] `Origin-Agent-Cluster: ?1` and `X-Permitted-Cross-Domain-Policies: none` deployed 2026-11-19 (nothing in `apps/web` sets `document.domain`).
   - [x] No `X-Powered-By` (checked 2026-11-19).
@@ -1675,6 +1676,7 @@ Done: `/s/<plate|vin|alarms>/<section>` aliases (own preview + `og:url`, then SP
 Research result: worth it only as one small feed. The release log (`packages/shared/src/releases/<yyyy-mm>.ts`, ua/ru/en, tagged `new|improved|data|fix`) is already feed-shaped and `SeoController` (`apps/api/src/spa/`) already serves `/sitemap.xml` + `/robots.txt`, so no migration, ingest or seed CSV. Weakness: a releases-only feed goes quiet whenever no features ship, so it needs content that changes without a release.
 
 **Item types (one feed per language, `?lang=`, default ua):**
+
 1. Releases: `new` items per day (irregular).
 2. Read guides: `ARTICLES` entries by `published` date (rare).
 3. Monthly stats post on the 1st (guaranteed pulse; from `/stats`, can also feed the digest mail).
@@ -1684,6 +1686,7 @@ Research result: worth it only as one small feed. The release log (`packages/sha
 **Out on purpose:** wanted / Garpun records (property of individuals, abuse risk), car news and stock news (third-party headlines, `/api/news*` is blocked in robots and `/news` is `noindex`; Yahoo endpoint is unofficial), per-plate / per-VIN feeds (enumerable, `noindex`).
 
 **Decisions to keep:**
+
 - Path must NOT be under `/api/` (`robots.txt` has `Disallow: /api/`): e.g. `/feed.xml`, served by `SeoController`.
 - Atom, with a stable `id` per item; releases need a per-day anchor (`/releases#<date>`) and the page must scroll to it.
 - `<link rel="alternate" type="application/atom+xml">` in the page head per language; list it in the "Agent discovery" section.
@@ -1691,6 +1694,7 @@ Research result: worth it only as one small feed. The release log (`packages/sha
 - UI-visible strings: "-" not an em dash.
 
 **Steps:**
+
 - [ ] 1. Pure serializer (`apps/api/src/feed/`): releases + guides, XML escaping, `new`-items-only filter, tests
 - [ ] 2. Route in `SeoController`, per-language feeds, head `<link>`, release-day anchor on `/releases`
 - [ ] 3. Edge cache + docs (`features-reference.md` "Sitemap, robots and rate limits", `checklists.md` docs-after-feature, release entry + `LATEST_RELEASE_DATE`)
