@@ -12,7 +12,8 @@ const TOKEN_SEGMENT = /^[A-Za-z0-9_-]{22,}$/
 
 const isExtensionUri = (uri: string): boolean => {
   const value = uri.trim().toLowerCase()
-  return EXTENSION_SCHEMES.some(s => value.startsWith(`${s}:`))
+  // Chrome sends the bare scheme (`chrome-extension`, no colon) as `source-file` for eval reports (CARSUA-1S).
+  return EXTENSION_SCHEMES.some(s => value === s || value.startsWith(`${s}:`))
 }
 
 /** `data:` URIs arrive as `data` (legacy, truncated) or `data:...`; `about:blank` as `about` or `about:...`. */

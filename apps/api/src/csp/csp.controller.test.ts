@@ -138,6 +138,11 @@ describe('POST /api/csp-report', () => {
     expect(captureMessage).not.toHaveBeenCalled()
   })
 
+  it('drops an eval report whose source-file is the bare extension scheme (CARSUA-1S)', async () => {
+    await post(legacy('eval', { 'source-file': 'chrome-extension', 'effective-directive': 'script-src' }))
+    expect(captureMessage).not.toHaveBeenCalled()
+  })
+
   it('drops the Cloudflare JS Detections inline script, but keeps other inline scripts', async () => {
     await post(legacy('inline', { 'script-sample': '(function(){function c(){var b=a.content' }))
     expect(captureMessage).not.toHaveBeenCalled()
