@@ -3105,6 +3105,7 @@
   "paid.soon.trust_counters": "Home page counters: how many records and sources we hold",
   "paid.soon.telegram_bot": "Telegram bot: send a plate or VIN, get a short answer",
   "paid.soon.embed_widget": "Plate and VIN lookup widget for other sites",
+  "paid.soon.atom_feed": "Atom feed of site updates: new features, guides and monthly stats for your feed reader",
   "paid.soon.race_extras": "Test-drive game: music, a second track, a ghost of your best lap",
   "paid.soon.depreciation": "Depreciation curve and a \"best time to sell\" hint (checking data sources)",
   "paid.soon.per_capita": "Per-capita statistics (the newest official data is from 2022)",

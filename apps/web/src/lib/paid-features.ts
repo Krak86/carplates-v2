@@ -30,6 +30,7 @@ export const UPCOMING_FEATURES = [
   { id: 'trust_counters', icon: '🔢', status: 'idea' },
   { id: 'telegram_bot', icon: '✈️', status: 'idea' },
   { id: 'embed_widget', icon: '🧩', status: 'idea' },
+  { id: 'atom_feed', icon: '📡', status: 'idea' },
   { id: 'race_extras', icon: '🏁', status: 'idea' },
   { id: 'depreciation', icon: '📉', status: 'research' },
   { id: 'per_capita', icon: '👥', status: 'research' }
