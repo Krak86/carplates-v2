@@ -8,6 +8,10 @@
 cd /opt/carsua/compose
 export COMPOSE_FILE=docker-compose.prod.yml
 touch .env
+# docker-compose.prod.yml has no `latest` fallback and needs every tag to parse, so a tag that was never deployed gets a placeholder
+# (an image tagged `unset` never exists: starting that service fails loudly instead of pulling whatever `latest` is).
+for _k in API_TAG_BLUE API_TAG_GREEN ALPR_TAG INGEST_TAG; do grep -q "^${_k}=" .env || echo "${_k}=unset" >> .env; done
+unset _k
 
 # set_env KEY VALUE: replace (or add) one line in compose/.env, which holds the image tags and the colour tags.
 set_env() { { grep -v "^$1=" .env || true; echo "$1=$2"; } > .env.tmp && mv .env.tmp .env; }

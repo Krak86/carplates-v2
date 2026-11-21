@@ -18,6 +18,10 @@ on:
         description: 'First setup: copy compose files + secrets and start only Postgres (restore the DB dump, then run again without this)'
         type: boolean
         default: false
+      image_tag:
+        description: 'Rollback: an earlier image tag (a full commit SHA already in ghcr.io). Skips CI and the build and runs the blue/green switch with that image. Empty = deploy this commit'
+        type: string
+        default: ''
 
 concurrency:
   group: deploy-api
@@ -28,21 +32,20 @@ permissions:
 
 jobs:
   ci:
+    if: ${{ !inputs.image_tag }}
     uses: ./.github/workflows/ci.yml
 
   build:
     needs: ci
+    if: ${{ !inputs.image_tag }}
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     permissions:
       contents: read
       packages: write
-    outputs:
-      owner: ${{ steps.meta.outputs.owner }}
     steps:
       - uses: actions/checkout@v7
-      - id: meta
-        uses: ./.github/actions/build-image
+      - uses: ./.github/actions/build-image
         with:
           image: carsua-api
           file: apps/api/Dockerfile
@@ -50,6 +53,8 @@ jobs:
 
   deploy:
     needs: build
+    # A rollback skips ci + build, and a skipped need would skip this job too: run unless a need failed or the run was cancelled.
+    if: ${{ !cancelled() && !contains(needs.*.result, 'failure') }}
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     environment: production # restricted to main; add required reviewers there if you want a click-to-deploy gate
@@ -69,7 +74,7 @@ jobs:
 
       - name: Write env files and origin certificate
         env:
-          GH_OWNER: ${{ needs.build.outputs.owner }}
+          IMAGE_TAG: ${{ inputs.image_tag || github.sha }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
           AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
           PUBLIC_SITE_URL: ${{ vars.PUBLIC_SITE_URL }}
@@ -119,13 +124,16 @@ jobs:
         run: |
           : "${POSTGRES_PASSWORD:?POSTGRES_PASSWORD secret is missing}"
           : "${AUTH_SECRET:?AUTH_SECRET secret is missing}"
+          # A rollback must be a full commit SHA (the tag build-image pushed); nothing else reaches the shell below.
+          [[ "$IMAGE_TAG" =~ ^[0-9a-f]{40}$ ]] || { echo "::error::image_tag must be a 40-character commit SHA"; exit 1; }
+          GH_OWNER="${GITHUB_REPOSITORY_OWNER,,}" # the GHCR namespace, lowercased like build-image does
 
           # emit (only non-empty values are written, so an unset optional feature stays "not configured" in env.ts) and push_env.
           . infra/ci/lib.sh
 
           {
             printf 'DATABASE_URL=postgres://carplates:%s@postgres:5432/carplates\n' "$POSTGRES_PASSWORD"
-            printf 'GIT_SHA=%s\n' "$GITHUB_SHA"
+            printf 'GIT_SHA=%s\n' "$IMAGE_TAG"
             emit AUTH_SECRET PUBLIC_SITE_URL MAIL_TRANSPORT MAIL_FROM MAIL_REPLY_TO MAIL_FROM_NEWS DIGEST_ENABLED RESEND_API_KEY CONTACT_TO SMTP_URL \
               GOOGLE_CLIENT_ID TELEGRAM_BOT_TOKEN TELEGRAM_BOT_USERNAME TURNSTILE_SITE_KEY TURNSTILE_SECRET_KEY \
               PLATE_RECOGNIZER_CLOUD_TOKEN PLATE_RECOGNIZER_CLOUD_ENABLED RIA_CHECK_ENABLED PIXABAY_API_KEY \
@@ -177,11 +185,16 @@ jobs:
 
       - name: Start Postgres only (sync_only)
         if: ${{ inputs.sync_only }}
-        run: ssh vps 'cd /opt/carsua/compose && COMPOSE_FILE=docker-compose.prod.yml docker compose up -d postgres'
+        # lib.sh enters the compose folder, selects the prod file and seeds the image tags that docker-compose.prod.yml requires.
+        run: ssh vps '. /opt/carsua/compose/lib.sh && docker compose up -d postgres'
 
       - name: Blue/green switch
         if: ${{ !inputs.sync_only }}
-        run: ssh vps bash -s -- "$GITHUB_SHA" < infra/vps/deploy-api.sh
+        env:
+          IMAGE_TAG: ${{ inputs.image_tag || github.sha }}
+        run: |
+          [[ "$IMAGE_TAG" =~ ^[0-9a-f]{40}$ ]] || { echo "::error::image_tag must be a 40-character commit SHA"; exit 1; }
+          ssh vps bash -s -- "$IMAGE_TAG" < infra/vps/deploy-api.sh
 
       # Advisory only: Cloudflare Bot Fight Mode serves GitHub runner IPs a Managed Challenge (403), and the blue/green
       # step above already health-checked the new container on the origin. UptimeRobot watches the public /healthz.
