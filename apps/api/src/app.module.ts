@@ -7,7 +7,7 @@ import { ZodValidationPipe } from 'nestjs-zod'
 import { AuthModule } from './auth/auth.module.js'
 import { AllExceptionsFilter } from './common/all-exceptions.filter.js'
 import { OriginGuard } from './common/origin.guard.js'
-import { GLOBAL_THROTTLE } from './common/throttle.js'
+import { GLOBAL_THROTTLE, throttleStorage } from './common/throttle.js'
 import { DbModule } from './db/db.module.js'
 import { ContactModule } from './contact/contact.module.js'
 import { CspModule } from './csp/csp.module.js'
@@ -64,7 +64,7 @@ import { WikispecsModule } from './wikispecs/wikispecs.module.js'
 @Module({
   imports: [
     SentryModule.forRoot(),
-    ThrottlerModule.forRoot(GLOBAL_THROTTLE),
+    ThrottlerModule.forRoot({ ...GLOBAL_THROTTLE, storage: throttleStorage() }),
     DbModule,
     MissedModule,
     MailModule,

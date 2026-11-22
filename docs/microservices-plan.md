@@ -150,7 +150,7 @@ workflow and logger; new services then inherit exact image tags, `stop_grace_per
 `infra/vps/deploy-<svc>.sh`. Subset: BullMQ mail queue (step 0) → idea 1 RabbitMQ `mail-service` → idea 2 Kafka only if still wanted.
 Ideas 3, 4, 5, 7, 8 are deferred; idea 6 (`apps/worker`) only at 2+ API replicas, otherwise a `pg_try_advisory_lock` per timer.
 
-0. **Redis first** (owner decision 2026-11-18): the self-hosted Redis from the throttler item (PLAN.md) lands before any broker. It then
+0. **Redis first** (owner decision 2026-11-18; ✅ built 2026-11-22 as the throttler store: `redis:8.10.3-alpine`, password, AOF, `noeviction`, internal only, `/opt/carsua/redisdata`; `docs/deploy.md` "Redis". BullMQ should connect with its own `ioredis` connection to the same `REDIS_URL` (BullMQ needs `maxRetriesPerRequest: null`, which the throttler client deliberately does not use) and a distinct key prefix, never `thr:`): the self-hosted Redis from the throttler item (PLAN.md) lands before any broker. It then
    serves as cache/throttler store, and also gives a near-free messaging option (BullMQ job queue, Redis Streams) with no new
    infrastructure. Consequence: mail-service (idea 1) can first be built on **BullMQ** (retry, delay, failed set, dashboard) and the
    RabbitMQ/Kafka versions stay as the deliberate learning step after it, so the same contract (`mailSendSchema`) can be compared

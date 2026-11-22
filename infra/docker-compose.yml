@@ -1,5 +1,4 @@
-# Local development database only. Production compose (Caddy, Redis, API, web,
-# ingest cron) lands in Phase 4 as infra/docker-compose.prod.yml.
+# Local development services only (Postgres, mailpit, optional Redis). Production is infra/docker-compose.prod.yml.
 name: carplates-v2
 
 services:
@@ -31,5 +30,23 @@ services:
       - '127.0.0.1:1025:1025'
       - '127.0.0.1:8025:8025'
 
+  # Optional: shared throttler counters, like production. Without REDIS_URL the api throttles in memory (tests never need this).
+  # Try it: `docker compose up -d redis` + REDIS_URL=redis://localhost:6379 in apps/api/.env. No password, bound to localhost only.
+  redis:
+    image: redis:8.10.3-alpine
+    restart: unless-stopped
+    command:
+      ['redis-server', '--appendonly', 'yes', '--save', '', '--maxmemory', '128mb', '--maxmemory-policy', 'noeviction']
+    ports:
+      - '127.0.0.1:6379:6379'
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ['CMD-SHELL', 'redis-cli ping | grep -q PONG']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
 volumes:
   pgdata:
+  redisdata:

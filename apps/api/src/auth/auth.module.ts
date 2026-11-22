@@ -1,6 +1,7 @@
 import { Global, Module } from '@nestjs/common'
 import { ThrottlerModule } from '@nestjs/throttler'
 
+import { throttleStorage } from '../common/throttle.js'
 import { AccountPurgeService } from './account-purge.service.js'
 import { AccountSecurityController } from './account-security.controller.js'
 import { AccountSecurityService } from './account-security.service.js'
@@ -14,7 +15,7 @@ import { TurnstileService } from './turnstile.js'
 /** Global so any feature module can put SessionGuard / AdminGuard on its routes. */
 @Global()
 @Module({
-  imports: [ThrottlerModule.forRoot([{ ttl: 60_000, limit: 30 }])],
+  imports: [ThrottlerModule.forRoot({ throttlers: [{ ttl: 60_000, limit: 30 }], storage: throttleStorage() })],
   controllers: [AuthController, AccountSecurityController],
   providers: [
     AuthService,

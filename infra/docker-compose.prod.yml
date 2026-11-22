@@ -1,7 +1,7 @@
 # Production stack. Lives on the VPS as /opt/carsua/compose/docker-compose.prod.yml (CI copies it on every api deploy;
 # paths below are relative to that folder). Only Caddy publishes ports; everything else is on the internal network.
 # Blue/green api: the deploy starts the idle colour with the new image, waits for /healthz, then stops the old one.
-# Colour tags come from /opt/carsua/compose/.env (written by the deploy): API_TAG_BLUE, API_TAG_GREEN, ALPR_TAG, INGEST_TAG, GH_OWNER.
+# Colour tags come from /opt/carsua/compose/.env (written by the deploy): API_TAG_BLUE, API_TAG_GREEN, ALPR_TAG, INGEST_TAG, GH_OWNER, REDIS_UID.
 # No `latest` fallback: compose needs every tag to parse the file, so lib.sh seeds a missing one with the placeholder `unset`
 # (never pulled by a deploy script: each pulls only the service whose tag it just set).
 name: carsua
@@ -76,6 +76,33 @@ services:
     depends_on:
       postgres: { condition: service_healthy }
     mem_limit: 2g
+    cap_drop: [ALL]
+    security_opt: ['no-new-privileges:true']
+    logging: *logging
+
+  # Shared counters for the api throttler (both blue/green colours, survives api restarts); the BullMQ base later. Internal network only
+  # (no `ports`). The api never waits for it: Redis down = per-process throttling (apps/api/src/common/throttle-storage.ts).
+  # AOF so a Redis restart keeps the windows; `noeviction` so a counter is never silently dropped (keys all carry a TTL, so 256 MB is ample).
+  redis:
+    image: redis:8.10.3-alpine # exact pin (PLAN.md "Version pins"); bump on purpose
+    restart: unless-stopped
+    env_file: ../env/redis.env # REDIS_PASSWORD
+    command:
+      - sh
+      - -c
+      - exec redis-server --requirepass "$$REDIS_PASSWORD" --appendonly yes --appendfsync everysec --save "" --maxmemory 256mb --maxmemory-policy noeviction
+    volumes:
+      - ../redisdata:/data
+    healthcheck:
+      test: ['CMD-SHELL', 'REDISCLI_AUTH="$$REDIS_PASSWORD" redis-cli ping | grep -q PONG']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    stop_grace_period: 30s # SIGTERM flushes the AOF
+    mem_limit: 384m
+    # Runs as the deploy user (uid seeded into .env by lib.sh), who owns ../redisdata: the image's own entrypoint only chowns /data
+    # and drops privileges when the command is literally `redis-server`, and here `sh -c` expands the password from the env file.
+    user: '${REDIS_UID:?REDIS_UID not set}:${REDIS_UID}'
     cap_drop: [ALL]
     security_opt: ['no-new-privileges:true']
     logging: *logging

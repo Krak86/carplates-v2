@@ -14,6 +14,7 @@ Below-the-fold sections are `LazySection`s; a new shareable one must list its id
 
 - Blue/green ⇒ backward-compatible migrations.
 - Prod compose images need an exact tag, never `latest` / a floating major (`${X_TAG:?…}` + the key in the `lib.sh` seed loop; rollback = "Deploy API" with `image_tag`, `docs/deploy.md` "Rollback"). Long-running services also get `stop_grace_period`.
+- New stateful service (like `redis`): exact image tag, internal network only (no `ports`), password via a CI-written `env/<svc>.env` (secret in `deploy-api.yml` + `docs/deploy.md`), healthcheck, `mem_limit`, `cap_drop: [ALL]`, `stop_grace_period`, json-file logs, data under `/opt/carsua/<svc>data` (created in `lib.sh`), started in `deploy-api.sh`'s "stateful services" line, a PLAN.md "Version pins" mention. The api must keep working when it is down (fail open).
 - New VPS image (a new `carsua-*` service) ⇒ call `prune_images` from its deploy script (`lib.sh`), otherwise old sha-tagged images fill the disk.
 - New env var ⇒ `env.ts` + `deploy-api.yml` + `docs/deploy.md`.
 - New VPS deploy step ⇒ a script in `infra/vps/` that sources `/opt/carsua/compose/lib.sh` (`set_env`, `wait_healthy`); rsync `lib.sh` first and add the script to the workflow `paths`. Shared CI bits: `.github/actions/` (`ssh-setup`, `build-image`, `cf-purge`), `infra/ci/lib.sh` (`emit`, `push_env`).

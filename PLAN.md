@@ -40,6 +40,8 @@ by re-reading this section before bumping.
 
 **Not held back — clarifications so nobody "fixes" them:**
 
+- **Container images** are exact tags, never `latest` or a floating major: `postgres:18.6`, `caddy:2.11.9`, `redis:8.10.3-alpine` (added 2026-11-22; Redis 8 is AGPLv3, Valkey 9 is the BSD alternative if the licence ever matters). **`ioredis` `5.11.1`** (exact in `apps/api`) although `latest` is `6.0.0`: the throttler store only needs `eval`/`quit`; bump on purpose after reading its changelog.
+
 - **pnpm** — we _are_ on `latest` (`12.3.4`, pinned in `packageManager`). This
   machine's global launcher was broken (pnpm 10's self-management shim can't hand
   off to pnpm 12's layout, and pnpm 10 can't read a pnpm-12 lockfile); it was
@@ -1086,7 +1088,7 @@ VPS sizing, provider shortlist (Contabo Cloud VPS 6), static IP and DNS: [docs/d
   7. [x] PostHog (and the recorder / surveys / dead-clicks / web-vitals scripts it loads) now starts on first interaction or browser idle (max 4 s); early `capture()` calls are queued (`lib/telemetry.ts`, 2026-10-28). Sentry still starts at once. Re-measure after deploy.
 - HTTP/2 + HTTP/3 + Brotli + caching setup: [docs/deploy.md](docs/deploy.md) (origin publishes only 443/tcp behind Cloudflare, see origin lockdown H4)
 - Prod `docker-compose` (as built): Caddy (Cloudflare origin cert; no per-IP rate limit, dropped 2026-10-31) · api-blue/api-green (also serve the SPA) · alpr · postgres ·
-  ingest (cron, profile `jobs`). Redis (RIA + VIN cache, throttler store) is **not** in the compose file; PgBouncer is not used.
+  ingest (cron, profile `jobs`). Redis (`redis:8.10.3-alpine`, throttler store since 2026-11-22, later BullMQ; no RIA / VIN cache) is in the compose file; PgBouncer is not used.
 - ✅ Deploy tooling written 2026-10-15 (api/alpr Dockerfiles, `infra/docker-compose.prod.yml` + Caddyfile + maintenance page, blue/green api deploy,
   web symlink releases, 3 path-filtered GitHub workflows, bootstrap + backup scripts, web maintenance banner) — ✅ **first real VPS deploy done 2026-10-27** (`docs/plan-done.md` "First VPS deploy"); ✅ R2 backups (nightly + full, restore-tested), SSH hardening and Turnstile done the same day; ✅ UptimeRobot on `/healthz` and ✅ Cloudflare settings + WAF rate-limit rule (2026-10-28); ✅ security gate (mostly), browser smoke test, Contabo snapshot and Telegram preview refresh (2026-10-28); what is left (account-deletion test, CSP enforce, Dependabot): [docs/deploy.md](docs/deploy.md) "Still open".
   Runbook, secrets list and what is still open: [docs/deploy.md](docs/deploy.md). ✅ Ingest cron live 2026-10-28 (`docs/plan-done.md` "Ingest cron"); still open: healthchecks.io checks + `HC_PING_*` secrets, Redis throttler store.
@@ -1178,7 +1180,7 @@ Code-level audit findings and the full pre-deploy gate: [docs/security-checklist
   - Skip: COEP `require-corp` (breaks the YouTube / Sketchfab / Maps / Disqus embeds), `X-XSS-Protection` (ignored by browsers), `X-DNS-Prefetch-Control`, `X-Download-Options` (legacy IE only).
 - [x] Origin-level header fallback in `apps/api/src/main.ts` `onSend`: closed as not needed (2026-11-19). Authenticated Origin Pulls already rejects a direct-origin hit at the TLS handshake, and a copy of the new headers in `onSend` doubled Caddy's values (an invalid COOP), so it was reverted. Revisit only with Caddy `?` set-if-absent + `defer`.
 - [ ] Postgres least-privilege roles (API user must not own schemas/DDL; separate migration role). Redis throttler: see the line below.
-- [ ] Redis-backed throttler storage (shared counters, survives restarts, covers the blue/green overlap) — **not started**, Redis is not in the compose file. **Step 2 of "Build order" (after the Twelve-Factor P2/P3 items, before any broker); also the prerequisite of the BullMQ mail queue** in the microservices section, so no longer "low priority". Use `noeviction` + `appendonly yes`; a cache needs `allkeys-lru`, so use a separate DB/instance if both are added. Global daily counter for paid third-party keys (Plate Recognizer budget is already capped; only needed if a RIA key is added). **Decision (2026-11-18):** self-hosted pinned container (Redis 8 or Valkey, BSD), not an external free tier: Redis Cloud free is 30 MB / ~100 ops/s, Upstash free is 500K commands/month (~8K throttled requests/day), and both add a network hop per request. Coarse per-IP limits can go to a Cloudflare rate limiting rule instead.
+- [x] **Built 2026-11-22, awaiting deploy (section "Redis throttler store"; write-up in `docs/plan-done.md`; owner boxes there).** Redis-backed throttler storage (shared counters, survives restarts, covers the blue/green overlap). Original item text follows: **Step 2 of "Build order" (after the Twelve-Factor P2/P3 items, before any broker); also the prerequisite of the BullMQ mail queue** in the microservices section, so no longer "low priority". Use `noeviction` + `appendonly yes`; a cache needs `allkeys-lru`, so use a separate DB/instance if both are added. Global daily counter for paid third-party keys (Plate Recognizer budget is already capped; only needed if a RIA key is added). **Decision (2026-11-18):** self-hosted pinned container (Redis 8 or Valkey, BSD), not an external free tier: Redis Cloud free is 30 MB / ~100 ops/s, Upstash free is 500K commands/month (~8K throttled requests/day), and both add a network hop per request. Coarse per-IP limits can go to a Cloudflare rate limiting rule instead.
 - [x] Swagger is off in production (`swaggerEnabled`: `ENABLE_SWAGGER` or non-production; `/api/docs` serves the SPA shell). [x] `/api/admin/*` verified 2026-10-31: all three admin controllers (`features/admin`, `digest`, `usage-admin`) carry a class-level `@UseGuards(AdminGuard)` (session + `role = 'admin'`, else 401/403); the dev-only `/api/dev/emails` controller is not registered in production. Optional: IP-allowlist at Caddy.
 - [x] Secrets: production `AUTH_SECRET` / `POSTGRES_PASSWORD` differ from dev. Rotation **skipped by choice 2026-10-28**; rotate `POSTHOG_PERSONAL_API_KEY` and any other key shown in chat/screenshots if you consider it exposed.
 - [ ] `robots.txt`/sitemap: verify `PUBLIC_SITE_URL` is the real origin, submit `sitemap.xml` in Google Search Console and Bing Webmaster.
@@ -1557,10 +1559,24 @@ Deploy Web #111 is green (349 test files, 2581 tests); nothing blocks a deploy. 
 
 1. ✅ **Built 2026-11-21, awaiting deploy (owner "After deploy" boxes in the section below).** **Twelve-Factor P2/P3 items first** (section below, about half a day): they edit `infra/docker-compose.prod.yml`, the deploy workflow and
    `main.ts`, which Redis and every new service then reuse (pinned tags, `stop_grace_period`, JSON logs, rollback by tag).
-2. **Redis** (item "Redis-backed throttler storage" in the deploy-time security list): throttler store first, also the base for BullMQ.
+2. ✅ **Built 2026-11-22, awaiting deploy (section "Redis throttler store" below).** **Redis** (item "Redis-backed throttler storage" in the deploy-time security list): throttler store first, also the base for BullMQ.
 3. **Microservices, a subset only**: BullMQ mail queue → RabbitMQ `mail-service` → Kafka `alarm-service` only if still wanted. Skip
    `watch-service`, gRPC, npm package and SMTP relay until needed; `apps/worker` only at 2+ API replicas (else an advisory lock).
    New services must follow the Twelve-Factor items (exact tags, `stop_grace_period`, JSON logs, `infra/vps/deploy-<svc>.sh`).
+
+## Redis throttler store (step 2 of "Build order", built 2026-11-22)
+
+Shared throttler counters in a self-hosted `redis:8.10.3-alpine` (internal network, password, AOF + `noeviction`, `/opt/carsua/redisdata`), so a restart no longer resets them and blue/green count together. **Redis down = fail open into per-process memory** (never a 5xx, one WARN a minute). `REDIS_URL` unset = in-memory (dev, tests). `contact-limiter.ts` stays in memory on purpose. BullMQ is not built; it reuses this Redis (same `noeviction`/AOF instance, separate key prefix). Write-up: `docs/plan-done.md` "Redis throttler store"; operations: `docs/deploy.md` "Redis".
+
+- [x] Built: storage class + tests, shared by the three `ThrottlerModule.forRoot` calls, compose service, deploy script/workflow, dev compose, docs, version pin.
+- [ ] **Before the deploy (owner):** add the Environment `production` secret `REDIS_PASSWORD` (`openssl rand -hex 24`; hex only). "Deploy API" fails on purpose without it.
+- [ ] **After deploy (owner, on the VPS in `/opt/carsua/compose`, after `. ./lib.sh`):**
+  - [ ] `docker compose ps redis` is `healthy`; `ss -tln | grep 6379` prints nothing (no published port); `ls -ld /opt/carsua/redisdata` is owned by `deploy`; `grep REDIS_UID .env` is set.
+  - [ ] `docker compose logs redis --tail 5` shows startup lines and `Ready to accept connections`; `docker compose exec redis sh -c 'REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli config get maxmemory-policy'` prints `noeviction` and `... get appendonly` prints `yes`.
+  - [ ] Counters are shared: hit any `/api/*` route a few times, then `docker compose exec redis sh -c 'REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli --scan --pattern "thr:*" | head'` lists keys (and `docker compose logs api-<colour> | grep -c "Redis unavailable"` is 0).
+  - [ ] Counters survive a restart: `docker compose restart redis`, then the same `--scan` still lists keys (AOF).
+  - [ ] Fail-open drill: `docker compose stop redis`, `curl -s -o /dev/null -w '%{http_code}\n' https://carsua.app/api/stats/top` is still 200, the api log shows one `Redis unavailable` WARN; `docker compose start redis` and it recovers without an api restart.
+  - [ ] Overnight: `docker stats --no-stream redis` is far below the 384 MB limit.
 
 ## Twelve-Factor audit (2026-11-18) - 4 small gaps, the rest compliant (step 1 of "Build order")
 
@@ -1584,7 +1600,7 @@ Not worth it now, revisit only at 2+ API replicas:
 - Runtime-injected SPA config instead of build-time `VITE_*` (only matters with a real stage env promoting the same bundle).
 - In-API timers (alarm poller, losses refresh, account purge, shares cleanup, server stats) would run once per replica: move to a
   `worker` process (microservices idea 6, "Optional later" below) or guard with an advisory lock (the cheap option). Digest is already safe (claim row in `app.digest_sends`), purge is an idempotent DELETE.
-- `ThrottlerModule` and `contact/contact-limiter.ts` are in memory, so limits are per process: the self-hosted Redis store (step 2 of "Build order"; the Postgres option was dropped 2026-11-18).
+- `contact/contact-limiter.ts` is in memory (per process) on purpose, see "Redis throttler store"; the `ThrottlerModule` counters moved to Redis (2026-11-22).
 - Log shipping / aggregation (Loki or similar): Sentry + `docker compose logs` is enough at this size.
 
 ## Assistant + embeddable widget (idea 2026-11-08, to discuss)

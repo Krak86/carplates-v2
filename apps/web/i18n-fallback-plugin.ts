@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url'
 
 import type { Plugin } from 'vite'
 
-import { sliceOf } from './src/i18n/packs'
+import { sliceOf } from './src/i18n/packs.ts'
 
 const I18N_DIR = fileURLToPath(new URL('./src/i18n/', import.meta.url))
 const SOURCE_LANG = 'ua'
