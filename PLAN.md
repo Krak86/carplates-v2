@@ -1570,7 +1570,7 @@ Shared throttler counters in a self-hosted `redis:8.10.3-alpine` (internal netwo
 
 - [x] Built: storage class + tests, shared by the three `ThrottlerModule.forRoot` calls, compose service, deploy script/workflow, dev compose, docs, version pin.
 - [x] **Before the deploy (owner), done:** add the Environment `production` secret `REDIS_PASSWORD` (`openssl rand -hex 24`; hex only). "Deploy API" fails on purpose without it.
-- [ ] **After deploy (owner, on the VPS in `/opt/carsua/compose`, after `. ./lib.sh`):**
+- [ ] **After deploy (owner, on the VPS in `/opt/carsua/compose`, after `. ./lib.sh`; a check fails or something is missing: `docs/deploy.md` "If an After deploy check fails"):**
   - [ ] `docker compose ps redis` is `healthy`; `ss -tln | grep 6379` prints nothing (no published port); `ls -ld /opt/carsua/redisdata` is owned by `deploy`; `grep REDIS_UID .env` is set.
   - [ ] `docker compose logs redis --tail 5` shows startup lines and `Ready to accept connections`; `docker compose exec redis sh -c 'REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli config get maxmemory-policy'` prints `noeviction` and `... get appendonly` prints `yes`.
   - [ ] Counters are shared: hit any `/api/*` route a few times, then `docker compose exec redis sh -c 'REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli --scan --pattern "thr:*" | head'` lists keys (and `docker compose logs api-<colour> | grep -c "Redis unavailable"` is 0).
@@ -1599,7 +1599,7 @@ ingest as one-off `docker compose run --rm` with the release image (XII). Follow
 and one API instance; the items below are the cheap ones.
 
 - [x] **Done 2026-11-21 (built, awaiting deploy; write-up in `docs/plan-done.md`):** rollback by `image_tag` in "Deploy API" + `docs/deploy.md` "Rollback"; no `latest` in prod compose, `caddy:2.11.9` pinned; `stop_grace_period: 30s`; JSON api logs in production.
-- [ ] **After deploy** (owner, items above):
+- [ ] **After deploy** (owner, items above; a check fails or something is missing: `docs/deploy.md` "If an After deploy check fails"):
   - [ ] On the VPS `cd /opt/carsua/compose && cat .env` shows the four tags (`API_TAG_BLUE`, `API_TAG_GREEN`, `ALPR_TAG`, `INGEST_TAG`; a missing one is seeded as `unset`), `docker compose config -q` passes, `docker compose ps` shows caddy on `caddy:2.11.9` (`docker compose exec caddy caddy version`).
   - [ ] `docker inspect --format '{{.HostConfig.StopTimeout}}' <live api container>` prints `30` (the colour switch recreates only the new colour; the old one gets it on its next deploy).
   - [ ] `docker compose logs api-<colour> --tail 5` shows JSON lines (`{"level":"log",…}`), and the admin Server tab still works.
