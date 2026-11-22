@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto'
 
-import { Injectable, Logger } from '@nestjs/common'
+import { Injectable, Logger, ServiceUnavailableException } from '@nestjs/common'
 import type { OnApplicationShutdown } from '@nestjs/common'
 import { Queue, Worker } from 'bullmq'
 import type { Job } from 'bullmq'
@@ -97,10 +97,15 @@ export class MailQueueService implements OnApplicationShutdown {
     const empty = { waiting: 0, active: 0, delayed: 0, failed: 0, completed: 0 }
     if (!this.enabled) return { enabled: false, counts: empty, failed: [] }
     const queue = this.getQueue()
-    const [counts, failed] = await Promise.all([
-      queue.getJobCounts('waiting', 'active', 'delayed', 'failed', 'completed'),
-      queue.getFailed(0, FAILED_LIST_LIMIT - 1)
-    ])
+    // Redis down: a clear 503 for the admin view instead of a 500 (sending itself falls back to a direct send).
+    const [counts, failed] = await this.withTimeout(
+      Promise.all([
+        queue.getJobCounts('waiting', 'active', 'delayed', 'failed', 'completed'),
+        queue.getFailed(0, FAILED_LIST_LIMIT - 1)
+      ])
+    ).catch(() => {
+      throw new ServiceUnavailableException('Mail queue unavailable (Redis is not reachable)')
+    })
     return {
       enabled: true,
       counts: { ...empty, ...counts },
