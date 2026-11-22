@@ -4961,3 +4961,14 @@ Applied by hand on `stage` (same updates as PR #201, so the PR can be closed): e
 - **Sign-out confirm:** `SignOutDialog` (portaled alertdialog) explains what staying signed in keeps; "Stay signed in" is focused, Escape/backdrop cancel; `AccountMenu` opens it instead of signing out at once.
 - **Atom feed:** plan only (`PLAN.md` "Atom feed"): one small feed per language outside `/api/`, items = releases, read guides, monthly stats post, batched SETAM lots; "What's next" on `/features` lists it as an idea (`atom_feed` in `paid-features.ts`).
 - **About page:** new brief entries `notFound` and `speed`; refreshed photo viewer, share, account and security texts. Release note v2.1468. No new third-party hosts since the 2026-11-18 About update.
+
+## Twelve-Factor P2/P3 quick items (2026-11-21) ✅ built, awaiting deploy
+
+Step 1 of PLAN.md "Build order"; the audit itself is in the Twelve-Factor audit entry above.
+
+- **Rollback by tag (V):** "Deploy API" has a `image_tag` input (a full 40-char commit SHA, validated in the workflow). Set: `ci` and `build` are skipped, `deploy` runs anyway (`!cancelled() && !contains(needs.*.result, 'failure')`), `GIT_SHA` in `api.env` and the `deploy-api.sh` argument use that tag, `GH_OWNER` is derived from `GITHUB_REPOSITORY_OWNER` (the build job's `owner` output is gone). Empty = unchanged behaviour. `docs/deploy.md` "Rollback" covers it plus the manual API and web rollbacks.
+- **No `latest` in prod compose (II):** `${API_TAG_BLUE|API_TAG_GREEN|ALPR_TAG|INGEST_TAG:?… not set}`. Compose needs every tag to parse the file (even for `up -d postgres`), so `lib.sh` seeds a never-deployed tag with the placeholder `unset` (an image that never exists, so a stray start fails loudly). The `sync_only` step now sources `lib.sh` for that. `deploy-alpr.sh` / `deploy-ingest.sh` already `set_env` their tag first; on a fresh VPS run `deploy-alpr` before the first api deploy (already the documented order), because `deploy-api.sh` does `up -d alpr`. `caddy:2` -> `caddy:2.11.9` (PLAN.md "Version pins").
+- **Graceful stop (IX):** `stop_grace_period: 30s` on the `x-api` anchor. Applies to a colour when it is recreated (the old colour keeps 10 s until its next deploy).
+- **JSON logs (XI):** `main.ts` passes `new ConsoleLogger({ json: env.NODE_ENV === 'production' })` to `NestFactory.create`; dev keeps text. No log parsing exists in the repo or docs that depends on the text format (`docs/privacy-compliance.md` greps `Purged`, which still matches the JSON `message`).
+- **Checklist:** `docs/checklists.md` "Deploy" gained the exact-tag / `stop_grace_period` rule for new services.
+- Owner checks after deploy: PLAN.md "Twelve-Factor audit" -> "After deploy".

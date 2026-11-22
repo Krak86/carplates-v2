@@ -1,7 +1,7 @@
 import './instrument.js' // Sentry — must load before anything it instruments
 
 import multipart from '@fastify/multipart'
-import { Logger } from '@nestjs/common'
+import { ConsoleLogger, Logger } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 import { FastifyAdapter } from '@nestjs/platform-fastify'
 import type { NestFastifyApplication } from '@nestjs/platform-fastify'
@@ -24,7 +24,9 @@ async function bootstrap(): Promise<void> {
       trustProxy: env.TRUST_PROXY,
       // Slow-request (slowloris) guard; the longest legit request is a 4 MB phone-camera upload.
       requestTimeout: 60_000
-    })
+    }),
+    // One JSON object per line in production (docker logs, grep/jq friendly); dev keeps the coloured text.
+    { logger: new ConsoleLogger({ json: env.NODE_ENV === 'production' }) }
   )
   app.enableShutdownHooks()
   // Baseline hardening. No CSP/HSTS here: the CSP needs the embed allowlist (YouTube, Sketchfab, Maps, PostHog)

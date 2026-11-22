@@ -52,9 +52,8 @@ by re-reading this section before bumping.
   the linter. `eslint-plugin-react-hooks@7` (ESLint-10-native, incl. the React
   Compiler rules) covers what matters. Re-add only if a patched
   `eslint-plugin-react` ships and its extra rules are wanted.
-- **Caddy image** — `infra/docker-compose.prod.yml` uses `caddy:2`, which floats within major 2 (a `docker compose pull` takes the newest 2.x;
-  newest seen 2026-11-05: `2.11.9`). Not held back, but not an exact pin either. Check the running one with
-  `docker compose exec caddy caddy version`; pin to `caddy:2.11.x` if a surprise upgrade mid-deploy ever matters.
+- **Caddy image** — `infra/docker-compose.prod.yml` pins `caddy:2.11.9` exactly (was the floating `caddy:2`; `2.11.9` was the newest 2.x on
+  2026-11-21). Not held back: bump it on purpose (edit the tag, deploy, check `docker compose exec caddy caddy version` and the headers), no auto-upgrade.
 - **tsconfig `incremental`** — deliberately unset (not a version thing): with
   per-package `tsc` its `.tsbuildinfo` lived outside `dist/`, so `rm -rf dist`
   left a stale cache and tsc silently emitted nothing.
@@ -1556,7 +1555,7 @@ Deploy Web #111 is green (349 test files, 2581 tests); nothing blocks a deploy. 
 
 ## Build order: Twelve-Factor quick items → Redis → microservices subset (decided 2026-11-19)
 
-1. **Twelve-Factor P2/P3 items first** (section below, about half a day): they edit `infra/docker-compose.prod.yml`, the deploy workflow and
+1. ✅ **Built 2026-11-21, awaiting deploy (owner "After deploy" boxes in the section below).** **Twelve-Factor P2/P3 items first** (section below, about half a day): they edit `infra/docker-compose.prod.yml`, the deploy workflow and
    `main.ts`, which Redis and every new service then reuse (pinned tags, `stop_grace_period`, JSON logs, rollback by tag).
 2. **Redis** (item "Redis-backed throttler storage" in the deploy-time security list): throttler store first, also the base for BullMQ.
 3. **Microservices, a subset only**: BullMQ mail queue → RabbitMQ `mail-service` → Kafka `alarm-service` only if still wanted. Skip
@@ -1572,20 +1571,13 @@ healthcheck (IX), same Postgres 18.6 in dev and prod (X), stdout logs + rotated 
 ingest as one-off `docker compose run --rm` with the release image (XII). Following every factor to the letter is not worth it for one VPS
 and one API instance; the items below are the cheap ones.
 
-- [ ] **P2 Rollback by tag (V).** Today an API rollback = revert commit + full CI. `.github/workflows/deploy-api.yml`: add a
-      `workflow_dispatch` input `image_tag` (empty = `$GITHUB_SHA`); when set, skip `ci` / `build` and pass it to `infra/vps/deploy-api.sh`
-      (already takes the tag as `$1`). Relies on the existing "migrations backward compatible" rule. Add a short "Rollback" section to
-      `docs/deploy.md` covering it plus the manual web rollback (`cd /opt/carsua/web && ln -sfn releases/<id> current.tmp && mv -T current.tmp current`,
-      5 releases are kept).
-- [ ] **P2 No `latest` in prod compose (II).** `infra/docker-compose.prod.yml` falls back to `:-latest` for `API_TAG_BLUE`, `API_TAG_GREEN`,
-      `ALPR_TAG`, `INGEST_TAG`: change to `${X:?X not set}`. First confirm `deploy-alpr.sh` / `deploy-ingest.sh` always `set_env` their tag
-      before any `up` / `run` (`infra/vps/lib.sh`), else the first deploy fails. Pin `caddy:2` to an exact `2.x.y` and add it to "Version pins".
-- [ ] **P3 Graceful stop window (IX).** Docker's default 10 s stop grace is shorter than the 60 s Fastify `requestTimeout` (4 MB uploads), and
-      the old colour is stopped 6 s after the switch. Add `stop_grace_period: 30s` to the `x-api` anchor in `infra/docker-compose.prod.yml`.
-- [ ] **P3 Structured logs in production (XI).** `apps/api/src/main.ts`: `NestFactory.create(..., { logger: new ConsoleLogger({ json: env.NODE_ENV === 'production' }) })`
-      (Nest 11 built-in, no new dependency); dev keeps text. Check the admin Server tab / any log grep in `docs/` still works with JSON lines.
-- [ ] **After deploy** (owner, items above): `docker compose config` on the VPS passes; run "Deploy API" by hand with the previous SHA as
-      `image_tag`, `/healthz` green and `GIT_SHA` matches, then redeploy the current SHA; `docker compose logs api-<colour> | head` shows JSON lines.
+- [x] **Done 2026-11-21 (built, awaiting deploy; write-up in `docs/plan-done.md`):** rollback by `image_tag` in "Deploy API" + `docs/deploy.md` "Rollback"; no `latest` in prod compose, `caddy:2.11.9` pinned; `stop_grace_period: 30s`; JSON api logs in production.
+- [ ] **After deploy** (owner, items above):
+  - [ ] On the VPS `cd /opt/carsua/compose && cat .env` shows the four tags (`API_TAG_BLUE`, `API_TAG_GREEN`, `ALPR_TAG`, `INGEST_TAG`; a missing one is seeded as `unset`), `docker compose config -q` passes, `docker compose ps` shows caddy on `caddy:2.11.9` (`docker compose exec caddy caddy version`).
+  - [ ] `docker inspect --format '{{.HostConfig.StopTimeout}}' <live api container>` prints `30` (the colour switch recreates only the new colour; the old one gets it on its next deploy).
+  - [ ] `docker compose logs api-<colour> --tail 5` shows JSON lines (`{"level":"log",…}`), and the admin Server tab still works.
+  - [ ] Rollback drill: run "Deploy API" by hand with the previous SHA as `image_tag` (CI and build are skipped), `/healthz` green and the running image tag (`docker compose ps`) is that SHA, then run it again with an empty `image_tag`.
+  - [ ] Caddy 2.11.9 behaves as before: `curl -sI https://carsua.app/` still has the enforced CSP header.
 
 Not worth it now, revisit only at 2+ API replicas:
 
