@@ -76,6 +76,7 @@ jobs:
         env:
           IMAGE_TAG: ${{ inputs.image_tag || github.sha }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
           AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
           PUBLIC_SITE_URL: ${{ vars.PUBLIC_SITE_URL }}
           MAIL_TRANSPORT: ${{ vars.MAIL_TRANSPORT }}
@@ -124,6 +125,8 @@ jobs:
         run: |
           : "${POSTGRES_PASSWORD:?POSTGRES_PASSWORD secret is missing}"
           : "${AUTH_SECRET:?AUTH_SECRET secret is missing}"
+          : "${REDIS_PASSWORD:?REDIS_PASSWORD secret is missing}"
+          [[ "$REDIS_PASSWORD" =~ ^[0-9a-f]{32,}$ ]] || { echo "::error::REDIS_PASSWORD must be hex (openssl rand -hex 24): it goes into a URL"; exit 1; }
           # A rollback must be a full commit SHA (the tag build-image pushed); nothing else reaches the shell below.
           [[ "$IMAGE_TAG" =~ ^[0-9a-f]{40}$ ]] || { echo "::error::image_tag must be a 40-character commit SHA"; exit 1; }
           GH_OWNER="${GITHUB_REPOSITORY_OWNER,,}" # the GHCR namespace, lowercased like build-image does
@@ -133,6 +136,7 @@ jobs:
 
           {
             printf 'DATABASE_URL=postgres://carplates:%s@postgres:5432/carplates\n' "$POSTGRES_PASSWORD"
+            printf 'REDIS_URL=redis://:%s@redis:6379\n' "$REDIS_PASSWORD"
             printf 'GIT_SHA=%s\n' "$IMAGE_TAG"
             emit AUTH_SECRET PUBLIC_SITE_URL MAIL_TRANSPORT MAIL_FROM MAIL_REPLY_TO MAIL_FROM_NEWS DIGEST_ENABLED RESEND_API_KEY CONTACT_TO SMTP_URL \
               GOOGLE_CLIENT_ID TELEGRAM_BOT_TOKEN TELEGRAM_BOT_USERNAME TURNSTILE_SITE_KEY TURNSTILE_SECRET_KEY \
@@ -144,7 +148,9 @@ jobs:
           emit ALPR_API_KEY > alpr.env
           printf 'POSTGRES_USER=carplates\nPOSTGRES_PASSWORD=%s\nPOSTGRES_DB=carplates\n' "$POSTGRES_PASSWORD" > postgres.env
 
+          printf 'REDIS_PASSWORD=%s\n' "$REDIS_PASSWORD" > redis.env
           push_env api.env /opt/carsua/env/api.env
+          push_env redis.env /opt/carsua/env/redis.env
           push_env postgres.env /opt/carsua/env/postgres.env
           push_env alpr.env /opt/carsua/env/alpr.env
           # GH_OWNER lives in compose/.env next to the colour tags; replace just that line (lib.sh was synced above).
@@ -181,7 +187,7 @@ jobs:
             fi
             push_env backup.env /opt/carsua/env/backup.env
           fi
-          rm -f api.env alpr.env postgres.env backup.env
+          rm -f api.env alpr.env postgres.env redis.env backup.env
 
       - name: Start Postgres only (sync_only)
         if: ${{ inputs.sync_only }}

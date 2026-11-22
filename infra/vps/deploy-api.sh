@@ -25,7 +25,9 @@ for attempt in 1 2 3; do
 done
 
 # Stateful services first (no-ops when already up). `up -d` never recreates them unless their definition changed.
-docker compose up -d postgres alpr caddy
+docker compose up -d postgres redis alpr caddy
+# The api does not depend on Redis (it throttles per process without it), but start counting shared from the first request.
+wait_healthy redis || echo "warn: redis is $HEALTH_STATUS, the new api throttles per process until it is up" >&2
 
 # The workflow pipes this script into `bash -s`, so bash reads it from stdin: any command that also reads stdin eats the rest
 # of the script and bash exits 0 early. Hence </dev/null on every docker call that could attach stdin.

@@ -6,7 +6,8 @@ const COOLDOWN_MS = CONTACT_COOLDOWN_MINUTES * 60_000
 /**
  * One contact message per sender per cooldown window. In memory on purpose: nothing about a message is stored, and the
  * worst a restart or a second (blue/green) instance can do is allow one extra message. The per-IP throttle and the
- * per-address code limits (`email-challenge.ts`, in the DB) still apply on top.
+ * per-address code limits (`email-challenge.ts`, in the DB) still apply on top. Kept out of Redis (decided 2026-11-22): the
+ * per-IP throttle already lives there, and this path must not gain a Redis dependency for one extra message at most.
  */
 export class ContactLimiter {
   private readonly sentAt = new Map<string, number>()

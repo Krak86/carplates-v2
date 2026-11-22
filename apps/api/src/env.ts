@@ -128,6 +128,10 @@ const envSchema = z.object({
   /** Turns the global per-IP throttle off for local load tests (`pnpm load-test`). Ignored when NODE_ENV=production. */
   THROTTLE_DISABLED: boolish,
 
+  /** `redis://[:password@]host:port` of the shared Redis (throttler counters; later the BullMQ queue). Unset = counters stay
+   *  in each process's memory (dev, tests). Redis down at runtime degrades to that memory store, never to a 5xx. */
+  REDIS_URL: z.string().min(1).optional(),
+
   /** Swagger UI at /api/docs — off in production unless explicitly enabled. */
   ENABLE_SWAGGER: boolish,
 

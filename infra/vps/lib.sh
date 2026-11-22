@@ -12,6 +12,9 @@ touch .env
 # (an image tagged `unset` never exists: starting that service fails loudly instead of pulling whatever `latest` is).
 for _k in API_TAG_BLUE API_TAG_GREEN ALPR_TAG INGEST_TAG; do grep -q "^${_k}=" .env || echo "${_k}=unset" >> .env; done
 unset _k
+# Redis runs as the deploy user so it can write the bind-mounted ../redisdata (created here, owned by deploy, never root).
+mkdir -p ../redisdata
+grep -q '^REDIS_UID=' .env || echo "REDIS_UID=$(id -u)" >> .env
 
 # set_env KEY VALUE: replace (or add) one line in compose/.env, which holds the image tags and the colour tags.
 set_env() { { grep -v "^$1=" .env || true; echo "$1=$2"; } > .env.tmp && mv .env.tmp .env; }

@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url'
 import react from '@vitejs/plugin-react'
 import { defineProject } from 'vitest/config'
 
-import { i18nFallback } from './i18n-fallback-plugin'
+import { i18nFallback } from './i18n-fallback-plugin.ts'
 
 export default defineProject({
   plugins: [react(), i18nFallback()],

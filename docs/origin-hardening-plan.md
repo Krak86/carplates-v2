@@ -55,7 +55,7 @@ Expected: issuer `CloudFlare Origin SSL Certificate Authority`. "unable to get l
 ### Containers (docker-compose.prod.yml)
 
 6 services defined: `caddy`, `api-blue`, `api-green`, `alpr`, `postgres`, `ingest` (profile `jobs`, only via `docker compose run --rm`).
-Normally 4 or 5 run (green is up only during a deploy). **Not defined: PgBouncer, Redis.** Dev compose adds `mailpit` and a local `alpr`.
+Normally 5 or 6 run (green is up only during a deploy; `redis` added 2026-11-22). **Not defined: PgBouncer.** Dev compose adds `mailpit` and a local `alpr`.
 Only `caddy` publishes ports (`80:80`, `443:443`, `443:443/udp`, line 32). Others are reachable by service name on the internal network only
 (`api-blue:3000` in the Caddyfile, `http://alpr:8088`). Docker-published ports bypass ufw (comment in `bootstrap.sh`): never add `ports:` to postgres/alpr.
 
@@ -142,7 +142,7 @@ SELECT state, count(*) FROM pg_stat_activity GROUP BY state;   -- sustained use 
 
 `too many clients already` in the logs, `pool.waitingCount` above 0, or memory pressure from many backends. Costs: transaction pooling breaks prepared statements, session `SET`, advisory locks and `LISTEN`. The likelier bottleneck is heavy queries on the 24M-row registry, not connection count (check `pg_stat_statements` first).
 
-**Redis: not in the compose file; reasons it is on the backlog** (PLAN.md "Redis-backed throttler storage"; since 2026-11-19 step 2 of PLAN.md "Build order", after the Twelve-Factor quick items, and the base of the BullMQ queue in `docs/microservices-plan.md`): (1) shared throttler counters that survive restarts and cover the blue/green overlap (today per process, reset on restart), (2) an optional global daily counter for paid third-party keys (e.g. a RIA key, 5000/day), (3) a cache shared between blue and green (the catalog stays in process memory instead). (4) the BullMQ job queue of the microservices plan. Add it per the build order, or earlier if one of those becomes a real problem.
+**Redis: in the compose file since 2026-11-22 (throttler store only; `docs/deploy.md` "Redis"). Reasons it was on the backlog** (PLAN.md "Redis-backed throttler storage"; since 2026-11-19 step 2 of PLAN.md "Build order", after the Twelve-Factor quick items, and the base of the BullMQ queue in `docs/microservices-plan.md`): (1) shared throttler counters that survive restarts and cover the blue/green overlap (today per process, reset on restart), (2) an optional global daily counter for paid third-party keys (e.g. a RIA key, 5000/day), (3) a cache shared between blue and green (the catalog stays in process memory instead). (4) the BullMQ job queue of the microservices plan. Add it per the build order, or earlier if one of those becomes a real problem.
 
 **Redis: self-hosted, not an external free tier** (decided 2026-11-18, free-tier figures from third-party pages, verify before relying on them). Redis Cloud free: 30 MB, ~100 ops/s, ~30 connections. Upstash free: 256 MB but 500K commands/month, and a throttle check is 2+ commands, so about 8K requests/day. Storage is never the limit (a counter is ~100-200 bytes); commands and latency are. An external provider also adds a network round trip to every API call and a fail-open/fail-closed decision. Use a pinned container (Redis 8 AGPL or Valkey BSD, never `latest`), internal network only, no published port. Coarse per-IP limits can instead be a Cloudflare rate limiting rule (free-plan rule count unverified, check the Cloudflare docs).
 

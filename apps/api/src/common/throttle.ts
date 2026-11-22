@@ -1,7 +1,11 @@
 import type { ExecutionContext } from '@nestjs/common'
-import type { ThrottlerModuleOptions } from '@nestjs/throttler'
+import type { ThrottlerModuleOptions, ThrottlerStorage } from '@nestjs/throttler'
 
 import { loadEnv, throttleDisabled } from '../env.js'
+import { sharedThrottlerStorage } from './throttle-storage.js'
+
+/** The shared Redis store (`REDIS_URL`), or `undefined` = Nest's per-process memory store. Same instance in every module. */
+export const throttleStorage = (): ThrottlerStorage | undefined => sharedThrottlerStorage(loadEnv().REDIS_URL)
 
 /** Counts only `/api/*`, and nothing when `THROTTLE_DISABLED` is set (local load tests). */
 export const skipThrottle = (ctx: ExecutionContext): boolean => {

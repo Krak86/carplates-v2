@@ -11,7 +11,7 @@ import type { HtmlTagDescriptor, Plugin } from 'vite'
 import { imagetools } from 'vite-imagetools'
 import { VitePWA } from 'vite-plugin-pwa'
 
-import { i18nFallback } from './i18n-fallback-plugin'
+import { i18nFallback } from './i18n-fallback-plugin.ts'
 
 const DAY_S = 24 * 60 * 60
 const BRAND_COLOR = '#1d4ed8'
