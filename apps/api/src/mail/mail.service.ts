@@ -1,9 +1,12 @@
-import { Injectable, Logger } from '@nestjs/common'
+import { Inject, Injectable, Logger } from '@nestjs/common'
+import type { OnModuleInit } from '@nestjs/common'
 import { createTransport } from 'nodemailer'
 import type { Transporter } from 'nodemailer'
+import type { MailKind } from '@carplates/shared'
 
 import { loadEnv } from '../env.js'
 
+import { MailQueueService } from './mail-queue.service.js'
 import { renderNoticeMail } from './render.js'
 import type { NoticeEmailProps } from './templates.js'
 
@@ -28,12 +31,29 @@ const SEND_TIMEOUT_MS = 10_000
  * provider's SMTP — Brevo, Postmark, SES, Mailjet…), `log` (dev default: prints, never sends).
  */
 @Injectable()
-export class MailService {
+export class MailService implements OnModuleInit {
   private readonly logger = new Logger(MailService.name)
   private readonly env = loadEnv()
   private smtp: Transporter | null = null
 
-  async send(mail: OutgoingMail): Promise<void> {
+  constructor(@Inject(MailQueueService) private readonly queue: MailQueueService) {}
+
+  onModuleInit(): void {
+    this.queue.startWorker(mail => this.transmit(mail))
+  }
+
+  /**
+   * With `kind` the mail goes through the BullMQ queue when it is on (retries with backoff, failed set), and **falls back to
+   * a direct send when Redis is unreachable** so nothing (auth codes) is lost; without `kind` (digest, which has its own
+   * claim/retry) it is always sent directly. `idempotencyKey` makes a repeated enqueue a no-op.
+   */
+  async send(mail: OutgoingMail, kind?: MailKind, idempotencyKey?: string): Promise<void> {
+    if (kind && (await this.queue.enqueue(mail, kind, idempotencyKey))) return
+    await this.transmit(mail)
+  }
+
+  /** The actual provider call; also the queue worker's handler. */
+  private async transmit(mail: OutgoingMail): Promise<void> {
     switch (this.env.MAIL_TRANSPORT) {
       case 'resend':
         return this.sendResend(mail)
@@ -47,7 +67,7 @@ export class MailService {
 
   /** Renders and sends an informational notice (email changed, new sign-in, deletion scheduled). */
   async sendNotice(to: string, props: NoticeEmailProps): Promise<void> {
-    await this.send({ to, ...(await renderNoticeMail(props)) })
+    await this.send({ to, ...(await renderNoticeMail(props)) }, 'notice')
   }
 
   private async sendResend(mail: OutgoingMail): Promise<void> {

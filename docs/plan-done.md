@@ -4985,3 +4985,17 @@ Step 2 of PLAN.md "Build order". **What it is for:** the API throttler counted r
 - **Dev:** `infra/docker-compose.yml` has an optional `redis` service (`127.0.0.1:6379`, no password); set `REDIS_URL=redis://localhost:6379` in `apps/api/.env` to try it. Not needed for tests.
 - **Tests:** `throttle-storage.test.ts` (reply mapping, block, fail-open with one warning, shutdown, unset URL). The Lua script and the fail-open path were also run once against a real `redis:8.10.3-alpine`.
 - Owner checks and the one pre-deploy step (the `REDIS_PASSWORD` secret): PLAN.md "Redis throttler store" -> "Before / after deploy".
+
+## BullMQ mail queue (2026-11-22) ✅ built, awaiting deploy (owner checks in PLAN.md)
+
+Step 3a of PLAN.md "Build order", the first microservice-plan item. **Why:** a send used to run inside the request (10 s provider timeout, no retry), so a Resend blip failed a sign-in or lost a contact message. Now the mail is queued and retried.
+
+- **Contract:** `mailSendSchema` in `packages/shared/src/events.ts` (`kind` code|notice|contact, `idempotencyKey`, the rendered mail), plus `MAIL_KINDS` / `QUEUE_NAMES` lists and `mailQueueStatusSchema`. The same contract is meant for a later RabbitMQ version. Mail is rendered in the api before enqueueing, so the queue holds no template data.
+- **Queue:** `apps/api/src/mail/mail-queue.service.ts`, BullMQ `5.81.6` (pin chosen because it depends on exactly `ioredis` 5.11.1). Own ioredis connections (the Worker needs `maxRetriesPerRequest: null`, the throttler client must not), prefix `mq` (never `thr:`). Job id = idempotency key (`code-<challengeId>`), so a duplicate enqueue is a no-op. 5 attempts, exponential backoff from 5 s; completed removed after 1 h; failed kept 7 days / 1000 (they hold the rendered mail). Worker concurrency 3, closed gracefully on shutdown.
+- **Worker in the api process, not a separate one:** one api replica (plus the short blue/green overlap, which BullMQ job locks make safe); `apps/worker` stays reserved for 2+ replicas.
+- **Moved onto the queue:** email codes (`email-challenge.service.ts`), notices (`sendNotice`), contact. **Not moved:** the digest (its own `digest_sends` claim/release and pacing; two retry layers would fight). Callers keep `mail.send(mail)`; passing a `kind` opts in.
+- **Redis down = direct send (decided).** `enqueue` fails or exceeds 2 s, so `MailService.send` transmits inline exactly as before, with one `Mail queue:` WARN a minute. Auth codes are never lost and the request never waits on a dead Redis. Jobs already queued wait in Redis (AOF, noeviction).
+- **Visibility:** admin-only `GET /api/admin/mail-queue` (counts + last 20 failures, recipient masked, `no-store`), WARN per failed attempt and ERROR `giving up` at the last. No Bull Board, no admin UI page.
+- **Config:** `MAIL_QUEUE` (boolish, default off; production refuses it without `REDIS_URL`) in `env.ts`, `deploy-api.yml` (repo variable), `docs/deploy.md` "Mail queue". Off or no `REDIS_URL` (dev, tests) = every mail is sent inline as before.
+- **Tests:** `mail.service.test.ts` (queued = no direct send, enqueue failure falls back, digest bypass, disabled queue, masking); `contact.service.test.ts` updated for the `'contact'` kind. Also run once against a real `redis:8.10.3-alpine`: first attempt fails, backoff retry succeeds, duplicate id deduplicated, keys under `mq:mail:*`.
+- `pnpm-workspace.yaml`: `msgpackr-extract` build script off (bullmq's optional native speed-up, pure-JS fallback).

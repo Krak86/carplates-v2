@@ -77,7 +77,10 @@ describe('ContactService', () => {
     it('mails the owner with the code-verified sender as Reply-To', async () => {
       await service.send(withCode, null)
       expect(verifyCode).toHaveBeenCalledWith(CHALLENGE_ID, '123456', 'contact')
-      expect(send).toHaveBeenCalledWith(expect.objectContaining({ to: 'owner@example.com', replyTo: 'a@b.co' }))
+      expect(send).toHaveBeenCalledWith(
+        expect.objectContaining({ to: 'owner@example.com', replyTo: 'a@b.co' }),
+        'contact'
+      )
     })
 
     it('needs a code from an anonymous sender', async () => {
@@ -95,7 +98,7 @@ describe('ContactService', () => {
       userForToken.mockResolvedValue(user)
       await service.send(body, 'token')
       expect(verifyCode).not.toHaveBeenCalled()
-      expect(send).toHaveBeenCalledWith(expect.objectContaining({ replyTo: 'member@example.com' }))
+      expect(send).toHaveBeenCalledWith(expect.objectContaining({ replyTo: 'member@example.com' }), 'contact')
     })
 
     it('allows one message per sender per cooldown, then answers 429', async () => {
@@ -130,7 +133,7 @@ describe('ContactService', () => {
       env.CONTACT_TO = undefined
       env.MAIL_REPLY_TO = 'support@example.com'
       await service.send(withCode, null)
-      expect(send).toHaveBeenCalledWith(expect.objectContaining({ to: 'support@example.com' }))
+      expect(send).toHaveBeenCalledWith(expect.objectContaining({ to: 'support@example.com' }), 'contact')
     })
 
     it('is disabled when neither is set', async () => {

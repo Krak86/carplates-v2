@@ -1183,3 +1183,14 @@ export {
   type ShowroomOemLink,
   type ShowroomTuningPage
 } from './showroom.js'
+
+export {
+  MAIL_KINDS,
+  QUEUE_NAMES,
+  mailQueueStatusSchema,
+  mailSendSchema,
+  type MailKind,
+  type MailQueueStatus,
+  type MailSend,
+  type QueueName
+} from './events.js'

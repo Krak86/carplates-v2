@@ -40,7 +40,7 @@ by re-reading this section before bumping.
 
 **Not held back — clarifications so nobody "fixes" them:**
 
-- **Container images** are exact tags, never `latest` or a floating major: `postgres:18.6`, `caddy:2.11.9`, `redis:8.10.3-alpine` (added 2026-11-22; Redis 8 is AGPLv3, Valkey 9 is the BSD alternative if the licence ever matters). **`ioredis` `5.11.1`** (exact in `apps/api`) although `latest` is `6.0.0`: the throttler store only needs `eval`/`quit`; bump on purpose after reading its changelog.
+- **Container images** are exact tags, never `latest` or a floating major: `postgres:18.6`, `caddy:2.11.9`, `redis:8.10.3-alpine` (added 2026-11-22; Redis 8 is AGPLv3, Valkey 9 is the BSD alternative if the licence ever matters). **`ioredis` `5.11.1`** (exact in `apps/api`) although `latest` is `6.0.0`: the throttler store only needs `eval`/`quit`; bump on purpose after reading its changelog. **`bullmq` `5.81.6`** (exact in `apps/api`, added 2026-11-22): it depends on exactly `ioredis` 5.11.1, so one copy; `latest` is 6.7.8 (ioredis only a peer there), move on purpose. `msgpackr-extract` build script is off (pure-JS fallback).
 
 - **pnpm** — we _are_ on `latest` (`12.3.4`, pinned in `packageManager`). This
   machine's global launcher was broken (pnpm 10's self-management shim can't hand
@@ -1088,7 +1088,7 @@ VPS sizing, provider shortlist (Contabo Cloud VPS 6), static IP and DNS: [docs/d
   7. [x] PostHog (and the recorder / surveys / dead-clicks / web-vitals scripts it loads) now starts on first interaction or browser idle (max 4 s); early `capture()` calls are queued (`lib/telemetry.ts`, 2026-10-28). Sentry still starts at once. Re-measure after deploy.
 - HTTP/2 + HTTP/3 + Brotli + caching setup: [docs/deploy.md](docs/deploy.md) (origin publishes only 443/tcp behind Cloudflare, see origin lockdown H4)
 - Prod `docker-compose` (as built): Caddy (Cloudflare origin cert; no per-IP rate limit, dropped 2026-10-31) · api-blue/api-green (also serve the SPA) · alpr · postgres ·
-  ingest (cron, profile `jobs`). Redis (`redis:8.10.3-alpine`, throttler store since 2026-11-22, later BullMQ; no RIA / VIN cache) is in the compose file; PgBouncer is not used.
+  ingest (cron, profile `jobs`). Redis (`redis:8.10.3-alpine`, throttler store since 2026-11-22, BullMQ mail queue since 2026-11-22; no RIA / VIN cache) is in the compose file; PgBouncer is not used.
 - ✅ Deploy tooling written 2026-10-15 (api/alpr Dockerfiles, `infra/docker-compose.prod.yml` + Caddyfile + maintenance page, blue/green api deploy,
   web symlink releases, 3 path-filtered GitHub workflows, bootstrap + backup scripts, web maintenance banner) — ✅ **first real VPS deploy done 2026-10-27** (`docs/plan-done.md` "First VPS deploy"); ✅ R2 backups (nightly + full, restore-tested), SSH hardening and Turnstile done the same day; ✅ UptimeRobot on `/healthz` and ✅ Cloudflare settings + WAF rate-limit rule (2026-10-28); ✅ security gate (mostly), browser smoke test, Contabo snapshot and Telegram preview refresh (2026-10-28); what is left (account-deletion test, CSP enforce, Dependabot): [docs/deploy.md](docs/deploy.md) "Still open".
   Runbook, secrets list and what is still open: [docs/deploy.md](docs/deploy.md). ✅ Ingest cron live 2026-10-28 (`docs/plan-done.md` "Ingest cron"); still open: healthchecks.io checks + `HC_PING_*` secrets, Redis throttler store.
@@ -1560,7 +1560,7 @@ Deploy Web #111 is green (349 test files, 2581 tests); nothing blocks a deploy. 
 1. ✅ **Built 2026-11-21, awaiting deploy (owner "After deploy" boxes in the section below).** **Twelve-Factor P2/P3 items first** (section below, about half a day): they edit `infra/docker-compose.prod.yml`, the deploy workflow and
    `main.ts`, which Redis and every new service then reuse (pinned tags, `stop_grace_period`, JSON logs, rollback by tag).
 2. ✅ **Built and deployed 2026-11-22; owner VPS checks still open (section "Redis throttler store" below).** **Redis** (item "Redis-backed throttler storage" in the deploy-time security list): throttler store first, also the base for BullMQ.
-3. **Microservices, a subset only**: BullMQ mail queue → RabbitMQ `mail-service` → Kafka `alarm-service` only if still wanted. Skip
+3. **Microservices, a subset only**: ✅ BullMQ mail queue (built 2026-11-22, awaiting deploy; section "BullMQ mail queue" below) → RabbitMQ `mail-service` → Kafka `alarm-service` only if still wanted. Skip
    `watch-service`, gRPC, npm package and SMTP relay until needed; `apps/worker` only at 2+ API replicas (else an advisory lock).
    New services must follow the Twelve-Factor items (exact tags, `stop_grace_period`, JSON logs, `infra/vps/deploy-<svc>.sh`).
 
@@ -1577,6 +1577,17 @@ Shared throttler counters in a self-hosted `redis:8.10.3-alpine` (internal netwo
   - [ ] Counters survive a restart: `docker compose restart redis`, then the same `--scan` still lists keys (AOF).
   - [ ] Fail-open drill: `docker compose stop redis`, `curl -s -o /dev/null -w '%{http_code}\n' https://carsua.app/api/stats/top` is still 200, the api log shows one `Redis unavailable` WARN; `docker compose start redis` and it recovers without an api restart.
   - [ ] Overnight: `docker stats --no-stream redis` is far below the 384 MB limit.
+
+## BullMQ mail queue (step 3a of "Build order", built 2026-11-22, awaiting deploy)
+
+Sign-in codes, notices and contact mail go through a BullMQ queue (`mq:mail:*`) on the shared Redis, worker inside the api process (no new container; `apps/worker` only at 2+ replicas). Digest stays direct. Redis down at enqueue = direct send (codes never lost). Write-up: `docs/plan-done.md` "BullMQ mail queue"; operations: `docs/deploy.md` "Mail queue". RabbitMQ `mail-service` is the next, optional step on the same `mailSendSchema`.
+
+- [x] Built: `packages/shared/src/events.ts` (`mailSendSchema`), `mail/mail-queue.service.ts`, `MailService.send(mail, kind?, key?)`, admin `GET /api/admin/mail-queue`, `MAIL_QUEUE` env (env.ts, deploy-api.yml, deploy.md), `bullmq` pin, tests (also run once against real `redis:8.10.3-alpine`: retry, idempotent job id, keys).
+- [ ] **After deploy (owner):**
+  - [ ] Deploy with `MAIL_QUEUE` unset first (behaviour unchanged), then set the repo variable `MAIL_QUEUE=true` and run "Deploy API" again.
+  - [ ] Request an email sign-in code on carsua.app: the mail arrives; `docker compose exec redis sh -c 'REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli --scan --pattern "mq:mail:*" | head'` lists keys; `thr:*` keys are unaffected.
+  - [ ] As admin open `/api/admin/mail-queue`: `enabled: true`, `failed` is empty.
+  - [ ] Drill: `docker compose stop redis`, request a code: it still arrives (direct send) and the api log shows a `Mail queue:` WARN; `docker compose start redis`.
 
 ## Twelve-Factor audit (2026-11-18) - 4 small gaps, the rest compliant (step 1 of "Build order")
 
@@ -1640,7 +1651,7 @@ Learning playground, not a need: one VPS and one API are enough today. Rule of t
 
 Order (2026-11-19): after the Twelve-Factor P2/P3 items and the Redis throttler (see "Build order"); do a subset, not everything. New services follow the Twelve-Factor items (exact tags, `stop_grace_period`, JSON logs, own `deploy-<svc>.sh`).
 
-- [ ] Redis first = the throttler item (self-hosted, not a separate task here); then the BullMQ mail queue before RabbitMQ, see docs/microservices-plan.md step 0
+- [x] Redis first = the throttler item; ✅ BullMQ mail queue built 2026-11-22 (section "BullMQ mail queue"); RabbitMQ `mail-service` next only if wanted
 - [ ] Infra: `mq` compose profile (RabbitMQ 4.x + Kafka 4.x KRaft + dev UIs), version pins, env flags in `apps/api/src/env.ts`
 - [ ] Contracts: `packages/shared/src/events.ts` (Zod message schemas, topic / queue names)
 - [ ] `apps/mail-service` (RabbitMQ: durable queue, retry with delay, DLQ, idempotency)

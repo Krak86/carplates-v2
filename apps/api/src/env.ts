@@ -90,6 +90,9 @@ const envSchema = z.object({
   AUTH_SECRET: z.string().min(32).optional(),
   /** Transactional mail transport: `log` (dev default, prints to the API log), `smtp` (Mailpit / any provider) or `resend`. */
   MAIL_TRANSPORT: z.enum(['log', 'smtp', 'resend']).default('log'),
+  /** Sends code / notice / contact mails through a BullMQ queue on `REDIS_URL` (retries, failed set). Needs `REDIS_URL`; Redis
+   *  down at enqueue time falls back to a direct send. The digest is always direct. Off = every mail is sent inline. */
+  MAIL_QUEUE: boolish,
   RESEND_API_KEY: z.string().optional(),
   SMTP_URL: z.string().default('smtp://localhost:1025'),
   MAIL_FROM: z.string().default('carsua.app <no-reply@localhost>'),
@@ -128,7 +131,7 @@ const envSchema = z.object({
   /** Turns the global per-IP throttle off for local load tests (`pnpm load-test`). Ignored when NODE_ENV=production. */
   THROTTLE_DISABLED: boolish,
 
-  /** `redis://[:password@]host:port` of the shared Redis (throttler counters; later the BullMQ queue). Unset = counters stay
+  /** `redis://[:password@]host:port` of the shared Redis (throttler counters, the BullMQ mail queue). Unset = counters stay
    *  in each process's memory (dev, tests). Redis down at runtime degrades to that memory store, never to a 5xx. */
   REDIS_URL: z.string().min(1).optional(),
 
@@ -168,6 +171,7 @@ function assertProductionEnv(env: Env): void {
   if (/localhost|127\.0\.0\.1/.test(env.PUBLIC_SITE_URL))
     problems.push('PUBLIC_SITE_URL must be the public https origin')
   if (env.MAIL_TRANSPORT === 'log') problems.push('MAIL_TRANSPORT must be smtp or resend')
+  if (env.MAIL_QUEUE && !env.REDIS_URL) problems.push('REDIS_URL is required for MAIL_QUEUE')
   if (env.MAIL_TRANSPORT === 'resend' && !env.RESEND_API_KEY) problems.push('RESEND_API_KEY is required for resend')
   if (problems.length) throw new Error(`Invalid production environment:\n${problems.map(p => `  ${p}`).join('\n')}`)
 }
