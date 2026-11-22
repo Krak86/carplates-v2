@@ -98,7 +98,7 @@ export class ContactService {
     const sender = await this.resolveSender(body, user)
 
     // The code is already spent here; MailService logged the provider's reason, the client starts over with a new code.
-    await this.mail.send({ to, replyTo: sender.email, ...renderContactMail(body, sender) }).catch(() => {
+    await this.mail.send({ to, replyTo: sender.email, ...renderContactMail(body, sender) }, 'contact').catch(() => {
       throw new BadGatewayException('Could not deliver the message')
     })
     this.limiter.record(key)

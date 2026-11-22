@@ -97,7 +97,7 @@ export class EmailChallengeService {
       minutes: EMAIL_CHALLENGE_TTL_MINUTES,
       device: input.device
     })
-    await this.mail.send({ to: input.email, ...mail })
+    await this.mail.send({ to: input.email, ...mail }, 'code', `code-${id}`)
 
     return { challengeId: id, expiresAt: expiresAt.toISOString(), resendAfterSeconds: EMAIL_RESEND_SECONDS }
   }
