@@ -4973,7 +4973,7 @@ Step 1 of PLAN.md "Build order"; the audit itself is in the Twelve-Factor audit 
 - **Checklist:** `docs/checklists.md` "Deploy" gained the exact-tag / `stop_grace_period` rule for new services.
 - Owner checks after deploy: PLAN.md "Twelve-Factor audit" -> "After deploy".
 
-## Redis throttler store (2026-11-22) ✅ built, awaiting deploy
+## Redis throttler store (2026-11-22) ✅ built and deployed (owner VPS checks in PLAN.md)
 
 Step 2 of PLAN.md "Build order". **What it is for:** the API throttler counted requests in each process's memory, so a deploy or restart reset every counter, the blue and green colours each counted separately during the overlap (a client could get up to double the limit), and nothing could be shared between processes. Redis is now the shared counter store, and the base the BullMQ mail queue (step 3) will reuse. BullMQ itself is **not** built.
 

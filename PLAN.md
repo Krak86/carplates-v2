@@ -1559,17 +1559,17 @@ Deploy Web #111 is green (349 test files, 2581 tests); nothing blocks a deploy. 
 
 1. ✅ **Built 2026-11-21, awaiting deploy (owner "After deploy" boxes in the section below).** **Twelve-Factor P2/P3 items first** (section below, about half a day): they edit `infra/docker-compose.prod.yml`, the deploy workflow and
    `main.ts`, which Redis and every new service then reuse (pinned tags, `stop_grace_period`, JSON logs, rollback by tag).
-2. ✅ **Built 2026-11-22, awaiting deploy (section "Redis throttler store" below).** **Redis** (item "Redis-backed throttler storage" in the deploy-time security list): throttler store first, also the base for BullMQ.
+2. ✅ **Built and deployed 2026-11-22; owner VPS checks still open (section "Redis throttler store" below).** **Redis** (item "Redis-backed throttler storage" in the deploy-time security list): throttler store first, also the base for BullMQ.
 3. **Microservices, a subset only**: BullMQ mail queue → RabbitMQ `mail-service` → Kafka `alarm-service` only if still wanted. Skip
    `watch-service`, gRPC, npm package and SMTP relay until needed; `apps/worker` only at 2+ API replicas (else an advisory lock).
    New services must follow the Twelve-Factor items (exact tags, `stop_grace_period`, JSON logs, `infra/vps/deploy-<svc>.sh`).
 
-## Redis throttler store (step 2 of "Build order", built 2026-11-22)
+## Redis throttler store (step 2 of "Build order", built and deployed 2026-11-22)
 
 Shared throttler counters in a self-hosted `redis:8.10.3-alpine` (internal network, password, AOF + `noeviction`, `/opt/carsua/redisdata`), so a restart no longer resets them and blue/green count together. **Redis down = fail open into per-process memory** (never a 5xx, one WARN a minute). `REDIS_URL` unset = in-memory (dev, tests). `contact-limiter.ts` stays in memory on purpose. BullMQ is not built; it reuses this Redis (same `noeviction`/AOF instance, separate key prefix). Write-up: `docs/plan-done.md` "Redis throttler store"; operations: `docs/deploy.md` "Redis".
 
 - [x] Built: storage class + tests, shared by the three `ThrottlerModule.forRoot` calls, compose service, deploy script/workflow, dev compose, docs, version pin.
-- [ ] **Before the deploy (owner):** add the Environment `production` secret `REDIS_PASSWORD` (`openssl rand -hex 24`; hex only). "Deploy API" fails on purpose without it.
+- [x] **Before the deploy (owner), done:** add the Environment `production` secret `REDIS_PASSWORD` (`openssl rand -hex 24`; hex only). "Deploy API" fails on purpose without it.
 - [ ] **After deploy (owner, on the VPS in `/opt/carsua/compose`, after `. ./lib.sh`):**
   - [ ] `docker compose ps redis` is `healthy`; `ss -tln | grep 6379` prints nothing (no published port); `ls -ld /opt/carsua/redisdata` is owned by `deploy`; `grep REDIS_UID .env` is set.
   - [ ] `docker compose logs redis --tail 5` shows startup lines and `Ready to accept connections`; `docker compose exec redis sh -c 'REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli config get maxmemory-policy'` prints `noeviction` and `... get appendonly` prints `yes`.
