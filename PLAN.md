@@ -1560,7 +1560,7 @@ Deploy Web #111 is green (349 test files, 2581 tests); nothing blocks a deploy. 
 1. ✅ **Built 2026-11-21, awaiting deploy (owner "After deploy" boxes in the section below).** **Twelve-Factor P2/P3 items first** (section below, about half a day): they edit `infra/docker-compose.prod.yml`, the deploy workflow and
    `main.ts`, which Redis and every new service then reuse (pinned tags, `stop_grace_period`, JSON logs, rollback by tag).
 2. ✅ **Built and deployed 2026-11-22; owner VPS checks still open (section "Redis throttler store" below).** **Redis** (item "Redis-backed throttler storage" in the deploy-time security list): throttler store first, also the base for BullMQ.
-3. **Microservices, a subset only**: ✅ BullMQ mail queue (built 2026-11-22, awaiting deploy; section "BullMQ mail queue" below) → RabbitMQ `mail-service` → Kafka `alarm-service` only if still wanted. Skip
+3. **Microservices, a subset only**: ✅ BullMQ mail queue (built and deployed 2026-11-22; section "BullMQ mail queue" below) → RabbitMQ `mail-service` → Kafka `alarm-service` only if still wanted. Skip
    `watch-service`, gRPC, npm package and SMTP relay until needed; `apps/worker` only at 2+ API replicas (else an advisory lock).
    New services must follow the Twelve-Factor items (exact tags, `stop_grace_period`, JSON logs, `infra/vps/deploy-<svc>.sh`).
 
@@ -1578,16 +1578,16 @@ Shared throttler counters in a self-hosted `redis:8.10.3-alpine` (internal netwo
   - [ ] Fail-open drill: `docker compose stop redis`, `curl -s -o /dev/null -w '%{http_code}\n' https://carsua.app/api/stats/top` is still 200, the api log shows one `Redis unavailable` WARN; `docker compose start redis` and it recovers without an api restart.
   - [ ] Overnight: `docker stats --no-stream redis` is far below the 384 MB limit.
 
-## BullMQ mail queue (step 3a of "Build order", built 2026-11-22, awaiting deploy)
+## BullMQ mail queue (step 3a of "Build order", built and deployed 2026-11-22, owner checks done; the 503 for the admin view awaits the next deploy)
 
-Sign-in codes, notices and contact mail go through a BullMQ queue (`mq:mail:*`) on the shared Redis, worker inside the api process (no new container; `apps/worker` only at 2+ replicas). Digest stays direct. Redis down at enqueue = direct send (codes never lost). Write-up: `docs/plan-done.md` "BullMQ mail queue"; operations: `docs/deploy.md` "Mail queue". RabbitMQ `mail-service` is the next, optional step on the same `mailSendSchema`.
+Sign-in codes, notices and contact mail go through a BullMQ queue (`mq:mail:*`) on the shared Redis, worker inside the api process (no new container; `apps/worker` only at 2+ replicas). Digest stays direct. Redis down at enqueue = direct send (codes never lost); the admin view answers 503. Write-up: `docs/plan-done.md` "BullMQ mail queue"; operations: `docs/deploy.md` "Mail queue". RabbitMQ `mail-service` is the next, optional step on the same `mailSendSchema`.
 
 - [x] Built: `packages/shared/src/events.ts` (`mailSendSchema`), `mail/mail-queue.service.ts`, `MailService.send(mail, kind?, key?)`, admin `GET /api/admin/mail-queue`, `MAIL_QUEUE` env (env.ts, deploy-api.yml, deploy.md), `bullmq` pin, tests (also run once against real `redis:8.10.3-alpine`: retry, idempotent job id, keys).
-- [ ] **After deploy (owner):**
-  - [ ] Deploy with `MAIL_QUEUE` unset first (behaviour unchanged), then set the repo variable `MAIL_QUEUE=true` and run "Deploy API" again.
-  - [ ] Request an email sign-in code on carsua.app: the mail arrives; `docker compose exec redis sh -c 'REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli --scan --pattern "mq:mail:*" | head'` lists keys; `thr:*` keys are unaffected.
-  - [ ] As admin open `/api/admin/mail-queue`: `enabled: true`, `failed` is empty.
-  - [ ] Drill: `docker compose stop redis`, request a code: it still arrives (direct send) and the api log shows a `Mail queue:` WARN; `docker compose start redis`.
+- [x] **After deploy (owner), verified 2026-11-22:**
+  - [x] Deploy with `MAIL_QUEUE` unset first (behaviour unchanged), then set the repo variable `MAIL_QUEUE=true` and run "Deploy API" again.
+  - [x] Request an email sign-in code on carsua.app: the mail arrives; `docker compose exec redis sh -c 'REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli --scan --pattern "mq:mail:*" | head'` lists keys; `thr:*` keys are unaffected.
+  - [x] As admin open `/api/admin/mail-queue`: `enabled: true`, `failed` is empty.
+  - [x] Drill: `docker compose stop redis`, request a code: it still arrives (direct send) and the api log shows a `Mail queue:` WARN; `docker compose start redis`.
 
 ## Twelve-Factor audit (2026-11-18) - 4 small gaps, the rest compliant (step 1 of "Build order")
 
