@@ -4,7 +4,7 @@ Read the matching item before the change; CLAUDE.md only points here.
 
 ## Edge cache
 
-A new cacheable `/api/*` endpoint: `common/cache.ts` headers (`ROLLUP_CACHE`, `STATS_CACHE`, `LOSSES_CACHE`, …) + a Cloudflare Cache Rule (+ `PUBLIC_API_PATH_PREFIXES` if public). Details: `docs/features-reference.md` "Edge cache", `docs/deploy.md`.
+A new cacheable `/api/*` endpoint: `common/cache.ts` headers (`ROLLUP_CACHE`, `STATS_CACHE`, `LOSSES_CACHE`, …) + a Cloudflare Cache Rule (+ `PUBLIC_API_PATH_PREFIXES` if public). Details: `docs/features-reference.md` "Edge cache", `docs/deploy.md`. All layers (browser to Postgres) in one table: `docs/features-reference.md` "Cache layers".
 
 ## Lazy sections
 
