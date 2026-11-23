@@ -4999,3 +4999,10 @@ Step 3a of PLAN.md "Build order", the first microservice-plan item. **Why:** a s
 - **Config:** `MAIL_QUEUE` (boolish, default off; production refuses it without `REDIS_URL`) in `env.ts`, `deploy-api.yml` (repo variable), `docs/deploy.md` "Mail queue". Off or no `REDIS_URL` (dev, tests) = every mail is sent inline as before.
 - **Tests:** `mail.service.test.ts` (queued = no direct send, enqueue failure falls back, digest bypass, disabled queue, masking); `contact.service.test.ts` updated for the `'contact'` kind. Also run once against a real `redis:8.10.3-alpine`: first attempt fails, backoff retry succeeds, duplicate id deduplicated, keys under `mq:mail:*`.
 - `pnpm-workspace.yaml`: `msgpackr-extract` build script off (bullmq's optional native speed-up, pure-JS fallback).
+
+## /auctions cars only, share filters, Prozorro is_car (2026-11-23) ✅
+
+Features reference: `docs/features-reference.md` "Prozorro.Sale lots in Auction history", data guard (5).
+
+- **Bug:** property sales with one vehicle among other assets (the Illichivsk plant, 696 M UAH) were listed as cars and topped "sale price" sorting. **Fix:** `registry.prozorro_auctions.is_car` (migration 0105), set by the parser; list and stats are cars only by default, "Лише авто" checkbox (`?cars=0`), "Share filters" button. Release note v2.1480.
+- **Backfill:** local DB re-crawled 2017 to 2025-07 (1 173 of 14 407 rows false); VPS re-crawled by year with retries after deploy #244 (see the data guard for the commands and the Node 24 socket crash).
