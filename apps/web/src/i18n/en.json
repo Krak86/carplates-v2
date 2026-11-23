@@ -612,6 +612,8 @@
   "auctions.page.sort.year": "Model year",
   "auctions.page.sortAsc": "Smallest first",
   "auctions.page.sortDesc": "Largest first",
+  "auctions.page.carsOnly": "Cars only",
+  "auctions.page.share": "Share filters",
   "auctions.page.reset": "Reset",
   "auctions.page.total": "{{formatted}} lots",
   "auctions.page.empty": "No lots match these filters.",

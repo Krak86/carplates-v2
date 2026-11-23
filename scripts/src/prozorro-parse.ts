@@ -137,6 +137,9 @@ const isVehicleItem = (item: Item, title: string | null): boolean => {
   return VEHICLE_WORDS_RE.test(`${item.description?.uk_UA ?? ''} ${title ?? ''}`)
 }
 
+/** Titles of a property sale (estate, buildings, equipment); with no make known the lot is not a car sale. */
+const PROPERTY_TITLE_RE = /майн[аоуи]|комплекс|будівл|нерухом|споруд|обладнання|права вимог|боржника|банкрута/iu
+
 /**
  * A property lot (bankruptcy estate with a vehicle list in the description) fills the vehicle props with the form's column header
  * ("НАЙМЕНУВАННЯ ТЗ/СГ, МАРКА, МОДЕЛЬ, ..."). The identifiers found in such a lot belong to one of many vehicles, so it is no row.
@@ -262,6 +265,8 @@ export function toProzorroAuctionInsert(raw: unknown, now = new Date()): Prozorr
     const make = (brand ? titleMakeModel(brand).make : null) ?? brand?.toUpperCase() ?? fromTitle.make
     const model = text(props?.model)?.toUpperCase() ?? (brand ? null : fromTitle.model)
     const year = num(props?.productionYear)
+    // Cars only: every item is a vehicle, and a property-sale title needs a make from the structured props to count.
+    const isCar = vehicleItems.length === (a.items ?? []).length && !(PROPERTY_TITLE_RE.test(title ?? '') && !make)
     const categories = a.metaInfo?.categories ?? []
     const directions = a.metaInfo?.directions ?? []
     const sellerName = text(a.sellingEntity?.name?.uk_UA)
@@ -308,6 +313,7 @@ export function toProzorroAuctionInsert(raw: unknown, now = new Date()): Prozorr
         directions,
         auctionType: a.metaInfo?.auctionTypes?.[0] ?? a.sellingMethod?.split('-')[1] ?? null,
         photoUrls: photoUrls(a.documents),
+        isCar,
         sourceModifiedAt: modified
       }
     }

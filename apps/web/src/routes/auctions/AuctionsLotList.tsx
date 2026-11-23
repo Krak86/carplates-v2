@@ -23,6 +23,7 @@ import UaAuctionThumb from '@/components/ua-auctions/UaAuctionThumb'
 import { cn } from '@/lib/cn'
 import { toIntlLocale } from '@/lib/intl'
 import { auctionListQuery } from '@/lib/queries'
+import { useCopyFeedback } from '@/components/use-copy-feedback'
 import AuctionFilterField from '@/routes/auctions/AuctionFilterField'
 import AuctionMakeSearch from '@/routes/auctions/AuctionMakeSearch'
 import AuctionSourceTabs from '@/routes/auctions/AuctionSourceTabs'
@@ -139,6 +140,7 @@ export default function AuctionsLotList({ query, makes, regions, currency, fx, o
   const { t, i18n } = useTranslation()
   const locale = toIntlLocale(i18n.language)
   const { data, isError, isPlaceholderData } = useQuery(auctionListQuery(query))
+  const { copied, copy } = useCopyFeedback()
   const page = query.page ?? 1
   const pages = data ? pageCount(data.total, data.pageSize) : 1
 
@@ -294,6 +296,23 @@ export default function AuctionsLotList({ query, makes, regions, currency, fx, o
           className={cn(FIELD, 'cursor-pointer')}
         >
           {query.asc === 'true' ? '▲' : '▼'}
+        </button>
+
+        <label className="flex items-center gap-1.5 self-center px-1 py-1.5 text-sm">
+          <input
+            type="checkbox"
+            checked={query.carsOnly !== 'false'}
+            onChange={e => onChange({ cars: e.target.checked ? null : '0' })}
+          />
+          {t('auctions.page.carsOnly')}
+        </label>
+
+        <button
+          type="button"
+          onClick={() => copy(window.location.href)}
+          className="px-2 py-1.5 text-sm text-[var(--color-primary)] underline"
+        >
+          {copied ? t('copy.copied') : t('auctions.page.share')}
         </button>
 
         <button type="button" onClick={onReset} className="px-2 py-1.5 text-sm text-[var(--color-primary)] underline">

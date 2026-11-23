@@ -79,7 +79,7 @@ async function save(db: Db, rows: ProzorroAuctionRowInput[]): Promise<{ inserted
       .onConflictDoUpdate({
         target: prozorroAuctions.auctionId,
         set: UPDATE_SET,
-        setWhere: sql`${prozorroAuctions.sourceModifiedAt} < excluded.source_modified_at`
+        setWhere: sql`${prozorroAuctions.sourceModifiedAt} < excluded.source_modified_at OR ${prozorroAuctions.isCar} IS DISTINCT FROM excluded.is_car`
       })
       // xmax is 0 on a freshly inserted tuple; a row left alone by `setWhere` is not returned at all.
       .returning({ isNew: sql<boolean>`(xmax = 0)` })

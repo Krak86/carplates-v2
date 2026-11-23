@@ -614,6 +614,8 @@
   "auctions.page.sort.year": "Год выпуска",
   "auctions.page.sortAsc": "Сначала меньшие",
   "auctions.page.sortDesc": "Сначала большие",
+  "auctions.page.carsOnly": "Только авто",
+  "auctions.page.share": "Поделиться фильтрами",
   "auctions.page.reset": "Сбросить",
   "auctions.page.total": "{{formatted}} лотов",
   "auctions.page.empty": "Нет лотов по этим фильтрам.",

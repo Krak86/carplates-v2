@@ -18,6 +18,31 @@ function parseOk(name: string): Extract<ReturnType<typeof toProzorroAuctionInser
 }
 
 describe('Prozorro vehicle auctions', () => {
+  it('is_car: a vehicle-only auction is a car, a property sale with a vehicle among other assets is not', () => {
+    expect(parseOk('renault-11gta').row.isCar).toBe(true)
+    const base = fixture('renault-11gta') as { items: unknown[]; title: { uk_UA: string } }
+    const mixed = {
+      ...base,
+      items: [
+        ...base.items,
+        {
+          description: { uk_UA: 'Будівля цеху' },
+          classification: { id: '45210000-2' },
+          itemProps: { itemPropsType: 'realEstate' }
+        }
+      ]
+    }
+    const res = toProzorroAuctionInsert(mixed, NOW)
+    expect(res.ok && res.row.isCar).toBe(false)
+    const estate = {
+      ...base,
+      title: { uk_UA: 'Продаж майна боржника ПАТ «КОМБІНАТ»' },
+      items: base.items.map(i => ({ ...(i as object), itemProps: { identificationNumber: 'VF611GTA000122884' } }))
+    }
+    const res2 = toProzorroAuctionInsert(estate, NOW)
+    expect(res2.ok && res2.row.isCar).toBe(false)
+  })
+
   it('Renault 11GTA: structured props, plate from the title, seller and photos', () => {
     const { row, vehicles } = parseOk('renault-11gta')
     expect(vehicles).toBe(1)
