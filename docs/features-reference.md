@@ -317,6 +317,7 @@ manifest `no-cache` (`spa.controller.ts`). `@vite-pwa/assets-generator` must sta
 ## Link previews
 
 **Folder layout (2026-11-23):** `apps/api/src/spa/` = `spa.controller.ts` (SPA shell + meta injection) and the shared `spa-text.ts`, `meta.ts`, `preview.service.ts`, `compare-preview.ts`, `lru.ts`; `og/` = `og.controller.ts` + card builders (`og-card`, `alarm-card`, `page-card`); `seo/` = `seo.controller.ts`, `sitemap.ts`, `indexnow.ts`. Older notes in `docs/plan-done.md` keep the pre-split paths.
+**No full SSR (2026-11-23):** the SPA stays. The API injects meta, JSON-LD and, for catalog pages only, a plain-HTML `#root` block (`catalogSeoBlock` + `injectRoot`; React replaces it on load, it does not hydrate it). Plate/VIN pages are `noindex`, so server-rendering or prerendering them has no SEO payoff (millions of pages). Revisit only for a measured indexing problem, and then use a framework (React Router framework mode or TanStack Start), not hand-rolled `renderToString`.
 Meta tags + `/og/*.png` are produced by the **API** (`apps/api/src/spa/`) on first load/deep link — Vite (`:5173`) never shows them. To
 test: `pnpm build`, set `WEB_DIST_DIR=../web/dist` in `apps/api/.env`, restart the API, open `localhost:3000/<plate>` (Incognito, the
 SW caches `index.html`). Plate/VIN pages are `noindex`; `?lang=` selects the language.
