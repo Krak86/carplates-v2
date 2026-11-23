@@ -12,9 +12,9 @@ import { VinModule } from '../vin/vin.module.js'
 import { WantedModule } from '../wanted/wanted.module.js'
 import { WikiModule } from '../wiki/wiki.module.js'
 import { ComparePreviewService } from './compare-preview.js'
-import { OgController } from './og.controller.js'
+import { OgController } from './og/og.controller.js'
 import { PreviewService } from './preview.service.js'
-import { SeoController } from './seo.controller.js'
+import { SeoController } from './seo/seo.controller.js'
 import { SpaController } from './spa.controller.js'
 
 @Module({

@@ -4075,7 +4075,7 @@ Plan: `PLAN.md` "Visual stats, map logos, cards and quizzes". Convention: `docs/
 
 ## OG card: region flag and carsua.app (2026-10-29)
 
-- `/og/<PLATE>.png` (`apps/api/src/spa/og-card.ts`) draws the plate's region flag top-right (150x100, white frame; plates only, when the region has one) and `carsua.app` bottom-right on a dark backing (plate, VIN and generic cards). Everything else is unchanged. This is separate from the browser-drawn "Save as picture" card.
+- `/og/<PLATE>.png` (`apps/api/src/spa/og-card.ts`, now `spa/og/`) draws the plate's region flag top-right (150x100, white frame; plates only, when the region has one) and `carsua.app` bottom-right on a dark backing (plate, VIN and generic cards). Everything else is unchanged. This is separate from the browser-drawn "Save as picture" card.
 - `REGION_IDS` moved to `packages/shared/src/regionIds.ts` (web `lib/region-ids.ts` re-exports it); `Preview.regionId` carries it; `OgController` reads `public/og-flags/<id>.png`.
 - resvg cannot decode WebP, so the flags are 180 px PNGs built from `assets/flags-lg` by `pnpm --filter scripts build:og-flags` (re-run after adding a region flag; 27 files, ~280 KB). Tests in `og-card.test.ts`; checked by rendering a sample card.
 - Cached cards (LRU, edge 1 day, crawlers) show the old image until they expire.
@@ -4165,7 +4165,7 @@ Plan: `PLAN.md` "Visual stats, map logos, cards and quizzes". Convention: `docs/
   slugs in `page-card.ts`). Headline = title before the first colon (68 px, 26 chars/line; over 50 chars: 56 px, 30 chars/line; two lines
   max), description two lines of 54 chars. Every static page except `/` uses it as `og:image`; unknown slug = 404; same font-less
   no-cache rule as plate cards. `/read/extremes` ua title shortened to fit.
-- **IndexNow:** key constant in `apps/api/src/spa/indexnow.ts` (public by design, no env var), served at `/<key>.txt` by `SeoController`;
+- **IndexNow:** key constant in `apps/api/src/spa/indexnow.ts` (now `spa/seo/`) (public by design, no env var), served at `/<key>.txt` by `SeoController`;
   `deploy-api.yml` POSTs all sitemap `<loc>` to `api.indexnow.org` after each api deploy (best-effort).
 - **Not touched on purpose:** `releases.ts` / About (infrastructure and link previews, nothing a user sees in the app).
 
@@ -4375,7 +4375,7 @@ Duty, excise, VAT and the pension fee for a car imported to Ukraine, at the NBU 
 
 1. **Shared calc** (`packages/shared/src/customs.ts`): versioned rules `ua-import-2026.1`, `calcImportCosts`, query parser, `mapFuel`, presets (fixtures: the 3 presets, excise EUR 480 / 1,200 / 60). Also fixed `customsAgeK` (now - make year, no -1; Tax Code art. 215.3.5-1).
 2. **Route** `/customs`: form, result with every step, official sources, presets, rules audit card; route checklist done.
-3. **Sitemap**: `STATIC_PAGES` entry, `/sitemap` page entry, tests in `apps/api/src/spa/sitemap.test.ts` and `routes/sitemap/helpers.test.ts`.
+3. **Sitemap**: `STATIC_PAGES` entry, `/sitemap` page entry, tests in `apps/api/src/spa/sitemap.test.ts` (now `spa/seo/`) and `routes/sitemap/helpers.test.ts`.
 4. **Read guides**: `CostSection` in `/read/imports` with shared `CustomsCalcLinks`; no rates quoted (an `/read/auctions` section was added and then removed: that guide is about Ukrainian auctions).
 5. **Prefill link**: VIN page engine card only (hidden for cars with a Ukrainian registry history); hybrids never prefilled and the form fuel stays empty until picked. Auction-lot links were built and removed (lots are sold in UAH inside Ukraine); `AuctionCheck` has a plain `/customs` link.
 6. **Docs and release**: About, `releases.ts` `new` item, features-reference, this entry.
@@ -4921,7 +4921,7 @@ Trigger: Lighthouse on `/BC6743PH` (mobile, slow 4G): performance 42, FCP 7.0 s,
 - Search Console reported 320 Soft 404 (`/cars/*?lang=ru|en`, `/news`). `robots` `Allow: /api/catalog/` was not enough: the catalog routes render from a client `/api/catalog` fetch, and a failed or slow fetch in Google's render left an error card or skeleton.
 - **Embed:** `catalogPageOf` injects `<script type="application/json" id="catalog-data">` (`renderCatalogData`, `<` escaped) into the head of `/cars`, `/cars/:make`, `/cars/:make/:model`. Contract `catalogEmbedSchema` / `CATALOG_EMBED_ID` in `packages/shared/src/catalog.ts` (not `schemas.ts`: offline data untouched). The web reads it once (`lib/catalog-embed.ts`, Zod-parsed, same make/model only) as `initialData` of `catalogModelQuery` / `catalogMakeQuery` / `catalogMakesQuery`. The routes show the error card only when there is no data.
 - **Decision:** `staleTime: Infinity` stays, so an embedded page makes no mount fetch (HTML edge-cached at most a day, catalog rebuilt monthly; a refetch would only reintroduce the render-time failure). Pages without a usable embed (in-app navigation, parse failure) fetch as before. For a refresh on mount, set `staleTime: 0` when seeded from the embed.
-- **`/news`:** `NOINDEX` set in `apps/api/src/spa/sitemap.ts` (known page, `noindex`, no `alternates`, out of `sitemapPaths`); `/api/news*` stays blocked in robots (third-party headlines).
+- **`/news`:** `NOINDEX` set in `apps/api/src/spa/sitemap.ts` (now `spa/seo/`) (known page, `noindex`, no `alternates`, out of `sitemapPaths`); `/api/news*` stays blocked in robots (third-party headlines).
 - Tests: `sitemap.test.ts`, `spa.controller.test.ts` (news noindex, embed per page type), `catalog-text.test.ts` (escaping), `lib/catalog-embed.test.ts`. Version `v2.1414`.
 
 ## Dictionary step 1: delta fallback (2026-11-20) ✅

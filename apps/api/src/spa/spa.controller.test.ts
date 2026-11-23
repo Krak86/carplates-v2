@@ -229,7 +229,7 @@ describe('SpaController meta injection', () => {
   })
 
   it('gives every sitemap page an og:image (its own card, never the home default)', async () => {
-    const { sitemapPaths } = await import('./sitemap.js')
+    const { sitemapPaths } = await import('./seo/sitemap.js')
     const images = new Map<string, string>()
     for (const path of sitemapPaths().filter(p => p !== '/')) {
       const html = await get(path)

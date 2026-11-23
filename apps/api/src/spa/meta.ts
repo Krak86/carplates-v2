@@ -1,4 +1,4 @@
-import { OG_HEIGHT, OG_WIDTH } from './og-card.js'
+import { OG_HEIGHT, OG_WIDTH } from './og/og-card.js'
 import { DEFAULT_LANG, LANGS, OG_LOCALE, SITE_NAME, type Lang } from './spa-text.js'
 
 export type MetaInput = {

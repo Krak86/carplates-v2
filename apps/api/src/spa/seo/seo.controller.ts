@@ -1,8 +1,8 @@
 import { Controller, Get, Header, Inject } from '@nestjs/common'
 import { ApiExcludeController } from '@nestjs/swagger'
 
-import { CatalogService } from '../catalog/catalog.service.js'
-import { loadEnv } from '../env.js'
+import { CatalogService } from '../../catalog/catalog.service.js'
+import { loadEnv } from '../../env.js'
 import { INDEXNOW_KEY } from './indexnow.js'
 import { renderCatalogSitemap, renderRobots, renderSitemap, renderSitemapIndex } from './sitemap.js'
 

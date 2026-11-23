@@ -6,23 +6,23 @@ import { ApiExcludeController } from '@nestjs/swagger'
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler'
 import type { FastifyReply } from 'fastify'
 
-import { AlarmService } from '../alarm/alarm.service.js'
-import { LossesService } from '../losses/losses.service.js'
-import { catalogMakePageText, catalogPageText } from '../catalog/catalog-text.js'
-import { CatalogService } from '../catalog/catalog.service.js'
-import { loadEnv } from '../env.js'
+import { AlarmService } from '../../alarm/alarm.service.js'
+import { LossesService } from '../../losses/losses.service.js'
+import { catalogMakePageText, catalogPageText } from '../../catalog/catalog-text.js'
+import { CatalogService } from '../../catalog/catalog.service.js'
+import { loadEnv } from '../../env.js'
 import type { OblastPath } from './alarm-card.js'
 import { buildAlarmMapCardSvg, buildLossesCardSvg, projectOblasts, readGeoJson } from './alarm-card.js'
-import { ComparePreviewService } from './compare-preview.js'
-import { Lru } from './lru.js'
+import { ComparePreviewService } from '../compare-preview.js'
+import { Lru } from '../lru.js'
 import { buildCardSvg, buildPageCardSvg, readLogo, renderPng } from './og-card.js'
 import { catalogMakeOfCard, catalogSlugsOfCard, pagePathForSlug, shareAliasOfCard } from './page-card.js'
-import { PreviewService } from './preview.service.js'
-import { SHARE_ALIAS_PAGES, STATIC_PAGES, TAGLINE, resolveLang, type Lang } from './spa-text.js'
+import { PreviewService } from '../preview.service.js'
+import { SHARE_ALIAS_PAGES, STATIC_PAGES, TAGLINE, resolveLang, type Lang } from '../spa-text.js'
 
 // Where the web app's static assets (fonts, brand logos) live: the built dist in production,
 // the Vite public dir in dev (WEB_DIST_DIR unset).
-const DEV_PUBLIC_DIR = resolve(import.meta.dirname, '../../../web/public')
+const DEV_PUBLIC_DIR = resolve(import.meta.dirname, '../../../../web/public')
 
 const PNG_CACHE_MAX = 300
 const CACHE_OK = 'public, max-age=86400'

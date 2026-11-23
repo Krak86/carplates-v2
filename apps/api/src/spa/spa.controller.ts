@@ -34,7 +34,7 @@ import {
   injectRoot,
   renderCatalogData
 } from '../catalog/catalog-text.js'
-import { lossesPreviewText } from './alarm-card.js'
+import { lossesPreviewText } from './og/alarm-card.js'
 import { LossesService } from '../losses/losses.service.js'
 import { WikiService } from '../wiki/wiki.service.js'
 import { CatalogService } from '../catalog/catalog.service.js'
@@ -52,9 +52,9 @@ import {
   PAGE_IMAGES,
   pageCardSlug,
   shareAliasCardSlug
-} from './page-card.js'
+} from './og/page-card.js'
 import { PreviewService } from './preview.service.js'
-import { NOINDEX, sitemapPaths } from './sitemap.js'
+import { NOINDEX, sitemapPaths } from './seo/sitemap.js'
 import {
   DEFAULT_LANG,
   SHARE_ALIAS_PAGES,

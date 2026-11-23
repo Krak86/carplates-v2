@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs'
 import type { AlarmsResponse, LossesResponse } from '@carplates/shared'
 
 import { FONT_FAMILY, OG_HEIGHT, OG_WIDTH, SITE_URL, background, esc, header, panel } from './og-card.js'
-import type { Lang } from './spa-text.js'
+import type { Lang } from '../spa-text.js'
 
 /** First day of the full-scale invasion (same date as the web's `WAR_START_DATE`). */
 const WAR_START = [2022, 2, 24] as const

@@ -1065,7 +1065,7 @@ Group 1 dimension callouts + garage-fit -> Group 3 (existing order). Owner says 
 - **Import customs calculator `/customs` (done 2026-11-01; write-up: `docs/plan-done.md` "Import customs calculator").** Duty + excise + VAT + pension fee for a car imported to UA, rules as a versioned object (`ua-import-2026.1`, valid 2026-01-01..2026-12-31), NBU EUR rate via `fx.ts`. Steps (each is shippable on its own; run `pnpm format`, tests, suggest a commit after each):
   1. ✅ (2026-11-01) **Shared calc** (`packages/shared/src/customs.ts` + test): `calcImportCosts(input, rules)`; formulas: duty 10% (0% EV, 0% EUR.1), excise petrol €50/cm³k up to 3000 else €100, diesel €75 up to 3500 else €150, x age coefficient (current year - model year, min 1, max 15), EV €1/kWh, VAT 20% of (value + duty + excise), pension 3/4/5% of UAH value at 165/290 x subsistence minimum (₴3,328 in 2026; EV exempt). Fixtures = the 3 preset examples (€480 / €1,200 / €60 excise). Also the query-param parser (Zod: `fuel,value,cc,year,kwh,duty,eur1`) and `mapFuel()` (free text / NHTSA / Prozorro -> petrol|diesel|hybrid|ev|null). **Verify first** against zakon.rada.gov.ua: EV excise/duty for 2026, hybrid excise, cm³ thresholds, under-1-year cars. Build `@carplates/shared`.
   2. ✅ (2026-11-01) **`/customs` route**: form + result + "what was counted" + official sources + 3 preset links + rules audit card; defaults to the petrol preset, computes on load when params exist. Own contract file for the rules (new fields `.nullable().optional()`); EUR rate from the existing NBU/fx path. Route checklist: `ROUTE_TITLE_KEYS`, `STATIC_PAGES` ua/ru/en (`spa-text.ts`), `max-w-6xl`, App.tsx lazy route, i18n ua/ru/en.
-  3. ✅ (2026-11-01) **Sitemap**: XML (`STATIC_PAGES` entry + `apps/api/src/spa/sitemap.test.ts` list) and the `/sitemap` page (`routes/sitemap/helpers.ts` + its test).
+  3. ✅ (2026-11-01) **Sitemap**: XML (`STATIC_PAGES` entry + `apps/api/src/spa/seo/sitemap.test.ts` list) and the `/sitemap` page (`routes/sitemap/helpers.ts` + its test).
   4. ✅ (2026-11-01) **Read guides**: `CostSection` in `/read/imports` (compact calc + presets, add to `jumps`), short section + link in `/read/auctions`, entry in `routes/read/links.ts` / `/read` index.
   5. ✅ (2026-11-01; VIN page only, hidden for registered cars; lot links removed because lots are sold in UAH inside UA; plain link in `AuctionCheck`; empty fuel option) **Prefill links**: `/auctions` lot card and `AuctionCheck`/`AuctionVinModal` (year, `fuel`, `engineCc`, price -> EUR via NBU; only when `year` + `engineCc` exist), VIN page `VinEngineCard` (cc, fuel, year; value empty). Hybrids need an explicit user choice.
   6. ✅ (2026-11-01; `latest.ts` already 2026-11-01) **Docs and release**: About (`FEATURES` + `about.brief.*` + `about.feature.*`, `SOURCES` NBU + Tax Code), `releases.ts` `new` item (+ `latest.ts` bump), `features-reference.md` section, `plan-done.md`, ✅ line here. Later/low priority: links from `/cars/:make/:model`, `/compare`, `/fuel`.
@@ -1101,7 +1101,7 @@ VPS sizing, provider shortlist (Contabo Cloud VPS 6), static IP and DNS: [docs/d
 
 ### Bot protection, sitemap & SEO (2026-10-12)
 
-✅ **Built in code:** `/sitemap.xml` + generated `/robots.txt` (`apps/api/src/spa/seo.controller.ts`, from `PUBLIC_SITE_URL`; lists
+✅ **Built in code:** `/sitemap.xml` + generated `/robots.txt` (`apps/api/src/spa/seo/seo.controller.ts`, from `PUBLIC_SITE_URL`; lists
 every `STATIC_PAGES` route except `/history`, `/favorites`; plate/VIN pages stay `noindex`) · global `@nestjs/throttler` guard on
 `/api/*` only (`common/throttle.ts`: 30/1s, 150/60s, 1500/1h per IP; `/api/plate/*` 100/60s, `/api/vin/*` 30/60s; `/api/auth/me`
 skipped; recognize/auth/og keep their own tighter limits) · `TRUST_PROXY` env (`trustProxy` for the real client IP) · baseline
@@ -1570,7 +1570,7 @@ Shared throttler counters in a self-hosted `redis:8.10.3-alpine` (internal netwo
 
 - [x] Built: storage class + tests, shared by the three `ThrottlerModule.forRoot` calls, compose service, deploy script/workflow, dev compose, docs, version pin.
 - [x] **Before the deploy (owner), done:** add the Environment `production` secret `REDIS_PASSWORD` (`openssl rand -hex 24`; hex only). "Deploy API" fails on purpose without it.
-- [ ] **After deploy (owner, on the VPS in `/opt/carsua/compose`, after `. ./lib.sh`):**
+- [ ] **After deploy (owner, on the VPS in `/opt/carsua/compose`, after `. ./lib.sh`; a check fails or something is missing: `docs/deploy.md` "If an After deploy check fails"):**
   - [ ] `docker compose ps redis` is `healthy`; `ss -tln | grep 6379` prints nothing (no published port); `ls -ld /opt/carsua/redisdata` is owned by `deploy`; `grep REDIS_UID .env` is set.
   - [ ] `docker compose logs redis --tail 5` shows startup lines and `Ready to accept connections`; `docker compose exec redis sh -c 'REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli config get maxmemory-policy'` prints `noeviction` and `... get appendonly` prints `yes`.
   - [ ] Counters are shared: hit any `/api/*` route a few times, then `docker compose exec redis sh -c 'REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli --scan --pattern "thr:*" | head'` lists keys (and `docker compose logs api-<colour> | grep -c "Redis unavailable"` is 0).
@@ -1599,7 +1599,7 @@ ingest as one-off `docker compose run --rm` with the release image (XII). Follow
 and one API instance; the items below are the cheap ones.
 
 - [x] **Done 2026-11-21 (built, awaiting deploy; write-up in `docs/plan-done.md`):** rollback by `image_tag` in "Deploy API" + `docs/deploy.md` "Rollback"; no `latest` in prod compose, `caddy:2.11.9` pinned; `stop_grace_period: 30s`; JSON api logs in production.
-- [ ] **After deploy** (owner, items above):
+- [ ] **After deploy** (owner, items above; a check fails or something is missing: `docs/deploy.md` "If an After deploy check fails"):
   - [ ] On the VPS `cd /opt/carsua/compose && cat .env` shows the four tags (`API_TAG_BLUE`, `API_TAG_GREEN`, `ALPR_TAG`, `INGEST_TAG`; a missing one is seeded as `unset`), `docker compose config -q` passes, `docker compose ps` shows caddy on `caddy:2.11.9` (`docker compose exec caddy caddy version`).
   - [ ] `docker inspect --format '{{.HostConfig.StopTimeout}}' <live api container>` prints `30` (the colour switch recreates only the new colour; the old one gets it on its next deploy).
   - [ ] `docker compose logs api-<colour> --tail 5` shows JSON lines (`{"level":"log",…}`), and the admin Server tab still works.

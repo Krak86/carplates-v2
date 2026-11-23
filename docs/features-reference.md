@@ -316,6 +316,7 @@ manifest `no-cache` (`spa.controller.ts`). `@vite-pwa/assets-generator` must sta
 
 ## Link previews
 
+**Folder layout (2026-11-23):** `apps/api/src/spa/` = `spa.controller.ts` (SPA shell + meta injection) and the shared `spa-text.ts`, `meta.ts`, `preview.service.ts`, `compare-preview.ts`, `lru.ts`; `og/` = `og.controller.ts` + card builders (`og-card`, `alarm-card`, `page-card`); `seo/` = `seo.controller.ts`, `sitemap.ts`, `indexnow.ts`. Older notes in `docs/plan-done.md` keep the pre-split paths.
 Meta tags + `/og/*.png` are produced by the **API** (`apps/api/src/spa/`) on first load/deep link — Vite (`:5173`) never shows them. To
 test: `pnpm build`, set `WEB_DIST_DIR=../web/dist` in `apps/api/.env`, restart the API, open `localhost:3000/<plate>` (Incognito, the
 SW caches `index.html`). Plate/VIN pages are `noindex`; `?lang=` selects the language.
@@ -884,7 +885,7 @@ One glyph per destination: `→` a route of this app · `↗` another site (new 
 
 ## Alerts / losses link previews, immersive racer, route progress (2026-11-07)
 
-- **`/alarms` previews** (`apps/api/src/spa/alarm-card.ts`, `OgController`): `/og/alarms.png` draws the live oblast map (red whole / yellow level / 55% partial; oblast level only, `ukraine-alarm-oblasts.geojson` projected server-side). **Fail closed:** a stale or failed feed draws the grey map with "no data", never a calm map, and is not cached in memory. `/og/losses.png` = day count with years / months + six headline counters (missing = "-"). Both use `CACHE_LIVE` (5 min). `?section=losses|map` get their own `og:url`, noindex (`SpaController.alarmsSectionMeta`); the plain `/alarms` card is the map. `map` is a `SHARE_SECTIONS` entry with a share button on `AlarmMapCard`.
+- **`/alarms` previews** (`apps/api/src/spa/og/alarm-card.ts`, `OgController`): `/og/alarms.png` draws the live oblast map (red whole / yellow level / 55% partial; oblast level only, `ukraine-alarm-oblasts.geojson` projected server-side). **Fail closed:** a stale or failed feed draws the grey map with "no data", never a calm map, and is not cached in memory. `/og/losses.png` = day count with years / months + six headline counters (missing = "-"). Both use `CACHE_LIVE` (5 min). `?section=losses|map` get their own `og:url`, noindex (`SpaController.alarmsSectionMeta`); the plain `/alarms` card is the map. `map` is a `SHARE_SECTIONS` entry with a share button on `AlarmMapCard`.
 - **War duration:** `warDuration` (web `losses-helpers.ts`, api `alarm-card.ts`; same start date 2022-02-24) shown in `LossesSection` as "day N · X years Y months Z days" (`losses.years|months|days` plurals).
 - **Map labels** (`AlarmMap`): at least `MIN_LABEL_PX` (11) on screen, measured by a `ResizeObserver` (a phone shows the 800-unit map at about 0.45 px per unit).
 - **Racer, touch:** one "Immersive mode" button = full screen + sound + auto drive + tilt steering; in full screen `RaceFullscreenBar` (top) switches sound / tilt / auto / map / restart / exit. Desktop keeps the plain full-screen button. A bump vibrates (`navigator.vibrate`, 70 ms; wreck 150-70-400; not on iOS).

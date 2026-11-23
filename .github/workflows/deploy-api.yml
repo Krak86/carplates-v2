@@ -253,7 +253,7 @@ jobs:
         env:
           URL: ${{ vars.PUBLIC_SITE_URL }}
         run: |
-          key=$(sed -n "s/.*INDEXNOW_KEY = '\([a-f0-9]*\)'.*/\1/p" apps/api/src/spa/indexnow.ts)
+          key=$(sed -n "s/.*INDEXNOW_KEY = '\([a-f0-9]*\)'.*/\1/p" apps/api/src/spa/seo/indexnow.ts)
           host="${URL#https://}"
           files=$(curl -fsS --max-time 20 "$URL/sitemap.xml" | sed -n 's|.*<loc>\([^<]*\)</loc>.*|\1|p') \
             || { echo "::warning::sitemap not reachable from the runner; skipping IndexNow"; exit 0; }

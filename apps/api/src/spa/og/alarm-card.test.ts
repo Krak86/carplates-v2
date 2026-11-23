@@ -14,7 +14,7 @@ import {
 } from './alarm-card.js'
 import { renderPng } from './og-card.js'
 
-const WEB_PUBLIC = join(import.meta.dirname, '../../../web/public')
+const WEB_PUBLIC = join(import.meta.dirname, '../../../../web/public')
 const FONTS = ['NotoSans-Regular.ttf', 'NotoSans-Bold.ttf'].map(f => join(WEB_PUBLIC, 'fonts', f))
 const PNG_SIGNATURE = '89504e470d0a1a0a'
 
