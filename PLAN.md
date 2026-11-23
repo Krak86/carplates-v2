@@ -1560,8 +1560,7 @@ Deploy Web #111 is green (349 test files, 2581 tests); nothing blocks a deploy. 
 1. ✅ **Built 2026-11-21, awaiting deploy (owner "After deploy" boxes in the section below).** **Twelve-Factor P2/P3 items first** (section below, about half a day): they edit `infra/docker-compose.prod.yml`, the deploy workflow and
    `main.ts`, which Redis and every new service then reuse (pinned tags, `stop_grace_period`, JSON logs, rollback by tag).
 2. ✅ **Built and deployed 2026-11-22; owner VPS checks still open (section "Redis throttler store" below).** **Redis** (item "Redis-backed throttler storage" in the deploy-time security list): throttler store first, also the base for BullMQ.
-3. **Microservices, a subset only**: ✅ BullMQ mail queue (built and deployed 2026-11-22; section "BullMQ mail queue" below) → RabbitMQ `mail-service` → Kafka `alarm-service` only if still wanted. Skip
-   `watch-service`, gRPC, npm package and SMTP relay until needed; `apps/worker` only at 2+ API replicas (else an advisory lock).
+3. **Microservices, a subset only**: ✅ BullMQ mail queue (built and deployed 2026-11-22; section "BullMQ mail queue" below). **Verdict 2026-11-23: stop here.** The BullMQ mail queue + Redis are the only queue the app needs; RabbitMQ `mail-service`, Kafka `alarm-service`, ALPR over a queue, `watch-service`, gRPC, npm package and SMTP relay are skipped until a real need appears (they stay documented in `docs/microservices-plan.md` as optional learning); `apps/worker` only at 2+ API replicas (else an advisory lock).
    New services must follow the Twelve-Factor items (exact tags, `stop_grace_period`, JSON logs, `infra/vps/deploy-<svc>.sh`).
 
 ## Redis throttler store (step 2 of "Build order", built and deployed 2026-11-22)
@@ -1650,6 +1649,8 @@ Admin-only `/admin/parking` page: on-demand snapshot from 2 home cameras (Reolin
 Learning playground, not a need: one VPS and one API are enough today. Rule of thumb: "do this" tasks go to RabbitMQ (queue, ack, retry, DLQ), "this happened" events go to Kafka (log, replay, consumer groups). Everything opt-in behind flags, brokers in a compose profile `mq`, own schema + role per service, inline fallback when a broker is down. Ideas ranked, library notes, memory budget and verification: [docs/microservices-plan.md](docs/microservices-plan.md).
 
 Order (2026-11-19): after the Twelve-Factor P2/P3 items and the Redis throttler (see "Build order"); do a subset, not everything. New services follow the Twelve-Factor items (exact tags, `stop_grace_period`, JSON logs, own `deploy-<svc>.sh`).
+
+**Verdict 2026-11-23: skip every box below for now.** The BullMQ mail queue + Redis are enough (details, the BullMQ + RabbitMQ "priority chain" idea, the Kafka RAM check and the in-process alarm SSE design: `docs/microservices-plan.md` "Verdict 2026-11-23"). `services/alpr` is already a microservice. Alarm SSE (the "later: SSE" item) is built in-process with a `Subject` and `@Sse()`, not with Kafka. Boxes stay unchecked as an optional learning backlog.
 
 - [x] Redis first = the throttler item; ✅ BullMQ mail queue built 2026-11-22 (section "BullMQ mail queue"); RabbitMQ `mail-service` next only if wanted
 - [ ] Infra: `mq` compose profile (RabbitMQ 4.x + Kafka 4.x KRaft + dev UIs), version pins, env flags in `apps/api/src/env.ts`
