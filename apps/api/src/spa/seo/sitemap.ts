@@ -1,7 +1,7 @@
 import { catalogMakePath, catalogPath } from '@carplates/shared'
 
-import { alternateLinks, langUrl } from './meta.js'
-import { LANGS, STATIC_PAGES } from './spa-text.js'
+import { alternateLinks, langUrl } from '../meta.js'
+import { LANGS, STATIC_PAGES } from '../spa-text.js'
 
 /** Per-device pages: nothing worth indexing (empty for a crawler). */
 const EXCLUDED = new Set(['/history', '/favorites'])

@@ -15,7 +15,7 @@ import {
   shareAliasCardSlug,
   shareAliasOfCard
 } from './page-card.js'
-import { LANGS, SHARE_ALIAS_PAGES, STATIC_PAGES } from './spa-text.js'
+import { LANGS, SHARE_ALIAS_PAGES, STATIC_PAGES } from '../spa-text.js'
 
 describe('catalog page slugs', () => {
   it('round-trips a catalog card slug', () => {

@@ -1,6 +1,6 @@
 import { catalogSlugSchema, isShareAlias, type ShareAlias } from '@carplates/shared'
 
-import { STATIC_PAGES } from './spa-text.js'
+import { STATIC_PAGES } from '../spa-text.js'
 
 /** `/og/page/<slug>.png` slug of a static path: `/stats` → `stats`, `/read/vin` → `read--vin`. Null for `/` (the default card). */
 export const pageCardSlug = (path: string): string | null => (path === '/' ? null : path.slice(1).replace(/\//g, '--'))

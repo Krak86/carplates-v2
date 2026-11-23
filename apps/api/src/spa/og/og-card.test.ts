@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest'
 import { buildCardSvg, genericCardSize, OG_HEIGHT, OG_WIDTH, renderPng } from './og-card.js'
 
 const FONTS = ['NotoSans-Regular.ttf', 'NotoSans-Bold.ttf'].map(f =>
-  join(import.meta.dirname, '../../../web/public/fonts', f)
+  join(import.meta.dirname, '../../../../web/public/fonts', f)
 )
 
 const PNG_SIGNATURE = '89504e470d0a1a0a'

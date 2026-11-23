@@ -158,7 +158,7 @@ Enforce CSP (+ report sink) · HSTS `includeSubDomains`/`preload` · **Redis-bac
 - **XSS — yes.** React escapes by default; `dangerouslySetInnerHTML`/`innerHTML`/`document.write`/
   `insertAdjacentHTML` return **zero** matches in `apps/web`. Server-side HTML (`apps/api/src/spa/meta.ts:34`
   `esc()` on title/description/OG url+image/hreflang; JSON-LD emits `<` as `<`); OG SVG text escaped
-  in `apps/api/src/spa/og-card.ts:28` and then rasterized to PNG anyway. Residual: CSP not yet enforced
+  in `apps/api/src/spa/og/og-card.ts:28` and then rasterized to PNG anyway. Residual: CSP not yet enforced
   (that's the backstop, not a code defect).
 - **CSRF — yes, defense in depth.** Session cookie `carsua_sid` is `HttpOnly; SameSite=Lax; Secure`
   (`apps/api/src/auth/session-cookie.ts`), **plus** a global `OriginGuard`
@@ -303,7 +303,7 @@ Ordered by value/effort. All are infra/ops, not code-architecture; the code-leve
 - `infra/Caddyfile` — CSP/HSTS/Permissions-Policy (edge).
 - `apps/api/src/main.ts` — nosniff/X-Frame-Options/Referrer-Policy/CORS/body limits.
 - `apps/api/src/common/origin.guard.ts`, `common/throttle.ts`, `common/cache.ts` — CSRF guard, rate limits, cache headers.
-- `apps/api/src/spa/meta.ts`, `spa/og-card.ts` — server HTML escaping.
+- `apps/api/src/spa/meta.ts`, `spa/og/og-card.ts` — server HTML escaping.
 - `apps/api/src/auth/session-cookie.ts` — session cookie flags.
 - `apps/api/src/shares/*` — upload validation + capability-token IDOR model.
 - `docs/deploy.md`, `README.md` — deploy pipeline, env, "never scan production" warning, local dev setup.
