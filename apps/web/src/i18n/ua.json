@@ -614,6 +614,8 @@
   "auctions.page.sort.year": "Рік випуску",
   "auctions.page.sortAsc": "Спочатку менші",
   "auctions.page.sortDesc": "Спочатку більші",
+  "auctions.page.carsOnly": "Лише авто",
+  "auctions.page.share": "Поділитися фільтрами",
   "auctions.page.reset": "Скинути",
   "auctions.page.total": "{{formatted}} лотів",
   "auctions.page.empty": "Немає лотів за цими фільтрами.",

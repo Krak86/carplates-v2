@@ -4,6 +4,18 @@ import type { ReleaseDay } from './core.js'
 /** 2026-11: newest day first. */
 export const DAYS: readonly ReleaseDay[] = [
   {
+    date: '2026-11-23',
+    version: 'v2.1480',
+    items: [
+      item(
+        'improved',
+        'Аукціони: за замовчуванням лише авто (продаж майна, де авто лише один із активів, прихований), є перемикач «Лише авто» і кнопка «Поділитися фільтрами»',
+        'Аукционы: по умолчанию только авто (продажа имущества, где авто лишь один из активов, скрыта), есть переключатель «Только авто» и кнопка «Поделиться фильтрами»',
+        'Auctions: cars only by default (property sales that merely include a vehicle are hidden), with a Cars only switch and a Share filters button'
+      )
+    ]
+  },
+  {
     date: '2026-11-21',
     version: 'v2.1468',
     items: [

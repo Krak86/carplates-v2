@@ -34,7 +34,7 @@ const parseNumber = (value: string | null): number | undefined => {
   return Number.isFinite(n) && n >= 0 ? n : undefined
 }
 
-/** The `/auctions` filters live in the URL (`?source=&group=&type=&make=&region=&outcome=&sort=&asc=&min=&max=&page=&dim=`) so a view can be shared. */
+/** The `/auctions` filters live in the URL (`?source=&group=&type=&make=&region=&outcome=&cars=&sort=&asc=&min=&max=&page=&dim=`) so a view can be shared. */
 export function useAuctionFilters() {
   const [searchParams, setSearchParams] = useSearchParams()
 
@@ -56,6 +56,8 @@ export function useAuctionFilters() {
     region: searchParams.get('region') ?? undefined,
     status: searchParams.get('status') ?? undefined,
     outcome,
+    // Cars only is the default; `?cars=0` also lists property sales that merely include a vehicle.
+    carsOnly: searchParams.get('cars') === '0' ? 'false' : undefined,
     sort,
     asc: searchParams.get('asc') === 'true' ? 'true' : 'false',
     minPrice: parseNumber(searchParams.get('min')),

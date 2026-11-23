@@ -142,7 +142,38 @@ the one real seam is `apps/api` (Node) → `services/alpr` (Python), today `fetc
 - Splitting the DB per service: keep one Postgres, but each new service gets its **own schema + role** (`mail`, `watch`), which
   is the honest microservice boundary on one box.
 
+## Verdict 2026-11-23: skip the extra queues and services for now
+
+One VPS, one API and moderate volume do not need more than what is built: the **BullMQ mail queue on the shared Redis** (retry, backoff,
+failed set, inline fallback when Redis is down). Nothing below is needed for speed or reliability; each is a learning project and costs
+RAM, deploy scripts and a new failure mode. Do them only when the owner wants the lesson or a real need appears.
+
+- **Skipped:** RabbitMQ `mail-service` (idea 1), Kafka `alarm-service` (idea 2), `watch-service` (3), ALPR over a queue (4) or gRPC (7),
+  "Trending now" (5), `apps/worker` (6), SMTP relay. Idea 8 (npm package) is unrelated to brokers.
+- **`services/alpr` is already a microservice** (own container, Python, HTTP, own tag and limits). It is stateless, so it owns no schema or queue.
+- **`apps/worker` / "2+ API replicas":** replicas are copies of the API container running at the same time. Each copy would run every in-API
+  timer (alarm poller, losses refresh, account purge, shares cleanup, stats), so the job would run twice. A `worker` process (or a
+  `pg_try_advisory_lock` per timer, the cheap option) fixes that. With one API this is not needed; the digest (claim row) and purge
+  (idempotent DELETE) are already safe.
+- **Lookup (`plate`, `vin`) stays in the API** (hot path, synchronous, a queue only adds latency).
+- **Kafka RAM check before any future Kafka work:** this plan budgets for a ~12 GB VPS, but `infra/docker-compose.prod.yml` says Postgres is
+  "sized for the 8 GB box". Confirm the real size first (Kafka ~700 MB, `-Xmx512m`).
+- **If BullMQ and RabbitMQ ever coexist** (decided in discussion, not built): exactly one queue per mail, never both. Recommended is a
+  priority chain: RabbitMQ first, BullMQ when the publish fails, inline send when Redis is down too. Put both behind one small interface
+  (`enqueue`), switched by an env list such as `MAIL_QUEUES=rabbitmq,bullmq`; the `idempotencyKey` is the dedupe key on both. The one known
+  edge: an enqueue that times out but was accepted can send twice (acceptable for codes and notices).
+- **Alarm SSE does not need Kafka.** Build it in-process: the poller already has `toOpen` / `toClose` from `diffAreas`; push them into an
+  RxJS `Subject` and serve a Nest `@Sse()` endpoint (no `@Res()`). Redis pub/sub only when the poller moves to its own process or the API runs
+  2+ replicas (a subscriber needs its own ioredis connection); BullMQ is a work queue (one consumer per job), never the fan-out. Cautions:
+  SSE bypasses the Cloudflare edge cache (today's cached polling costs the origin the same however many people watch, SSE grows with viewers),
+  so connect only on `/alarms` while the tab is visible, send diffs, cap connections and fall back to the cached polling; heartbeat every
+  ~25 s (Cloudflare idles out ~100 s); exclude the stream path from the Cloudflare Cache Rule; close streams on shutdown (30 s
+  `stop_grace_period`); give the route a `@Throttle`; wrap the push in try/catch like the recorder. The AI chat (`docs/ai-chat-plan.md`)
+  shares the same Caddy / Cloudflare / shutdown settings and the frame encoder, but uses `fetch` POST (it needs a body) while alarms can use `EventSource`.
+
 ## Recommended path (implementation order)
+
+> The steps below are the original plan; see the verdict above for what is actually going to be built.
 
 Decided 2026-11-19 (PLAN.md "Build order"): **Twelve-Factor P2/P3 items → Redis throttler → a subset of this plan.** Do the Twelve-Factor
 compose/logging/deploy items first, because every service and broker below is added to the same `infra/docker-compose*.yml`, deploy

@@ -77,7 +77,8 @@ const SORT_EXPR: Readonly<Record<AuctionSort, SQL>> = {
 }
 
 /** The union as a CTE `l`, narrowed to one source when asked. */
-const lotsWhere = (source: AuctionSource | undefined): SQL => sql`WHERE ${sourceFilter(source) ?? sql`true`}`
+const lotsWhere = (source: AuctionSource | undefined): SQL =>
+  sql`WHERE ${sourceFilter(source) ?? sql`true`} AND l.is_car`
 
 @Injectable()
 export class AuctionsStatsService {
@@ -186,6 +187,7 @@ export class AuctionsStatsService {
     const conditions = [
       sourceFilter(query.source),
       groupFilter(query.group),
+      query.carsOnly ? sql`l.is_car` : undefined,
       query.auctionType ? sql`l.auction_type = ${query.auctionType}` : undefined,
       query.make ? sql`l.make = ${query.make}` : undefined,
       query.region ? sql`l.region = ${query.region}` : undefined,

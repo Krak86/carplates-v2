@@ -81,7 +81,7 @@ describe('AuctionsStatsService.list', () => {
       ],
       140
     )
-    const res = await service.list({ outcome: 'sold', sort: 'newest', asc: false, page: 2 })
+    const res = await service.list({ outcome: 'sold', carsOnly: true, sort: 'newest', asc: false, page: 2 })
 
     expect(auctionListResponseSchema.safeParse(res).error?.issues).toBeUndefined()
     expect(res).toMatchObject({ total: 140, page: 2, pageSize: 25 })

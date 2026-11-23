@@ -66,7 +66,8 @@ export const unionLots: SQL = sql`
          NULL::text AS color, NULL::int AS kilometrage, NULL::text AS fuel, NULL::int AS engine_cc,
          NULL::text AS transmission, NULL::text AS condition, NULL::boolean AS damaged, NULL::text AS damage_text,
          NULL::text AS locality, '[]'::jsonb AS photo_urls,
-         ap.category AS debt_category, ap.issuer AS writ_issuer, ap.bailiff_office
+         ap.category AS debt_category, ap.issuer AS writ_issuer, ap.bailiff_office,
+         true AS is_car
   FROM registry.auction_lots al
   LEFT JOIN registry.auction_proceedings ap ON ap.proceeding_no = al.proceeding_no
   UNION ALL
@@ -98,7 +99,8 @@ export const unionLots: SQL = sql`
          color, kilometrage, fuel, engine_cc,
          transmission, condition, damaged, damage_text,
          locality, photo_urls,
-         NULL::text, NULL::text, NULL::text
+         NULL::text, NULL::text, NULL::text,
+         is_car
   FROM registry.prozorro_auctions`
 
 /** `source` / `group` filters as SQL over the union (`l`), whitelisted values only. */

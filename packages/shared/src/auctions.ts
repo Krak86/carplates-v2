@@ -259,6 +259,11 @@ export const auctionListQuerySchema = z.object({
   /** Feed status as published (`Торги відбулися`, …), exact match. */
   status: z.string().trim().min(1).max(60).optional(),
   outcome: z.enum(AUCTION_OUTCOMES).default(DEFAULT_AUCTION_OUTCOME),
+  /** Vehicle auctions only (the default); `false` also lists property sales that merely include a vehicle. */
+  carsOnly: z
+    .enum(['true', 'false'])
+    .default('true')
+    .transform(v => v === 'true'),
   /** Start price bounds, hryvnias. */
   minPrice: z.coerce.number().min(0).max(1e10).optional(),
   maxPrice: z.coerce.number().min(0).max(1e10).optional(),
@@ -279,6 +284,7 @@ export type AuctionListQuery = {
   region?: string
   status?: string
   outcome?: AuctionOutcome
+  carsOnly?: 'true' | 'false'
   minPrice?: number
   maxPrice?: number
   sort?: AuctionSort

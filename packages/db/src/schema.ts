@@ -1196,6 +1196,8 @@ export const prozorroAuctions = registry.table(
       .$type<string[]>()
       .notNull()
       .default(sql`'[]'::jsonb`),
+    /** The auction is about vehicles only (no other assets, no property-sale title); the list and stats default to these. */
+    isCar: boolean('is_car').notNull().default(true),
     sourceModifiedAt: timestamp('source_modified_at', { withTimezone: true }).notNull(),
     firstSeenAt: timestamp('first_seen_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
