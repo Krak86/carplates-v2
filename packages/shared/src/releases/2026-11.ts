@@ -5,8 +5,14 @@ import type { ReleaseDay } from './core.js'
 export const DAYS: readonly ReleaseDay[] = [
   {
     date: '2026-11-24',
-    version: 'v2.1491',
+    version: 'v2.1497',
     items: [
+      item(
+        'new',
+        'У грі-гонці: кнопка «Поділитися налаштуваннями» (однакове посилання на /race і з номера), режими «Релакс» і «Хардкор», задній хід (↓ після зупинки), вибір виду (ззаду, зверху, низько, від першої особи), смужка пройденого тест-драйву, а «Спочатку» тепер ремонтує авто',
+        'В игре-гонке: кнопка «Поделиться настройками» (одинаковая ссылка на /race и из номера), режимы «Релакс» и «Хардкор», задний ход (↓ после остановки), выбор вида (сзади, сверху, низко, от первого лица), полоска пройденного тест-драйва, а «Заново» теперь ремонтирует авто',
+        'The racer game gets a "Share settings" button (the same /race link from a plate or the game page), Relax and Hardcore modes, reverse (↓ after stopping), a camera view switch (behind, high, low, first person), a test drive progress line, and Restart now repairs the car'
+      ),
       item(
         'fix',
         'Посилання на спільне фото більше не залишає токен в адресному рядку, а аналітика й звіти про помилки не отримують токен, номери та VIN',

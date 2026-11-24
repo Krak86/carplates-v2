@@ -8,6 +8,8 @@ type Props = {
   tilt: Toggle
   auto: Toggle
   map: Toggle
+  onView: () => void
+  help: Toggle
   onRestart: () => void
   onExit: () => void
 }
@@ -32,8 +34,17 @@ function BarButton({ icon, label, pressed, onClick }: ButtonProps): ReactNode {
   )
 }
 
-/** The main switches of the immersive (full screen) mode in one row at the top: sound, tilt steering, auto drive, map, restart, exit. */
-export default function RaceFullscreenBar({ sound, tilt, auto, map, onRestart, onExit }: Props): ReactNode {
+/** The main switches of the immersive (full screen) mode in one row at the top: sound, tilt steering, auto drive, map, camera view, restart, exit. */
+export default function RaceFullscreenBar({
+  sound,
+  tilt,
+  auto,
+  map,
+  onView,
+  help,
+  onRestart,
+  onExit
+}: Props): ReactNode {
   const { t } = useTranslation()
 
   return (
@@ -47,6 +58,8 @@ export default function RaceFullscreenBar({ sound, tilt, auto, map, onRestart, o
       <BarButton icon="📱" label={t('race.bar.tilt')} pressed={tilt.on} onClick={tilt.onToggle} />
       <BarButton icon="🏎" label={t('race.bar.auto')} pressed={auto.on} onClick={auto.onToggle} />
       <BarButton icon="🗺" label={t('race.bar.map')} pressed={map.on} onClick={map.onToggle} />
+      <BarButton icon="👁" label={t('race.view')} onClick={onView} />
+      <BarButton icon="?" label={t('race.help.title')} pressed={help.on} onClick={help.onToggle} />
       <BarButton icon="↺" label={t('race.restart')} onClick={onRestart} />
       <BarButton icon="✕" label={t('race.touch.exitFullscreen')} onClick={onExit} />
     </div>

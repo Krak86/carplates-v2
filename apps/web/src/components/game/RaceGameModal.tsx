@@ -6,14 +6,13 @@ import { regionName, type VehicleKind } from '@carplates/shared'
 
 import BrandLogo from '@/components/BrandLogo'
 import RegionFlag from '@/components/RegionFlag'
-import ShareButton from '@/components/ShareButton'
 import RaceCredits from '@/components/game/RaceCredits'
 import RaceGameStage from '@/components/game/RaceGameStage'
 import {
   DEFAULT_AUTO,
+  DEFAULT_VIEW,
   bodyForKind,
   decodeRaceConfig,
-  encodeRaceConfig,
   randomLanes,
   randomQuality,
   randomScenery,
@@ -67,6 +66,7 @@ export default function RaceGameModal({
     region: startRegion(plate),
     brand: brand ?? null,
     auto: DEFAULT_AUTO,
+    view: DEFAULT_VIEW,
     ...decodeRaceConfig(shared)
   }))
 
@@ -103,11 +103,6 @@ export default function RaceGameModal({
             )}
           </div>
           <div className="flex shrink-0 items-center gap-3">
-            <ShareButton
-              section="race"
-              tab={encodeRaceConfig(config)}
-              label={t('share.button', { section: t('race.shareName') })}
-            />
             <button
               type="button"
               onClick={onClose}

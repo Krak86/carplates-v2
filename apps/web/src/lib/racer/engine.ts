@@ -14,6 +14,7 @@ import {
   TOP_SPEED_KMH,
   TRAFFIC_COUNT,
   smokeLevel,
+  type CameraView,
   type RacerConfig,
   type RacerHud,
   type RoadColor,
@@ -40,7 +41,7 @@ export { preloadBackdrop, preloadBrandLogo, preloadRegionFlag }
 export type Racer = {
   /** Applies new settings live (car, scenery, lanes, traffic, resolution) without resetting the lap. */
   setConfig: (next: RacerConfig) => void
-  /** Back to the start line, lap timer cleared. After a wreck it also zeroes the bump and km counters. */
+  /** Back to the start line, lap timer cleared, the car repaired (bumps and smoke gone). After a wreck or the finish it also zeroes the km counter. */
   restart: () => void
   /** Sound is off until the viewer turns it on. */
   setSound: (on: boolean) => void
@@ -81,6 +82,11 @@ const BREAKING = -MAX_SPEED
 const DECEL = -MAX_SPEED / 5
 const OFF_ROAD_DECEL = -MAX_SPEED / 2
 const OFF_ROAD_LIMIT = MAX_SPEED / 4
+/** Reverse gear: ↓ at a standstill backs the car up, at a fixed top speed of 15 km/h (HUD) that no vehicle exceeds. */
+const REVERSE_MAX = 1500
+const REVERSE_ACCEL = MAX_SPEED / 4
+/** First-person view: the camera sits this high (the default is CAMERA_HEIGHT) and the car's own sprite is replaced by a hood. */
+const FIRST_PERSON_HEIGHT = 480
 /** Auto mode: the cruise speed steps in HUD km/h (0 = stand still); ↑ / ↓ move one step. The vehicle's top speed caps the list. */
 const CRUISE_KMH = [0, 20, 40, 60, 80, 100, 120] as const
 const DEFAULT_CRUISE_KMH = 40
@@ -177,6 +183,11 @@ function writeBest(v: number): void {
   }
 }
 
+/** Moves `v` towards 0 by `step` without crossing it. */
+function approachZero(v: number, step: number): number {
+  return v > 0 ? Math.max(0, v - step) : Math.min(0, v + step)
+}
+
 function sameConfig(a: RacerConfig, b: RacerConfig): boolean {
   return (
     a.color === b.color &&
@@ -189,7 +200,8 @@ function sameConfig(a: RacerConfig, b: RacerConfig): boolean {
     a.plate === b.plate &&
     a.region === b.region &&
     a.brand === b.brand &&
-    a.auto === b.auto
+    a.auto === b.auto &&
+    a.view === b.view
   )
 }
 
@@ -225,8 +237,10 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
   let hillOffset = 0
   let treeOffset = 0
   let playerX = 0
-  let camTarget = 0 // -1 (low, narrow, close) … 1 (high, wide): where the phone's pitch wants the camera
-  let camLevel = 0 // the eased value actually rendered
+  let camTarget = cfg.view === 'high' ? 1 : cfg.view === 'low' ? -1 : 0 // -1 (low, narrow, close) … 1 (high, wide): where the phone's pitch wants the camera
+  let camLevel = camTarget // the eased value actually rendered
+  let fpTarget = cfg.view === 'cockpit' ? 1 : 0 // 1 = first-person view
+  let fpLevel = fpTarget // the eased value actually rendered (0 = chase camera)
   let camDepth = CAMERA_DEPTH // render-only: depends on the field of view
   let position = 0
   let speed = 0
@@ -380,10 +394,11 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
   function update(dt: number): void {
     bumpCooldown -= dt
     camLevel += (camTarget - camLevel) * Math.min(1, dt * 4)
+    fpLevel += (fpTarget - fpLevel) * Math.min(1, dt * 6)
     updateSmoke(dt)
     const playerSegment = findSegment(position + PLAYER_Z)
     const playerW = atlas.player.straight.w * SPRITE_SCALE
-    const speedPercent = speed / MAX_SPEED
+    const speedPercent = Math.abs(speed) / MAX_SPEED // reversing steers and drifts like driving forward
     const dx = dt * 2 * speedPercent // at top speed, cross the road in 1 second
     const startPosition = position
 
@@ -401,19 +416,22 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
     const accel = ACCEL * (0.5 + 0.5 * (topSpeed() / MAX_SPEED)) * dt
     if (wrecked || finished) {
       // the car coasts to a halt and stays there; the wheel and pedals no longer answer
-      speed += BREAKING * 0.5 * dt
+      speed = approachZero(speed, -BREAKING * 0.5 * dt)
       braking = false
     } else if (cfg.auto) {
       // the car rolls on by itself and settles at the chosen cruise speed; ↓ / ↑ presses change that speed
       const target = Math.min(cruise * 100, topSpeed())
-      if (speed < target) speed += accel
-      else if (speed > target) speed += BREAKING * 0.5 * dt
+      if (keySlower && cruise === 0 && speed <= 0) speed = Math.max(-REVERSE_MAX, speed - REVERSE_ACCEL * dt)
+      else if (speed < target) speed += accel
+      else if (speed > target) speed = Math.max(target, speed + BREAKING * 0.5 * dt)
       braking = speed > target + BRAKE_MARGIN
     } else {
       if (keyFaster) speed += accel
-      else if (keySlower) speed += BREAKING * dt
-      else speed += DECEL * dt
-      braking = keySlower
+      else if (keySlower)
+        // brake to a standstill, then keep ↓ held to back up
+        speed = speed > 0 ? Math.max(0, speed + BREAKING * dt) : Math.max(-REVERSE_MAX, speed - REVERSE_ACCEL * dt)
+      else speed = speed > 0 ? Math.max(0, speed + DECEL * dt) : approachZero(speed, -DECEL * dt)
+      braking = keySlower && speed > 0
     }
 
     if (playerX < -1 || playerX > 1) {
@@ -422,10 +440,16 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
       for (const sprite of playerSegment.sprites) {
         const spriteW = sprite.source.w * SPRITE_SCALE
         if (overlap(playerX, playerW, sprite.offset + (spriteW / 2) * (sprite.offset > 0 ? 1 : -1), spriteW)) {
-          speed = MAX_SPEED / 5
           sound.crash()
           registerBump()
-          position = increase(playerSegment.p1.world.z, -PLAYER_Z, trackLength) // stop in front of the sprite
+          if (speed < 0) {
+            // backed into it: stop just behind the sprite's segment
+            speed = 0
+            position = increase(playerSegment.p2.world.z, -PLAYER_Z, trackLength)
+          } else {
+            speed = MAX_SPEED / 5
+            position = increase(playerSegment.p1.world.z, -PLAYER_Z, trackLength) // stop in front of the sprite
+          }
           break
         }
       }
@@ -443,8 +467,8 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
     }
 
     playerX = limit(playerX, -3, 3)
-    speed = limit(speed, 0, topSpeed())
-    driven += ((speed / 100) * dt) / 3600 // the HUD shows speed / 100 as km/h
+    speed = limit(speed, -REVERSE_MAX, topSpeed())
+    driven += ((Math.max(0, speed) / 100) * dt) / 3600 // the HUD shows speed / 100 as km/h; backing up does not count
     if (driven >= TEST_DRIVE_KM && !finished) {
       finished = true
       emitHud(true)
@@ -456,7 +480,7 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
     treeOffset = increase(treeOffset, TREE_SPEED * playerSegment.curve * travelled, 1)
 
     if (position > PLAYER_Z) {
-      if (currentLapTime && startPosition < PLAYER_Z) {
+      if (currentLapTime && startPosition < PLAYER_Z && speed > 0) {
         lastLapTime = currentLapTime
         currentLapTime = 0
         record = bestLap == null || lastLapTime <= bestLap
@@ -471,7 +495,7 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
       }
     }
 
-    sound.update(speed / MAX_SPEED, playerX < -1 || playerX > 1)
+    sound.update(Math.abs(speed) / MAX_SPEED, playerX < -1 || playerX > 1)
     emitHud()
   }
 
@@ -580,6 +604,7 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
   }
 
   function drawPlayer(scale: number, destX: number, destY: number, steer: number): void {
+    if (fpLevel > 0.6) return // first person: no car in front of the camera, see drawHood
     const bounce = 1.5 * Math.random() * (speed / MAX_SPEED) * resolution * randomChoice([-1, 1])
     const sprite = steer < 0 ? atlas.player.left : steer > 0 ? atlas.player.right : atlas.player.straight
     drawSprite(sprite, scale, destX, destY + bounce, -0.5, -1)
@@ -596,10 +621,11 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
   function render(): void {
     // Camera rig (render only; collisions keep using PLAYER_Z): a higher, wider camera sits further behind the car,
     // so traffic ahead is no longer hidden by it. Like the camera-height / field-of-view sliders of Jake Gordon's demo.
-    const cameraHeight =
+    const chaseHeight =
       camLevel >= 0
         ? interpolate(CAMERA_HEIGHT, CAMERA_HEIGHT_MAX, camLevel)
         : interpolate(CAMERA_HEIGHT, CAMERA_HEIGHT_MIN, -camLevel)
+    const cameraHeight = interpolate(chaseHeight, FIRST_PERSON_HEIGHT, fpLevel)
     const fov =
       camLevel >= 0 ? interpolate(FOV_DEG, FOV_MAX_DEG, camLevel) : interpolate(FOV_DEG, FOV_MIN_DEG, -camLevel)
     camDepth = 1 / Math.tan((fov / 2) * (Math.PI / 180))
@@ -686,7 +712,40 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
       }
     }
 
+    if (fpLevel > 0.6) drawHood((fpLevel - 0.6) / 0.4)
     drawSmoke()
+  }
+
+  /** First-person view: the bonnet in the body colour, the dashboard and the roof edge, drawn over the road. */
+  function drawHood(alpha: number): void {
+    const w = width
+    const h = height
+    ctx.save()
+    ctx.globalAlpha = alpha
+    // roof edge and A-pillars
+    ctx.fillStyle = '#111'
+    ctx.fillRect(0, 0, w, h * 0.06)
+    polygon(0, 0, w * 0.07, 0, w * 0.015, h * 0.55, 0, h * 0.62, '#111')
+    polygon(w, 0, w * 0.93, 0, w * 0.985, h * 0.55, w, h * 0.62, '#111')
+    // bonnet
+    const grad = ctx.createLinearGradient(0, h * 0.8, 0, h)
+    grad.addColorStop(0, cfg.color)
+    grad.addColorStop(1, '#000')
+    ctx.fillStyle = grad
+    ctx.beginPath()
+    ctx.moveTo(w * 0.12, h)
+    ctx.quadraticCurveTo(w * 0.5, h * 0.7, w * 0.88, h)
+    ctx.closePath()
+    ctx.fill()
+    ctx.fillStyle = 'rgba(255,255,255,0.18)'
+    ctx.beginPath()
+    ctx.ellipse(w * 0.5, h * 0.9, w * 0.22, h * 0.018, 0, 0, Math.PI * 2)
+    ctx.fill()
+    // dashboard
+    ctx.fillStyle = '#0b0b0d'
+    ctx.fillRect(0, h * 0.95, w, h * 0.05)
+    ctx.restore()
+    carAnchor = { x: w / 2, y: h * 0.86, w: w * 0.3, h: h * 0.2 } // the smoke rises from the bonnet
   }
 
   function project(p: Point, cameraX: number, cameraY: number, cameraZ: number): void {
@@ -880,6 +939,12 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
     return [...CRUISE_KMH.filter(k => k < top), top]
   }
 
+  /** Chase views are a camera level (low -1, default 0, high 1); the cockpit is its own first-person blend. */
+  function applyView(view: CameraView): void {
+    camTarget = view === 'high' ? 1 : view === 'low' ? -1 : 0
+    fpTarget = view === 'cockpit' ? 1 : 0
+  }
+
   function rebuildLook(): void {
     theme = THEMES[cfg.scenery]
     atlas = makeAtlas(theme, cfg.body, cfg.color, cfg.plate, cfg.brand, cfg.region, regionFlagImage(cfg.region))
@@ -950,12 +1015,14 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
 
   function restart(): void {
     if (wrecked || finished) {
-      // a wreck or a finished drive means a brand-new test drive: the counters start from zero too
+      // a wreck or a finished drive means a brand-new test drive: the odometer starts from zero too
       wrecked = false
       finished = false
-      bumps = 0
       driven = 0
     }
+    // a restart always repairs the car: no bumps, no smoke
+    bumps = 0
+    bumpCooldown = 0
     puffs = []
     puffDebt = 0
     position = 0
@@ -1006,6 +1073,7 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
         next.traffic === cfg.traffic &&
         next.region === cfg.region // the region sits on the billboards, which live in the road
       const brandChanged = next.brand !== cfg.brand
+      if (next.view !== cfg.view) applyView(next.view)
       cfg = next
       cruise = Math.min(cruise, Math.round(topSpeed() / 100)) // a slower vehicle caps the cruise speed
       if (brandChanged) {

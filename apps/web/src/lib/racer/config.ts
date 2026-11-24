@@ -120,6 +120,27 @@ export type TrafficLevel = (typeof TRAFFIC_LEVELS)[number]
 export const QUALITIES = ['low', 'medium', 'high'] as const
 export type Quality = (typeof QUALITIES)[number]
 
+/** Camera views: behind the car (the default), higher, lower, and first person from the cockpit. */
+export const CAMERA_VIEWS = ['behind', 'high', 'low', 'cockpit'] as const
+export type CameraView = (typeof CAMERA_VIEWS)[number]
+export const DEFAULT_VIEW: CameraView = 'behind'
+
+/** One-tap difficulty presets over the lanes and traffic settings: relax = widest-spaced road, hardcore = narrowest and busiest. */
+export const RACE_MODES = ['relax', 'hardcore'] as const
+export type RaceMode = (typeof RACE_MODES)[number]
+export const MODE_SETTINGS: Readonly<Record<RaceMode, { lanes: Lanes; traffic: TrafficLevel }>> = {
+  relax: { lanes: 2, traffic: 'few' },
+  hardcore: { lanes: 4, traffic: 'many' }
+}
+
+/** The preset the current lanes and traffic match, if any (derived, so it also follows a shared link). */
+export function activeMode(c: Pick<RacerConfig, 'lanes' | 'traffic'>): RaceMode | null {
+  return RACE_MODES.find(m => MODE_SETTINGS[m].lanes === c.lanes && MODE_SETTINGS[m].traffic === c.traffic) ?? null
+}
+
+/** Share of the test drive covered, 0-1. */
+export const driveProgress = (km: number): number => Math.max(0, Math.min(1, km / TEST_DRIVE_KM))
+
 export const DEFAULT_BODY: CarBody = 'sedan'
 export const DEFAULT_BACKDROP: BackdropId = 'carpathians'
 
@@ -203,6 +224,7 @@ export type RacerConfig = {
   brand: string | null
   /** Auto-forward mode: no gas pedal, the car cruises at a speed level that ↑ raises one step at a time. */
   auto: boolean
+  view: CameraView
 }
 
 /** Bumps at which the HUD starts joking that this is a crash test and not the viewer's car. */
@@ -363,14 +385,26 @@ export function bodyForKind(kind: VehicleKind | null, bodyText?: string | null):
 
 /** Settings (everything but the plate and brand, which come from the page) as one compact share-link token. */
 export function encodeRaceConfig(c: RacerConfig): string {
-  return [c.body, c.scenery, c.lanes, c.traffic, c.quality, c.color.slice(1), c.backdrop, c.auto ? 'a' : 'm'].join('-')
+  return [
+    c.body,
+    c.scenery,
+    c.lanes,
+    c.traffic,
+    c.quality,
+    c.color.slice(1),
+    c.backdrop,
+    c.auto ? 'a' : 'm',
+    c.view
+  ].join('-')
 }
 
 /** Reads a share-link token back; every part is validated, anything unknown is dropped (it is external input). */
 export function decodeRaceConfig(token: string | null): Partial<Omit<RacerConfig, 'plate' | 'region' | 'brand'>> {
-  const [body, scenery, lanes, traffic, quality, color, backdrop, mode] = (token ?? '').split('-')
+  const [body, scenery, lanes, traffic, quality, color, backdrop, mode, view] = (token ?? '').split('-')
   const out: Partial<Omit<RacerConfig, 'plate' | 'region' | 'brand'>> = {}
   if (mode === 'a' || mode === 'm') out.auto = mode === 'a'
+  const view_ = CAMERA_VIEWS.find(v => v === view)
+  if (view_) out.view = view_
   const body_ = CAR_BODIES.find(v => v === body)
   if (body_) out.body = body_
   const scenery_ = SCENERIES.find(v => v === scenery)

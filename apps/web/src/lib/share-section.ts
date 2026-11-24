@@ -74,6 +74,13 @@ export function buildShareUrl(section: ShareSection, tab?: string): string {
   return `${base}?section=${section}&${params.toString()}`
 }
 
+/** The standalone racer page with a settings token: the same link whether it is shared from /race or from a plate's test drive. */
+export function buildRaceShareUrl(token: string): string {
+  const params = new URLSearchParams({ tab: token, lang: i18n.language })
+  setFontParam(params)
+  return `${window.location.origin}/race?${params.toString()}`
+}
+
 export async function copyToClipboard(text: string): Promise<boolean> {
   try {
     await navigator.clipboard.writeText(text)
