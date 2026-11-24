@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 
+import PageToc from '@/components/PageToc'
 import Card from '@/components/ui/Card'
 import { INSTALL_SECTIONS, INSTALL_STEPS } from '@/routes/install/helpers'
 import { useInstallActions } from '@/routes/install/use-install-actions'
@@ -46,6 +47,8 @@ export default function InstallRoute(): ReactNode {
 
         <p>{t('install.intro')}</p>
 
+        <PageToc items={INSTALL_SECTIONS.map(({ id }) => ({ id, label: t(`install.${id}.h`) }))} />
+
         <ul className="list-disc space-y-1 pl-5">
           {INSTALL_STEPS.map(step => (
             <li key={step}>{t(`install.step.${step}`)}</li>
@@ -54,7 +57,7 @@ export default function InstallRoute(): ReactNode {
       </Card>
 
       {INSTALL_SECTIONS.map(({ id, items }) => (
-        <Card key={id} id={id} className="space-y-2 text-sm">
+        <Card key={id} id={id} className="scroll-mt-20 space-y-2 text-sm">
           <h2 className="text-base font-semibold">{t(`install.${id}.h`)}</h2>
 
           <ul className="list-disc space-y-1 pl-5">

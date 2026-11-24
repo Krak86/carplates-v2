@@ -5,8 +5,14 @@ import type { ReleaseDay } from './core.js'
 export const DAYS: readonly ReleaseDay[] = [
   {
     date: '2026-11-24',
-    version: 'v2.1483',
+    version: 'v2.1484',
     items: [
+      item(
+        'improved',
+        'На сторінках /install, /sitemap і /data-status з’явився зміст «На цій сторінці» з посиланнями на розділи',
+        'На страницах /install, /sitemap и /data-status появилось оглавление «На этой странице» со ссылками на разделы',
+        'The /install, /sitemap and /data-status pages now have an On this page table of contents linking to their sections'
+      ),
       item(
         'improved',
         'У «Перевірці» поруч з офіційними тестами ПДР (.gov.ua) додано неофіційні тренувальні тести pdr-testy.com.ua (гнучкіші), з позначками, посиланням у розділі «Про додаток» і в іграх «Гонки»; сервіси mvs.gov.ua тепер з логотипом ГСЦ МВС, а офіційні тести ПДР - з власним логотипом',
