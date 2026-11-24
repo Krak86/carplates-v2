@@ -124,6 +124,7 @@ import {
 } from '@/lib/api'
 import { embeddedCatalogMake, embeddedCatalogMakes, embeddedCatalogModel } from '@/lib/catalog-embed'
 import type { FuelEconomyParams, OriginParams, VehicleSearchFilters } from '@/lib/api'
+import { listComparisons } from '@/lib/compare-db'
 import { isFavorited, listFavorites } from '@/lib/favorites-db'
 import type { FavoriteKind } from '@/lib/favorites-db'
 import { listVisits } from '@/lib/history-db'
@@ -196,6 +197,15 @@ export function historyQuery() {
 
 export function favoritesQuery() {
   return queryOptions({ queryKey: ['favorites'], queryFn: listFavorites, networkMode: 'always' })
+}
+
+export function savedComparisonsQuery() {
+  return queryOptions({
+    queryKey: ['compare', 'saved'],
+    queryFn: listComparisons,
+    staleTime: Infinity,
+    networkMode: 'always'
+  })
 }
 
 export function favoriteQuery(kind: FavoriteKind, value: string) {

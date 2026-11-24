@@ -7,7 +7,7 @@ import { syncSaved } from '@/lib/api'
 import { applySyncedComparisons, exportComparisonsForSync } from '@/lib/compare-db'
 import { applySyncedFavorites, exportFavoritesForSync } from '@/lib/favorites-db'
 import { applySyncedVisits, exportVisitsForSync } from '@/lib/history-db'
-import { favoritesQuery, historyQuery } from '@/lib/queries'
+import { favoritesQuery, historyQuery, savedComparisonsQuery } from '@/lib/queries'
 import { SAVED_CHANGED_EVENT, notifySavedChanged } from '@/lib/saved-events'
 import { useSyncStore } from '@/store/sync-store'
 
@@ -67,7 +67,7 @@ export function useSavedSyncActions(): void {
       void queryClient.invalidateQueries({ queryKey: favoritesQuery().queryKey })
       void queryClient.invalidateQueries({ queryKey: historyQuery().queryKey })
       void queryClient.invalidateQueries({ predicate: query => query.queryKey[0] === 'favorite' })
-      void queryClient.invalidateQueries({ queryKey: ['compare', 'saved'] })
+      void queryClient.invalidateQueries({ queryKey: savedComparisonsQuery().queryKey })
       if (response.evictedFavorites > 0) setTrimmedFavorites(response.evictedFavorites)
     },
     onSettled: () => {
