@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 
 import Card from '@/components/ui/Card'
+import PageToc from '@/components/PageToc'
 import LegalTable from '@/routes/legal/LegalTable'
 
 export type LegalDoc = 'privacy' | 'terms'
@@ -46,18 +47,7 @@ export default function LegalRoute({ doc }: Props): ReactNode {
         <p className="text-xs text-[var(--color-muted)]">{t('legal.updated')}</p>
         <p>{t(`legal.${doc}.intro`)}</p>
 
-        <nav aria-label={t('legal.toc')} className="rounded-lg bg-[var(--color-border)]/30 p-3">
-          <p className="text-xs font-medium text-[var(--color-muted)]">{t('legal.toc')}</p>
-          <ol className="mt-1 list-decimal space-y-0.5 pl-5">
-            {SECTIONS[doc].map(id => (
-              <li key={id}>
-                <a href={`#${doc}-${id}`} className="text-[var(--color-primary)] underline">
-                  {t(`legal.${doc}.${id}.h`)}
-                </a>
-              </li>
-            ))}
-          </ol>
-        </nav>
+        <PageToc items={SECTIONS[doc].map(id => ({ id: `${doc}-${id}`, label: t(`legal.${doc}.${id}.h`) }))} />
 
         {SECTIONS[doc].map(id => (
           <section key={id} id={`${doc}-${id}`} className="scroll-mt-20">

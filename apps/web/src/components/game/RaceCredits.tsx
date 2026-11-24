@@ -25,6 +25,17 @@ export default function RaceCredits(): ReactNode {
           {t('race.pdr')} ↗
         </a>
       </p>
+
+      <p className="mt-1 text-xs text-[var(--color-muted)]">
+        <a
+          href="https://pdr-testy.com.ua/ispyt"
+          target="_blank"
+          rel="noopener noreferrer nofollow"
+          className="underline"
+        >
+          {t('race.pdrTesty')} ↗
+        </a>
+      </p>
     </>
   )
 }

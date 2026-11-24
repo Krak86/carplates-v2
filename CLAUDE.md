@@ -5,7 +5,6 @@
 `carsua.app` v2 — Ukrainian vehicle lookup by plate or VIN (pnpm monorepo, Postgres, NHTSA). v1 is `../carplates/` (do not modify).
 
 Docs are huge: **grep `^## ` headings, never read whole**. `PLAN.md` backlog + pins · `docs/plan-done.md` · `README.md` · `docs/features-reference.md` (**read the matching section before touching a feature**) · `docs/commands-reference.md` · other `docs/*.md` on request.
-`docs/features-reference.md` (**read the matching section before touching a feature**) · `docs/commands-reference.md` · other `docs/*.md` on request.
 
 ## Layout
 

@@ -5,8 +5,26 @@ import type { ReleaseDay } from './core.js'
 export const DAYS: readonly ReleaseDay[] = [
   {
     date: '2026-11-24',
-    version: 'v2.1482',
+    version: 'v2.1487',
     items: [
+      item(
+        'improved',
+        'Розділ «Про додаток» оновлено: опис перевірки (офіційні й неофіційні тести ПДР), аукціонів (лише авто, «Поділитися фільтрами»), статистики (згорнуті таблиці на телефоні) і карти сайту (зміст «На цій сторінці»)',
+        'Раздел «О приложении» обновлен: описание проверки (официальные и неофициальные тесты ПДД), аукционов (только авто, «Поделиться фильтрами»), статистики (свернутые таблицы на телефоне) и карты сайта (оглавление «На этой странице»)',
+        'The About page is up to date: the descriptions of verification (official and unofficial traffic-rules tests), auctions (cars only, Share filters), statistics (collapsed tables on phones) and the site map (On this page contents)'
+      ),
+      item(
+        'improved',
+        'На сторінках /install, /sitemap і /data-status з’явився зміст «На цій сторінці» з посиланнями на розділи',
+        'На страницах /install, /sitemap и /data-status появилось оглавление «На этой странице» со ссылками на разделы',
+        'The /install, /sitemap and /data-status pages now have an On this page table of contents linking to their sections'
+      ),
+      item(
+        'improved',
+        'У «Перевірці» поруч з офіційними тестами ПДР (.gov.ua) додано неофіційні тренувальні тести pdr-testy.com.ua (гнучкіші), з позначками, посиланням у розділі «Про додаток» і в іграх «Гонки»; сервіси mvs.gov.ua тепер з логотипом ГСЦ МВС, а офіційні тести ПДР - з власним логотипом',
+        'В «Проверке» рядом с официальными тестами ПДД (.gov.ua) добавлены неофициальные тренировочные тесты pdr-testy.com.ua (более гибкие), с пометками, ссылкой в разделе «О приложении» и в игре «Гонки»; сервисы mvs.gov.ua теперь с логотипом ГСЦ МВД, а официальные тесты ПДД - с собственным логотипом',
+        'Verification now lists the unofficial, more flexible pdr-testy.com.ua practice tests next to the official .gov.ua traffic-rules tests, with notes, an About page link and a link under the race game; mvs.gov.ua services now show the HSC logo and the official tests their own logo'
+      ),
       item(
         'improved',
         'На телефоні таблиці за областями на /auctions, /stats і /wanted згорнуті, кнопка «Показати більше» плавно розкриває їх повністю; на /stats додано відступ перед блоком «Пов’язана статистика»',

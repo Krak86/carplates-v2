@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 
+import PageToc from '@/components/PageToc'
 import Card from '@/components/ui/Card'
 import { SITEMAP_GROUPS, SITEMAP_TIPS } from '@/routes/sitemap/helpers'
 
@@ -18,12 +19,21 @@ export default function SitemapRoute(): ReactNode {
         <h1 className="mb-2 text-2xl font-bold">
           <span aria-hidden>🗺️</span> {t('sitemap.title')}
         </h1>
-        <p className="text-[var(--color-muted)]">{t('sitemap.intro')}</p>
+        <p className="mb-3 text-[var(--color-muted)]">{t('sitemap.intro')}</p>
+        <PageToc
+          items={[
+            ...SITEMAP_GROUPS.map(group => ({
+              id: group.id,
+              label: `${group.icon} ${t(`sitemap.group.${group.id}`)}`
+            })),
+            { id: 'tips', label: `🧩 ${t('sitemap.tips.title')}` }
+          ]}
+        />
       </Card>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {SITEMAP_GROUPS.map(group => (
-          <Card key={group.id} id={group.id} className="space-y-2">
+          <Card key={group.id} id={group.id} className="scroll-mt-20 space-y-2">
             <h2 className="text-lg font-semibold">
               <span aria-hidden>{group.icon}</span> {t(`sitemap.group.${group.id}`)}
             </h2>
@@ -43,7 +53,7 @@ export default function SitemapRoute(): ReactNode {
         ))}
       </div>
 
-      <Card className="space-y-4">
+      <Card id="tips" className="scroll-mt-20 space-y-4">
         <div>
           <h2 className="text-lg font-semibold">
             <span aria-hidden>🧩</span> {t('sitemap.tips.title')}

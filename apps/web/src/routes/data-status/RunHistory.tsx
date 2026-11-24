@@ -35,7 +35,7 @@ export default function RunHistory({ jobs }: Props): ReactNode {
   })).sort((a, b) => (b.synced?.getTime() ?? -1) - (a.synced?.getTime() ?? -1))
 
   return (
-    <Card className="space-y-2">
+    <Card id="history" className="scroll-mt-20 space-y-2">
       <h2 className="text-lg font-semibold">
         {t('dataStatus.history')} ({rows.length})
       </h2>

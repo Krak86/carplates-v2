@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 
+import PageToc from '@/components/PageToc'
 import Card from '@/components/ui/Card'
 import { toIntlLocale } from '@/lib/intl'
 import { dataStatusQuery } from '@/lib/queries'
@@ -30,9 +31,21 @@ export default function DataStatusRoute(): ReactNode {
           <span aria-hidden>🗓️</span> {t('dataStatus.title')}
         </h1>
         <p className="text-muted">{t('dataStatus.intro')}</p>
+        <PageToc
+          items={[
+            { id: 'registry', label: t('dataStatus.registry.title') },
+            ...(status.isSuccess
+              ? [
+                  { id: 'summary', label: t('dataStatus.summary') },
+                  { id: 'history', label: t('dataStatus.history') },
+                  ...groupByCadence(DATASETS).map(g => ({ id: g.cadence, label: t(`dataStatus.cadence.${g.cadence}`) }))
+                ]
+              : [])
+          ]}
+        />
       </Card>
 
-      <Card className="space-y-2">
+      <Card id="registry" className="scroll-mt-20 space-y-2">
         <h2 className="text-lg font-semibold">{t('dataStatus.registry.title')}</h2>
         {status.isPending && <p className="text-muted">{t('dataStatus.loading')}</p>}
         {status.isError && <p className="text-muted">{t('result.error')}</p>}
@@ -52,7 +65,7 @@ export default function DataStatusRoute(): ReactNode {
 
       {status.isSuccess && (
         <>
-          <Card className="space-y-2">
+          <Card id="summary" className="scroll-mt-20 space-y-2">
             <h2 className="text-lg font-semibold">{t('dataStatus.summary')}</h2>
             <ul className="flex flex-wrap gap-3 text-sm">
               {STATUSES.filter(s => counts[s]).map(s => (

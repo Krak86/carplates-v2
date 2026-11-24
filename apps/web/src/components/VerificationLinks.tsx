@@ -13,7 +13,7 @@ import { cn } from '@/lib/cn'
 import { scrollElementIntoView } from '@/lib/share-section'
 
 type VerificationSite = {
-  id: 'bdr' | 'mtsbu' | 'otk' | 'license' | 'leisure' | 'customs' | 'shtrafua' | 'pdr' | 'historia'
+  id: 'bdr' | 'mtsbu' | 'otk' | 'license' | 'leisure' | 'customs' | 'shtrafua' | 'pdr' | 'pdrTesty' | 'historia'
   url: string
   /** Absent when we are not cleared to show the logo — an emoji tile is drawn instead. */
   icon?: string
@@ -26,20 +26,32 @@ type VerificationSite = {
 }
 
 const VERIFICATION_SITES: VerificationSite[] = [
-  { id: 'bdr', url: 'https://bdr.mvs.gov.ua/', icon: '/icons/bdr.svg', iconClass: 'size-8' },
+  { id: 'bdr', url: 'https://bdr.mvs.gov.ua/', icon: '/icons/hsc.webp', iconClass: 'h-8 w-auto' },
   { id: 'mtsbu', url: 'https://policy.mtsbu.ua/', icon: '/icons/mtsbu.svg', darkBg: true, iconClass: 'h-5 w-auto' },
-  // No logos for the HSC open-data checks or the official-tests site: none grants reuse of its mark.
-  { id: 'otk', url: 'https://solutions.mvs.gov.ua/search-otk', emoji: '🔧', iconClass: 'text-xl' },
-  { id: 'license', url: 'https://solutions.mvs.gov.ua/check-driver-license', emoji: '🪪', iconClass: 'text-xl' },
+  // All mvs.gov.ua services share the HSC (Main Service Centre) logo.
+  { id: 'otk', url: 'https://solutions.mvs.gov.ua/search-otk', icon: '/icons/hsc.webp', iconClass: 'h-8 w-auto' },
+  {
+    id: 'license',
+    url: 'https://solutions.mvs.gov.ua/check-driver-license',
+    icon: '/icons/hsc.webp',
+    iconClass: 'h-8 w-auto'
+  },
   {
     id: 'leisure',
     url: 'https://solutions.mvs.gov.ua/check-leisure-license-plates',
-    emoji: '🔢',
-    iconClass: 'text-xl'
+    icon: '/icons/hsc.webp',
+    iconClass: 'h-8 w-auto'
   },
   { id: 'customs', url: 'https://cabinet.customs.gov.ua/vtzcheck', emoji: '🛃', iconClass: 'text-xl' },
   { id: 'shtrafua', url: 'https://shtrafua.com', icon: '/icons/shtrafua.png', iconClass: 'h-5 w-auto' },
-  { id: 'pdr', url: 'https://pdr.infotech.gov.ua/', emoji: '📝', iconClass: 'text-xl' },
+  { id: 'pdr', url: 'https://pdr.infotech.gov.ua/', icon: '/icons/pdr.svg', iconClass: 'h-6 w-auto' },
+  // Unofficial, more flexible practice tests.
+  {
+    id: 'pdrTesty',
+    url: 'https://pdr-testy.com.ua/ispyt',
+    icon: '/icons/pdrtesty.jpg',
+    iconClass: 'size-8 rounded-md'
+  },
   // Polish government service (no logo: its mark is not licensed for reuse). Link-out only - it needs the plate, VIN and first-registration date together.
   { id: 'historia', url: 'https://www.gov.pl/web/gov/sprawdz-historie-pojazdu', emoji: '🇵🇱', iconClass: 'text-xl' }
 ]
