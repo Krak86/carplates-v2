@@ -5016,3 +5016,11 @@ Features reference: "Mobile collapsed tables and page TOC (2026-11-24)".
 - **pdr-testy.com.ua** (unofficial, more flexible practice tests, links only): Verification row after the official pdr.infotech.gov.ua one, About source tile, second credit line in `/race` and the plate modal. Logos: `pdr.svg`, `hsc.webp` (all mvs.gov.ua services), `pdrtesty.jpg`; unused `bdr.svg` removed. v2.1483.
 - **`PageToc`** (`components/PageToc.tsx`): "On this page" anchor list on `/install`, `/sitemap`, `/data-status` (and `/privacy`, `/terms`); i18n key `toc.title` is core. v2.1484.
 - **About page** (`AboutRoute.tsx`): `about.feature.verify|uaAuctions|stats|sitemap` extended for the above; the brief and detailed feature cards already sit between the main card and Sources. v2.1487.
+
+## Security wiki step 1 - share token and web telemetry scrub (2026-11-24)
+
+`?p=<token>` is removed with `replaceState` once `useSharedPhoto` reads it. `lib/telemetry-scrub.ts` rewrites URLs for PostHog `before_send` and Sentry `beforeSend`/`beforeSendTransaction`/`beforeBreadcrumb` (token redacted; plate, VIN and share id become route templates). Sentry events carry a `share_ref` tag (first 8 hex of SHA-256 of the token) to correlate one share without a usable token. Sentry `request.url` is now scrubbed too, which closes the earlier unverified claim. Release v2.1491.
+
+## Security wiki step 2 - API Sentry scrub (2026-11-24)
+
+`apps/api/src/sentry-scrub.ts` (used by `instrument.ts` for `beforeSend` and `beforeSendTransaction`) templates plate, VIN, card, ria-check, share and og paths, the SPA plate page, the Referer header, transaction names and breadcrumb URLs; it also drops Cookie and Authorization headers.

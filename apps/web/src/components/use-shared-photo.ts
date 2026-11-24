@@ -6,6 +6,7 @@ import type { ShareMetaResponse } from '@carplates/shared'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { ApiError } from '@/lib/api'
 import { sharedPhotoQuery } from '@/lib/queries'
+import { tagShare } from '@/lib/telemetry'
 
 type UseSharedPhoto = {
   /** The link's metadata once loaded; null when there is no `?p=` or it is dead. */
@@ -27,6 +28,16 @@ export function useSharedPhoto(
   const token = parsed.success ? parsed.data : null
   const query = useQuery({ ...sharedPhotoQuery(token ?? ''), enabled: !!token && online })
   const openedRef = useRef<string | null>(null)
+
+  // The token is a bearer credential: once read, take it out of the address bar (history, screenshots, telemetry URLs).
+  // The router keeps its own copy of the location, so `rawToken` stays valid for this render tree.
+  useEffect(() => {
+    if (rawToken === null) return
+    const url = new URL(window.location.href)
+    url.searchParams.delete('p')
+    window.history.replaceState(window.history.state, '', url)
+    if (token) void tagShare(token)
+  }, [rawToken, token])
 
   useEffect(() => {
     if (!token || !query.data || openedRef.current === token) return

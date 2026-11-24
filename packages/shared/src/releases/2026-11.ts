@@ -5,8 +5,14 @@ import type { ReleaseDay } from './core.js'
 export const DAYS: readonly ReleaseDay[] = [
   {
     date: '2026-11-24',
-    version: 'v2.1490',
+    version: 'v2.1491',
     items: [
+      item(
+        'fix',
+        'Посилання на спільне фото більше не залишає токен в адресному рядку, а аналітика й звіти про помилки не отримують токен, номери та VIN',
+        'Ссылка на общее фото больше не оставляет токен в адресной строке, а аналитика и отчёты об ошибках не получают токен, номера и VIN',
+        'A shared-photo link no longer leaves its token in the address bar, and analytics and error reports no longer receive the token, plates or VINs'
+      ),
       item(
         'improved',
         'Збережені порівняння на /compare тепер синхронізуються між пристроями разом з обраним та історією (після входу в акаунт)',
