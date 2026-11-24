@@ -34,7 +34,15 @@ from anonymize import UndecodableImage, anonymize
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("alpr")
 
-app = FastAPI(title="carplates-alpr")
+# Shared secret with the API (`ALPR_API_KEY` on both sides; /healthz stays open for the container healthcheck).
+# Fail closed: no key means every caller on the internal network could run inference, so refuse to start.
+# `ALPR_ALLOW_NO_KEY=1` is the explicit opt-out for the local dev compose file only; production never sets it.
+API_KEY = os.environ.get("ALPR_API_KEY", "")
+if not API_KEY and os.environ.get("ALPR_ALLOW_NO_KEY") != "1":
+    raise SystemExit("ALPR_API_KEY is not set; refusing to start an unauthenticated ALPR service")
+
+# No /docs, /redoc or /openapi.json: they would publish the endpoint list to anyone who can reach the port.
+app = FastAPI(title="carplates-alpr", docs_url=None, redoc_url=None, openapi_url=None)
 
 alpr = ALPR(
     detector_model="yolo-v9-t-384-license-plate-end2end",
@@ -401,11 +409,6 @@ def _predict_frame(frame: np.ndarray) -> list[dict[str, Any]]:
 @app.get("/healthz")
 def healthz() -> dict[str, str]:
     return {"status": "ok"}
-
-
-# Shared secret with the API (`ALPR_API_KEY` on both sides). Unset = open, for a bare local run; /healthz stays open
-# for the container healthcheck.
-API_KEY = os.environ.get("ALPR_API_KEY", "")
 
 
 def _require_key(x_alpr_key: str = Header(default="")) -> None:

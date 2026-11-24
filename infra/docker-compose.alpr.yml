@@ -8,6 +8,10 @@ services:
     build:
       context: ../services/alpr
     restart: unless-stopped
+    environment:
+      # Dev only (bound to 127.0.0.1): lets the service start without a key. Production has no such opt-out.
+      # To test auth locally instead, set ALPR_API_KEY here and in apps/api/.env.
+      ALPR_ALLOW_NO_KEY: '1'
     ports:
       - '127.0.0.1:8088:8088'
     healthcheck:
