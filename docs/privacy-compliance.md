@@ -66,17 +66,19 @@ Historical migration is limited on free plans (a support ticket may help). Re-ch
 7. `account.delete.*` dialog omits synced favorites, history, settings and shared photos.
 8. `PLAN.md` "Backup policy" still says "No nightly job" (outdated).
 
+> **Rule:** every table holding per-user data (`app.user_saved_entries`, `app.user_saved_comparisons`, `app.user_settings` ...) references `app.users` with `ON DELETE CASCADE` (the purge in `account-purge.service.ts` is a plain `DELETE FROM app.users`), and a new one is named in `legal.privacy.device.p`, `legal.privacy.account.p`, `account.delete.itemSynced` and `install.data.3` (ua/ru/en).
+
 ## Retention table (to publish)
 
-| Data                                 | Kept                                                |
-| ------------------------------------ | --------------------------------------------------- |
-| Sessions                             | 30 days sliding, deleted on logout / account delete |
-| Email sign-in codes                  | 1 day after expiry                                  |
-| Sync tombstones                      | 30 days                                             |
-| Shared photos                        | 7 days (original upload within 1 hour)              |
-| Deleted account                      | 14-day grace, then hard delete (cascade)            |
-| Backups                              | up to 14 more days (after Step 3)                   |
-| Processors (PostHog, Sentry, Resend) | their own policies; link them                       |
+| Data                                                    | Kept                                                |
+| ------------------------------------------------------- | --------------------------------------------------- |
+| Sessions                                                | 30 days sliding, deleted on logout / account delete |
+| Email sign-in codes                                     | 1 day after expiry                                  |
+| Sync tombstones (favorites, history, saved comparisons) | 30 days                                             |
+| Shared photos                                           | 7 days (original upload within 1 hour)              |
+| Deleted account                                         | 14-day grace, then hard delete (cascade)            |
+| Backups                                                 | up to 14 more days (after Step 3)                   |
+| Processors (PostHog, Sentry, Resend)                    | their own policies; link them                       |
 
 ## Steps (each separate and committable; stop for review after each)
 

@@ -1112,6 +1112,14 @@ in-memory store resets on restart and isn't shared across instances), body-email
 
 ### Deploy-time security checklist (do when setting up the VPS)
 
+Security wiki (per-layer status, 33 numbered open steps with alternatives and CVE index, test inventory): [docs/security-wiki.md](docs/security-wiki.md). Owner-only open items (details in its step 32):
+
+- [ ] Cloudflare DNSSEC + CAA record; change the origin IP (H7) and test the IPv6 lockdown from outside; decide H11 (SSH over Tunnel or Tailscale); least-scope purge token.
+- [ ] Google Cloud: HTTP-referrer restriction on the Maps embed key.
+- [ ] 2FA (hardware key or TOTP, recovery codes stored) on GitHub, Cloudflare, registrar, Contabo, R2, Google Cloud, Sentry, PostHog, Resend, BotFather.
+- [ ] GitHub: branch protection on `main`, required reviewer on the `production` environment, secret scanning and push protection.
+- [ ] First `lynis` + `docker-bench-security` baseline on the VPS (wiki step 25) and a decrypt-and-restore drill once backups are encrypted (step 20).
+
 Code-level audit findings and the full pre-deploy gate: [docs/security-checklist.md](docs/security-checklist.md) (re-verified 2026-11-05; §1b has the infra settings status, finding #2 the CSP report-sink design). Local pentest runbook (never against production): [docs/pentest-lab.md](docs/pentest-lab.md).
 
 - [x] `TRUST_PROXY=true` is set in `infra/docker-compose.prod.yml` (Caddy + Cloudflare in front; Caddy trusts `CF-Connecting-IP` only from Cloudflare's ranges). Set only when the API port is not publicly reachable, else `X-Forwarded-For` is spoofable.

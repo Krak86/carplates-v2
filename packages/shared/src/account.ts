@@ -310,11 +310,28 @@ export const syncEntrySchema = z.object({
 })
 export type SyncEntry = z.infer<typeof syncEntrySchema>
 
+/** Most comparisons a user keeps (live entries; the oldest are dropped past it). */
+export const SAVED_COMPARISONS_LIMIT = 50
+
+/** One saved comparison on the wire; same last-write-wins / tombstone rules as `syncEntrySchema`. `id` = `<a>|<b>`. */
+export const syncComparisonSchema = z.object({
+  id: z.string().min(1).max(130),
+  a: z.string().min(1).max(64),
+  b: z.string().min(1).max(64),
+  labelA: z.string().max(200),
+  labelB: z.string().max(200),
+  date: z.number().int().positive(),
+  deleted: z.boolean().optional()
+})
+export type SyncComparison = z.infer<typeof syncComparisonSchema>
+
 const SYNC_MAX_ENTRIES = 1000
 
 export const syncRequestSchema = z.object({
   favorites: z.array(syncEntrySchema).max(SYNC_MAX_ENTRIES),
-  history: z.array(syncEntrySchema).max(SYNC_MAX_ENTRIES)
+  history: z.array(syncEntrySchema).max(SYNC_MAX_ENTRIES),
+  /** Absent from clients that predate comparison sync. */
+  comparisons: z.array(syncComparisonSchema).max(SYNC_MAX_ENTRIES).default([])
 })
 export type SyncRequest = z.infer<typeof syncRequestSchema>
 
@@ -322,6 +339,7 @@ export type SyncRequest = z.infer<typeof syncRequestSchema>
 export const syncResponseSchema = z.object({
   favorites: z.array(syncEntrySchema),
   history: z.array(syncEntrySchema),
+  comparisons: z.array(syncComparisonSchema).default([]),
   evictedFavorites: z.number().int().min(0)
 })
 export type SyncResponse = z.infer<typeof syncResponseSchema>

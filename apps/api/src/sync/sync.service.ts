@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { userSavedEntries } from '@carplates/db'
-import { FAVORITES_LIMIT, HISTORY_LIMIT, SYNC_TOMBSTONE_TTL_MS } from '@carplates/shared'
-import type { SyncEntry, SyncRequest, SyncResponse } from '@carplates/shared'
+import { userSavedComparisons, userSavedEntries } from '@carplates/db'
+import { FAVORITES_LIMIT, HISTORY_LIMIT, SAVED_COMPARISONS_LIMIT, SYNC_TOMBSTONE_TTL_MS } from '@carplates/shared'
+import type { SyncComparison, SyncEntry, SyncRequest, SyncResponse } from '@carplates/shared'
 import { and, eq, inArray, lt, sql } from 'drizzle-orm'
 
 import { DbService } from '../db/db.service.js'
@@ -9,6 +9,7 @@ import { DbService } from '../db/db.service.js'
 type List = 'favorite' | 'history'
 const LIST_LIMITS: Record<List, number> = { favorite: FAVORITES_LIMIT, history: HISTORY_LIMIT }
 type Row = typeof userSavedEntries.$inferSelect
+type ComparisonRow = typeof userSavedComparisons.$inferSelect
 
 /** Client clocks drift; a write dated further ahead than this is clamped so it can't win every future conflict. */
 const MAX_CLOCK_SKEW_MS = 5 * 60 * 1000
@@ -20,6 +21,16 @@ export const toSyncEntry = (row: Row): SyncEntry => ({
   date: row.date,
   ...(row.found === null ? {} : { found: row.found }),
   ...(row.tags?.length ? { tags: row.tags } : {}),
+  ...(row.deleted ? { deleted: true } : {})
+})
+
+export const toSyncComparison = (row: ComparisonRow): SyncComparison => ({
+  id: row.id,
+  a: row.a,
+  b: row.b,
+  labelA: row.labelA,
+  labelB: row.labelB,
+  date: row.date,
   ...(row.deleted ? { deleted: true } : {})
 })
 
@@ -68,6 +79,35 @@ export class SyncService {
           })
       }
 
+      if (request.comparisons.length) {
+        await tx
+          .insert(userSavedComparisons)
+          .values(
+            request.comparisons.map(c => ({
+              userId,
+              id: c.id,
+              a: c.a,
+              b: c.b,
+              labelA: c.labelA,
+              labelB: c.labelB,
+              date: Math.min(c.date, now + MAX_CLOCK_SKEW_MS),
+              deleted: c.deleted ?? false
+            }))
+          )
+          .onConflictDoUpdate({
+            target: [userSavedComparisons.userId, userSavedComparisons.id],
+            set: {
+              a: sql`excluded.a`,
+              b: sql`excluded.b`,
+              labelA: sql`excluded.label_a`,
+              labelB: sql`excluded.label_b`,
+              date: sql`excluded.date`,
+              deleted: sql`excluded.deleted`
+            },
+            setWhere: sql`excluded.date > ${userSavedComparisons.date}`
+          })
+      }
+
       let evictedFavorites = 0
       for (const list of ['favorite', 'history'] as const) {
         const excess = await tx
@@ -100,6 +140,37 @@ export class SyncService {
           )
       }
 
+      const excessComparisons = await tx
+        .select({ id: userSavedComparisons.id })
+        .from(userSavedComparisons)
+        .where(and(eq(userSavedComparisons.userId, userId), eq(userSavedComparisons.deleted, false)))
+        .orderBy(sql`${userSavedComparisons.date} DESC`)
+        .offset(SAVED_COMPARISONS_LIMIT)
+      if (excessComparisons.length) {
+        await tx
+          .update(userSavedComparisons)
+          .set({ deleted: true, date: now })
+          .where(
+            and(
+              eq(userSavedComparisons.userId, userId),
+              inArray(
+                userSavedComparisons.id,
+                excessComparisons.map(c => c.id)
+              )
+            )
+          )
+      }
+
+      await tx
+        .delete(userSavedComparisons)
+        .where(
+          and(
+            eq(userSavedComparisons.userId, userId),
+            eq(userSavedComparisons.deleted, true),
+            lt(userSavedComparisons.date, now - SYNC_TOMBSTONE_TTL_MS)
+          )
+        )
+
       await tx
         .delete(userSavedEntries)
         .where(
@@ -111,9 +182,11 @@ export class SyncService {
         )
 
       const rows = await tx.select().from(userSavedEntries).where(eq(userSavedEntries.userId, userId))
+      const comparisonRows = await tx.select().from(userSavedComparisons).where(eq(userSavedComparisons.userId, userId))
       return {
         favorites: rows.filter(r => r.list === 'favorite').map(toSyncEntry),
         history: rows.filter(r => r.list === 'history').map(toSyncEntry),
+        comparisons: comparisonRows.map(toSyncComparison),
         evictedFavorites
       }
     })

@@ -1,7 +1,7 @@
 # Security review & pre-deploy checklist
 
 Audit of the code as of **2026-10-13** (static read of `apps/api`, `apps/web`, `infra/`, `services/alpr`, plus `pnpm audit --prod`),
-**re-verified against live code and infra on 2026-11-05** (assessment: [security-hardening-plan-2026-11.md](security-hardening-plan-2026-11.md)).
+**re-verified against live code and infra on 2026-11-05**. Per-layer status, open steps (numbered), CVE index and test inventory: [security-wiki.md](security-wiki.md).
 Use it as the gate before the first deploy, then re-run the "Recurring" section. Infra items (Caddy, firewall, Cloudflare, Turnstile)
 are tracked in [PLAN.md "Deploy-time security checklist"](../PLAN.md); §1b below only records their verified status, it does not replace that list.
 

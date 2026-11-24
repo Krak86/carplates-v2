@@ -3,29 +3,22 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 
-import { comparisonId, listComparisons, removeComparison, saveComparison } from '@/lib/compare-db'
+import { comparisonId, removeComparison, saveComparison } from '@/lib/compare-db'
+import { savedComparisonsQuery } from '@/lib/queries'
 
 import { compareHref, parseCompareRef } from './ref'
 
-const SAVED_KEY = ['compare', 'saved'] as const
-const savedQuery = {
-  queryKey: SAVED_KEY,
-  queryFn: listComparisons,
-  staleTime: Infinity,
-  networkMode: 'always'
-} as const
-
 type SaveProps = { a: string; b: string; labelA: string; labelB: string }
 
-/** "Save" toggle for the comparison on screen (kept in this browser only). */
+/** "Save" toggle for the comparison on screen (synced for signed-in users). */
 export function CompareSaveButton({ a, b, labelA, labelB }: SaveProps): ReactNode {
   const { t } = useTranslation()
   const client = useQueryClient()
-  const saved = useQuery(savedQuery).data ?? []
+  const saved = useQuery(savedComparisonsQuery()).data ?? []
   const isSaved = saved.some(s => s.id === comparisonId(a, b))
   const mutation = useMutation({
     mutationFn: () => (isSaved ? removeComparison(comparisonId(a, b)) : saveComparison({ a, b, labelA, labelB })),
-    onSuccess: () => client.invalidateQueries({ queryKey: SAVED_KEY })
+    onSuccess: () => client.invalidateQueries({ queryKey: savedComparisonsQuery().queryKey })
   })
 
   return (
@@ -45,10 +38,10 @@ export function CompareSaveButton({ a, b, labelA, labelB }: SaveProps): ReactNod
 export function CompareSavedList(): ReactNode {
   const { t } = useTranslation()
   const client = useQueryClient()
-  const saved = useQuery(savedQuery).data ?? []
+  const saved = useQuery(savedComparisonsQuery()).data ?? []
   const mutation = useMutation({
     mutationFn: removeComparison,
-    onSuccess: () => client.invalidateQueries({ queryKey: SAVED_KEY })
+    onSuccess: () => client.invalidateQueries({ queryKey: savedComparisonsQuery().queryKey })
   })
 
   return (

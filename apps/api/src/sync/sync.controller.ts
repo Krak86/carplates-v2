@@ -9,7 +9,7 @@ import { zodParam } from '../common/zod-param.pipe.js'
 import { SyncResponseDto } from './sync.dto.js'
 import { SyncService } from './sync.service.js'
 
-/** Cross-device sync of the signed-in user's favorites + history: push local changes, get the merged state back. */
+/** Cross-device sync of the signed-in user's favorites, history and saved comparisons: push local changes, get the merged state back. */
 @ApiTags('sync')
 @Controller('api/sync')
 @UseGuards(SessionGuard)

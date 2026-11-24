@@ -4,9 +4,10 @@ import type { SyncResponse } from '@carplates/shared'
 
 import { useSession } from '@/components/auth/use-session'
 import { syncSaved } from '@/lib/api'
+import { applySyncedComparisons, exportComparisonsForSync } from '@/lib/compare-db'
 import { applySyncedFavorites, exportFavoritesForSync } from '@/lib/favorites-db'
 import { applySyncedVisits, exportVisitsForSync } from '@/lib/history-db'
-import { favoritesQuery, historyQuery } from '@/lib/queries'
+import { favoritesQuery, historyQuery, savedComparisonsQuery } from '@/lib/queries'
 import { SAVED_CHANGED_EVENT, notifySavedChanged } from '@/lib/saved-events'
 import { useSyncStore } from '@/store/sync-store'
 
@@ -20,21 +21,33 @@ const MIN_PULL_INTERVAL_MS = 60_000
 const MAX_ENTRIES = 1000
 
 async function runSync(): Promise<SyncResponse> {
-  const [favorites, history] = await Promise.all([exportFavoritesForSync(), exportVisitsForSync()])
+  const [favorites, history, comparisons] = await Promise.all([
+    exportFavoritesForSync(),
+    exportVisitsForSync(),
+    exportComparisonsForSync()
+  ])
   const newest = <T extends { date: number }>(entries: T[]): T[] =>
     entries.length > MAX_ENTRIES ? entries.sort((a, b) => b.date - a.date).slice(0, MAX_ENTRIES) : entries
-  const response = await syncSaved({ favorites: newest(favorites), history: newest(history) })
-  await Promise.all([applySyncedFavorites(response.favorites), applySyncedVisits(response.history)])
+  const response = await syncSaved({
+    favorites: newest(favorites),
+    history: newest(history),
+    comparisons: newest(comparisons)
+  })
+  await Promise.all([
+    applySyncedFavorites(response.favorites),
+    applySyncedVisits(response.history),
+    applySyncedComparisons(response.comparisons)
+  ])
   return response
 }
 
-/** True while a favorites/history sync is in flight — the add/remove buttons disable themselves meanwhile. */
+/** True while a favorites/history/comparisons sync is in flight — the add/remove buttons disable themselves meanwhile. */
 export function useIsSyncing(): boolean {
   return useIsMutating({ mutationKey: SYNC_MUTATION_KEY }) > 0
 }
 
 /**
- * Keeps the signed-in user's favorites + history in step across devices. Syncs on sign-in, shortly after every
+ * Keeps the signed-in user's favorites, history and saved comparisons in step across devices. Syncs on sign-in, shortly after every
  * local change, on coming back online and on returning to the tab. Conflicts resolve server-side, last write
  * (newest `date`) wins per entry. Anonymous and offline users stay purely local.
  */
@@ -54,6 +67,7 @@ export function useSavedSyncActions(): void {
       void queryClient.invalidateQueries({ queryKey: favoritesQuery().queryKey })
       void queryClient.invalidateQueries({ queryKey: historyQuery().queryKey })
       void queryClient.invalidateQueries({ predicate: query => query.queryKey[0] === 'favorite' })
+      void queryClient.invalidateQueries({ queryKey: savedComparisonsQuery().queryKey })
       if (response.evictedFavorites > 0) setTrimmedFavorites(response.evictedFavorites)
     },
     onSettled: () => {

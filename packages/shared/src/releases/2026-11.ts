@@ -5,8 +5,20 @@ import type { ReleaseDay } from './core.js'
 export const DAYS: readonly ReleaseDay[] = [
   {
     date: '2026-11-24',
-    version: 'v2.1488',
+    version: 'v2.1490',
     items: [
+      item(
+        'improved',
+        'Збережені порівняння на /compare тепер синхронізуються між пристроями разом з обраним та історією (після входу в акаунт)',
+        'Сохранённые сравнения на /compare теперь синхронизируются между устройствами вместе с избранным и историей (после входа в аккаунт)',
+        'Saved comparisons on /compare now sync across your devices together with favorites and history (when signed in)'
+      ),
+      item(
+        'improved',
+        'У «Про додаток» додано джерела (TradingView, RST, baza-gai, Opendatabot, ICCT, норми паркомісць), а політика конфіденційності, діалог видалення акаунта та /install тепер згадують збережені порівняння',
+        'В «О приложении» добавлены источники (TradingView, RST, baza-gai, Opendatabot, ICCT, нормы парковочных мест), а политика конфиденциальности, диалог удаления аккаунта и /install теперь упоминают сохранённые сравнения',
+        'The About page lists more sources (TradingView, RST, baza-gai, Opendatabot, ICCT, parking-space norms), and the privacy policy, delete-account dialog and /install now mention saved comparisons'
+      ),
       item(
         'improved',
         'Сторінка «Про додаток» тепер має зміст «На цій сторінці» з посиланнями на ліцензію, короткий опис, можливості та джерела',

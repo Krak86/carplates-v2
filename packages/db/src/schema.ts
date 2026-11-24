@@ -1786,6 +1786,21 @@ export const userSavedEntries = app.table(
   t => [primaryKey({ columns: [t.userId, t.list, t.kind, t.value] })]
 )
 
+export const userSavedComparisons = app.table(
+  'user_saved_comparisons',
+  {
+    userId: uuid('user_id').notNull(),
+    id: text('id').notNull(),
+    a: text('a').notNull(),
+    b: text('b').notNull(),
+    labelA: text('label_a').notNull(),
+    labelB: text('label_b').notNull(),
+    date: bigint('date', { mode: 'number' }).notNull(),
+    deleted: boolean('deleted').notNull().default(false)
+  },
+  t => [primaryKey({ columns: [t.userId, t.id] })]
+)
+
 export const usageEvents = app.table('usage_events', {
   id: bigint('id', { mode: 'number' }).primaryKey().generatedAlwaysAsIdentity(),
   at: timestamp('at', { withTimezone: true }).notNull().defaultNow(),

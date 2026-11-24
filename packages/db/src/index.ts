@@ -52,6 +52,7 @@ export {
   type EmailChallengeRow,
   sessions,
   userFeatures,
+  userSavedComparisons,
   userSavedEntries,
   userSettings,
   usageEvents,
