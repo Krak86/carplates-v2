@@ -12,7 +12,8 @@ RUN apt-get update \
   && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# requirements.txt is hash-pinned (pip-compile --generate-hashes from requirements.in); regenerate, never hand-edit.
+RUN pip install --no-cache-dir --require-hashes -r requirements.txt
 
 # models/: YuNet face detector (MIT, ~230 KB) is committed rather than downloaded, so the build needs no network
 # beyond pip and the weights are pinned to the exact file the eval ran against.

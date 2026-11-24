@@ -55,3 +55,10 @@ secrets/*
 *.key
 *.p12
 *.pfx
+
+# private keys / certs anywhere in the tree (secrets/ is covered above)
+*.pem
+*.crt
+id_*
+ci_key
+ci_key.pub

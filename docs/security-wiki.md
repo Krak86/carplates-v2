@@ -33,7 +33,7 @@ about authentication, input handling, least privilege, the network or the supply
 | #    | Factor              | Status           | How the app uses it                                                                                                     | Security relevance                 |
 | ---- | ------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
 | I    | Codebase            | Fully            | One monorepo, many deploys (blue/green, `stage` branch)                                                                 | Traceable code, one place to scan  |
-| II   | Dependencies        | Partly           | `pnpm-lock.yaml` frozen, `packageManager` pinned. ALPR `requirements.txt` unpinned → step 21                            | Reproducible builds, supply chain  |
+| II   | Dependencies        | Partly           | `pnpm-lock.yaml` frozen, `packageManager` pinned. ALPR `requirements.txt` hash-pinned (step 21)                            | Reproducible builds, supply chain  |
 | III  | Config              | Fully, with gaps | Zod `env.ts` + `assertProductionEnv`. Some secrets fail open → steps 3-4. Secrets visible in `docker inspect` → step 15 | Secrets out of code                |
 | IV   | Backing services    | Fully            | Postgres, Redis, ALPR, mail, R2 all by URL                                                                              | Swappable and isolatable → step 13 |
 | V    | Build, release, run | Fully            | SHA-tagged images, rollback by `image_tag`, immutable web build. `:latest` also pushed → step 26                        | Integrity, provenance              |
@@ -393,12 +393,13 @@ Tick the box and add a `docs/plan-done.md` entry when a step is finished. "Verif
 
 ### F. Supply chain and CI
 
-### Step 21 - Package-config hygiene [ ] · S-M · 🤖 · layer 10, 11
+### Step 21 - Package-config hygiene [x] · S-M · 🤖 · layer 10, 11
 
 - **What:** `minimumReleaseAge: 1440` (today 0, `pnpm-workspace.yaml:26`); add `*.pem`, `*.crt`, `id_*`, `ci_key` to `.gitignore`; Dependabot `pip` for `services/alpr`, docker for `/scripts` and `/infra`; hash-pinned `requirements.txt` (`pip-compile --generate-hashes`); check whether stable `onnxruntime-web` can replace the nightly `onnxruntime-web-dev` (`apps/web/package.json:31`).
 - **Why:** Shai-Hulud npm worm (2025), chalk/debug compromise (2025), PyTorch nightly `torchtriton` dependency confusion (2022).
 - **Alternatives:** Renovate `minimumReleaseAge` (richer grouping; replaces Dependabot) · Socket.dev (free tier only, not OSS).
 - **Verify:** `pnpm install --frozen-lockfile`, ALPR image builds with `--require-hashes`, Dependabot config validates.
+- **Done (2026-11-24):** `minimumReleaseAge: 1440`; key globs in `.gitignore`; Dependabot `pip` (`services/alpr`), docker `/scripts`, docker-compose `/infra`; `services/alpr/requirements.in` + hash-pinned `requirements.txt` (regenerate: `docker run --rm -v "$PWD/services/alpr:/w" -w /w python:3.12-slim sh -c "pip install pip-tools && pip-compile --generate-hashes --strip-extras -o requirements.txt requirements.in"`), Dockerfile uses `--require-hashes`. **`onnxruntime-web-dev` stays:** transformers.js 4.3.2 pins that exact nightly and mixing it with stable breaks the wasm ABI (plan-done CARSUA-2P); revisit when transformers.js pins a stable release.
 
 ### Step 22 - Pin Actions to commit SHAs [ ] · S · 🤖 · layer 11
 
