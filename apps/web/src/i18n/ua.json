@@ -2457,6 +2457,7 @@
   "stats.vdb.rare": "Поширені тут, рідкісні деінде",
   "stats.vdb.uaOnly": "Лише в Україні",
   "stats.noRows": "Немає рядків",
+  "common.showMore": "Показати більше",
   "stats.spec.metric": "Характеристика",
   "stats.spec.metric.power": "Потужність",
   "stats.spec.metric.displacement": "Двигун",

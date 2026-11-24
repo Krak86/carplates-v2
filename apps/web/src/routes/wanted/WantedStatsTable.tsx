@@ -18,6 +18,7 @@ import type { SortingState } from '@tanstack/react-table'
 import { useTranslation } from 'react-i18next'
 
 import ColorSwatch from '@/components/ColorSwatch'
+import MobileCollapse from '@/components/MobileCollapse'
 import { toIntlLocale } from '@/lib/intl'
 import { displayLabel } from '@/routes/wanted/helpers'
 import type { WantedDimension, WantedMetric, WantedPlateDimension, WantedTableRow } from '@/routes/wanted/types'
@@ -32,6 +33,9 @@ type Props = {
   labelHeader: string
   defaultSortKey: WantedMetric
 }
+
+/** Phone tables with at most this many rows show in full, without "Show more". */
+const COLLAPSE_MIN_ROWS = 8
 
 const features = tableFeatures({
   columnFilteringFeature,
@@ -118,50 +122,52 @@ export default function WantedStatsTable({
         className="mb-3 w-full max-w-xs rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-1.5 text-sm"
       />
 
-      <div className="max-h-[clamp(320px,70dvh,900px)] overflow-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)]/95 backdrop-blur-sm">
-        <table className="w-full text-sm tabular-nums">
-          <thead className="sticky top-0 bg-[var(--color-surface)]">
-            {table.getHeaderGroups().map(headerGroup => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map(header => {
-                  const sort = header.column.getIsSorted()
-                  return (
-                    <th
-                      key={header.id}
-                      onClick={header.column.getToggleSortingHandler()}
-                      className="cursor-pointer px-3 py-2 text-left font-medium select-none"
-                    >
-                      {flexRender(header.column.columnDef.header, header.getContext())}
-                      {sort === 'asc' && ' ▲'}
-                      {sort === 'desc' && ' ▼'}
-                    </th>
-                  )
-                })}
-              </tr>
-            ))}
-          </thead>
+      <MobileCollapse disabled={tableRows.length <= COLLAPSE_MIN_ROWS}>
+        <div className="overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)]/95 backdrop-blur-sm md:max-h-[clamp(320px,70dvh,900px)] md:overflow-auto">
+          <table className="w-full text-sm tabular-nums">
+            <thead className="sticky top-0 bg-[var(--color-surface)]">
+              {table.getHeaderGroups().map(headerGroup => (
+                <tr key={headerGroup.id}>
+                  {headerGroup.headers.map(header => {
+                    const sort = header.column.getIsSorted()
+                    return (
+                      <th
+                        key={header.id}
+                        onClick={header.column.getToggleSortingHandler()}
+                        className="cursor-pointer px-3 py-2 text-left font-medium select-none"
+                      >
+                        {flexRender(header.column.columnDef.header, header.getContext())}
+                        {sort === 'asc' && ' ▲'}
+                        {sort === 'desc' && ' ▼'}
+                      </th>
+                    )
+                  })}
+                </tr>
+              ))}
+            </thead>
 
-          <tbody>
-            {tableRows.map(row => (
-              <tr key={row.id} className="border-t border-[var(--color-border)]">
-                {row.getAllCells().map(cell => (
-                  <td key={cell.id} className="px-3 py-2">
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+            <tbody>
+              {tableRows.map(row => (
+                <tr key={row.id} className="border-t border-[var(--color-border)]">
+                  {row.getAllCells().map(cell => (
+                    <td key={cell.id} className="px-3 py-2">
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+
+              {tableRows.length === 0 && (
+                <tr>
+                  <td colSpan={columns.length} className="px-3 py-6 text-center text-[var(--color-muted)]">
+                    {t('stats.noRows')}
                   </td>
-                ))}
-              </tr>
-            ))}
-
-            {tableRows.length === 0 && (
-              <tr>
-                <td colSpan={columns.length} className="px-3 py-6 text-center text-[var(--color-muted)]">
-                  {t('stats.noRows')}
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </MobileCollapse>
     </div>
   )
 }

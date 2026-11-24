@@ -3,11 +3,15 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { AuctionStatsRow, Currency, FxResponse } from '@carplates/shared'
 
+import MobileCollapse from '@/components/MobileCollapse'
 import { formatPrice } from '@/components/ua-auctions/helpers'
 import { toIntlLocale } from '@/lib/intl'
 import { formatDelta, monthLabel, sortRows, withSoldPercent } from '@/routes/auctions/helpers'
 import { AUCTION_COLUMNS } from '@/routes/auctions/types'
 import type { AuctionColumn, AuctionDimension, FilterableDimension } from '@/routes/auctions/types'
+
+/** Phone tables with at most this many rows show in full, without "Show more". */
+const COLLAPSE_MIN_ROWS = 8
 
 type Props = {
   rows: readonly AuctionStatsRow[]
@@ -48,62 +52,66 @@ export default function AuctionsBreakdown({ rows, dimension, currency, fx, onPic
         className="mb-3 w-full max-w-xs rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-1.5 text-sm"
       />
 
-      <div className="max-h-[clamp(320px,70dvh,900px)] overflow-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)]/95 backdrop-blur-sm">
-        <table className="w-full text-sm tabular-nums">
-          <thead className="sticky top-0 bg-[var(--color-surface)]">
-            <tr>
-              {AUCTION_COLUMNS.map(column => (
-                <th
-                  key={column}
-                  aria-sort={sort.column === column ? (sort.desc ? 'descending' : 'ascending') : 'none'}
-                  className="px-3 py-2 text-left font-medium select-none"
-                >
-                  <button type="button" onClick={() => handleSort(column)} className="cursor-pointer font-medium">
-                    {column === 'label' ? t(`auctions.page.dimension.${dimension}`) : t(`auctions.page.col.${column}`)}
-                    {sort.column === column && (sort.desc ? ' ▼' : ' ▲')}
-                  </button>
-                </th>
-              ))}
-            </tr>
-          </thead>
-
-          <tbody>
-            {shown.map(r => (
-              <tr key={r.label} className="border-t border-[var(--color-border)]">
-                <td className="px-3 py-2">
-                  {dimension === 'region' || dimension === 'make' ? (
-                    <button
-                      type="button"
-                      onClick={() => onPick(dimension, r.label)}
-                      title={t('auctions.page.showLots')}
-                      className="text-left text-[var(--color-primary)] underline"
-                    >
-                      {r.label}
-                    </button>
-                  ) : dimension === 'month' ? (
-                    monthLabel(r.label, locale)
-                  ) : (
-                    r.label
-                  )}
-                </td>
-                <td className="px-3 py-2">{numberFormat.format(r.lots)}</td>
-                <td className="px-3 py-2">{numberFormat.format(r.sold)}</td>
-                <td className="px-3 py-2">{`${r.soldPercent.toLocaleString(locale, { maximumFractionDigits: 1 })}%`}</td>
-                <td className="px-3 py-2">{formatDelta(r.avgDeltaPercent, locale)}</td>
-                <td className="px-3 py-2">{formatPrice(r.medianSale, currency, fx, locale) ?? '-'}</td>
-              </tr>
-            ))}
-
-            {shown.length === 0 && (
+      <MobileCollapse disabled={shown.length <= COLLAPSE_MIN_ROWS}>
+        <div className="overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)]/95 backdrop-blur-sm md:max-h-[clamp(320px,70dvh,900px)] md:overflow-auto">
+          <table className="w-full text-sm tabular-nums">
+            <thead className="sticky top-0 bg-[var(--color-surface)]">
               <tr>
-                <td colSpan={AUCTION_COLUMNS.length} className="px-3 py-6 text-center text-[var(--color-muted)]">
-                  {t('stats.noRows')}
-                </td>
+                {AUCTION_COLUMNS.map(column => (
+                  <th
+                    key={column}
+                    aria-sort={sort.column === column ? (sort.desc ? 'descending' : 'ascending') : 'none'}
+                    className="px-3 py-2 text-left font-medium select-none"
+                  >
+                    <button type="button" onClick={() => handleSort(column)} className="cursor-pointer font-medium">
+                      {column === 'label'
+                        ? t(`auctions.page.dimension.${dimension}`)
+                        : t(`auctions.page.col.${column}`)}
+                      {sort.column === column && (sort.desc ? ' ▼' : ' ▲')}
+                    </button>
+                  </th>
+                ))}
               </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+
+            <tbody>
+              {shown.map(r => (
+                <tr key={r.label} className="border-t border-[var(--color-border)]">
+                  <td className="px-3 py-2">
+                    {dimension === 'region' || dimension === 'make' ? (
+                      <button
+                        type="button"
+                        onClick={() => onPick(dimension, r.label)}
+                        title={t('auctions.page.showLots')}
+                        className="text-left text-[var(--color-primary)] underline"
+                      >
+                        {r.label}
+                      </button>
+                    ) : dimension === 'month' ? (
+                      monthLabel(r.label, locale)
+                    ) : (
+                      r.label
+                    )}
+                  </td>
+                  <td className="px-3 py-2">{numberFormat.format(r.lots)}</td>
+                  <td className="px-3 py-2">{numberFormat.format(r.sold)}</td>
+                  <td className="px-3 py-2">{`${r.soldPercent.toLocaleString(locale, { maximumFractionDigits: 1 })}%`}</td>
+                  <td className="px-3 py-2">{formatDelta(r.avgDeltaPercent, locale)}</td>
+                  <td className="px-3 py-2">{formatPrice(r.medianSale, currency, fx, locale) ?? '-'}</td>
+                </tr>
+              ))}
+
+              {shown.length === 0 && (
+                <tr>
+                  <td colSpan={AUCTION_COLUMNS.length} className="px-3 py-6 text-center text-[var(--color-muted)]">
+                    {t('stats.noRows')}
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </MobileCollapse>
     </div>
   )
 }
