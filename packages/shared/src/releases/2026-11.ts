@@ -8,7 +8,7 @@ export const DAYS: readonly ReleaseDay[] = [
     version: 'v2.1491',
     items: [
       item(
-        'fixed',
+        'fix',
         'Посилання на спільне фото більше не залишає токен в адресному рядку, а аналітика й звіти про помилки не отримують токен, номери та VIN',
         'Ссылка на общее фото больше не оставляет токен в адресной строке, а аналитика и отчёты об ошибках не получают токен, номера и VIN',
         'A shared-photo link no longer leaves its token in the address bar, and analytics and error reports no longer receive the token, plates or VINs'
