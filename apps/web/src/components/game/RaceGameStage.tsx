@@ -3,23 +3,30 @@ import type { MouseEvent, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import RaceGameSettings from '@/components/game/RaceGameSettings'
+import RaceControlsHelp from '@/components/game/RaceControlsHelp'
 import RaceFullscreenBar from '@/components/game/RaceFullscreenBar'
 import RaceHornButton from '@/components/game/RaceHornButton'
 import RaceMiniMap from '@/components/game/RaceMiniMap'
+import RaceProgress from '@/components/game/RaceProgress'
 import RaceTouchControls from '@/components/game/RaceTouchControls'
 import { useRaceGameActions } from '@/components/game/use-race-game-actions'
 import { requestTiltPermission, useRaceTilt } from '@/components/game/use-race-tilt'
+import { useCopyFeedback } from '@/components/use-copy-feedback'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import {
   BUMP_LESSONS,
   BUMP_WARNING,
   BUMP_WRECK,
+  CAMERA_VIEWS,
   RACER_SIZE_KB,
   TEST_DRIVE_KM,
   SIRENS,
+  driveProgress,
+  encodeRaceConfig,
   type CarBody,
   type RacerConfig
 } from '@/lib/racer/config'
+import { buildRaceShareUrl } from '@/lib/share-section'
 
 type Props = {
   config: RacerConfig
@@ -29,6 +36,7 @@ type Props = {
 }
 
 const MOUSE_IDLE_MS = 2000
+const APP_KEYS = ['KeyF', 'KeyM', 'KeyV', 'KeyC', 'KeyR', 'KeyI', 'KeyN']
 
 /** The intro screen, then canvas + HUD + settings: everything of the game except the frame around it. */
 export default function RaceGameStage({ config, onChange, onPickBody }: Props): ReactNode {
@@ -41,6 +49,7 @@ export default function RaceGameStage({ config, onChange, onPickBody }: Props): 
   const { phase, hud, wasLoaded, handleStart, handleRestart, handleInput, handleCamera, getMap, setCanvas } =
     useRaceGameActions(config, sound, siren)
   const [showMap, setShowMap] = useState(true)
+  const [showHelp, setShowHelp] = useState(false)
   const isTouch = useMediaQuery('(pointer: coarse)')
   // steering by tilting the phone: opt-in each visit, never remembered
   const [tilt, setTilt] = useState(false)
@@ -79,6 +88,17 @@ export default function RaceGameStage({ config, onChange, onPickBody }: Props): 
     setShowMap(on => !on)
     e.currentTarget.blur() // keys must keep steering the car
   }
+
+  const { copied, copy } = useCopyFeedback()
+  // the same /race link whether the game is open from a plate or on its own page
+  const handleShare = (e: MouseEvent<HTMLButtonElement>): void => {
+    copy(buildRaceShareUrl(encodeRaceConfig(config)))
+    e.currentTarget.blur()
+  }
+
+  /** Behind -> high -> low -> cockpit -> behind. */
+  const cycleView = (): void =>
+    onChange({ view: CAMERA_VIEWS[(CAMERA_VIEWS.indexOf(config.view) + 1) % CAMERA_VIEWS.length] ?? config.view })
 
   const handleToggleSiren = (e?: MouseEvent<HTMLButtonElement>): void => {
     setSirenBody(siren ? null : config.body)
@@ -139,12 +159,17 @@ export default function RaceGameStage({ config, onChange, onPickBody }: Props): 
     toggleFullscreen()
   }
 
-  // F toggles full screen, M the sound (the engine ignores both)
+  // F full screen, M sound, V camera view, C auto / manual drive, R restart, N map, I the button legend (the engine ignores them all)
   useEffect(() => {
     const handleKey = (e: KeyboardEvent): void => {
-      if ((e.code !== 'KeyF' && e.code !== 'KeyM') || e.repeat || e.ctrlKey || e.metaKey || e.altKey) return
+      if (!APP_KEYS.includes(e.code) || e.repeat || e.ctrlKey || e.metaKey || e.altKey) return
       if (e.target instanceof HTMLElement && e.target.closest('input, textarea, select')) return
       if (e.code === 'KeyF') toggleFullscreen()
+      else if (e.code === 'KeyV') cycleView()
+      else if (e.code === 'KeyC') onChange({ auto: !config.auto })
+      else if (e.code === 'KeyR') handleRestart()
+      else if (e.code === 'KeyI') setShowHelp(on => !on)
+      else if (e.code === 'KeyN') setShowMap(on => !on)
       else setSound(on => !on)
     }
     window.addEventListener('keydown', handleKey)
@@ -225,9 +250,19 @@ export default function RaceGameStage({ config, onChange, onPickBody }: Props): 
               tilt={{ on: tilt, onToggle: () => void handleToggleTilt() }}
               auto={{ on: config.auto, onToggle: () => onChange({ auto: !config.auto }) }}
               map={{ on: showMap, onToggle: () => setShowMap(on => !on) }}
+              onView={cycleView}
+              help={{ on: showHelp, onToggle: () => setShowHelp(on => !on) }}
               onRestart={handleRestart}
               onExit={toggleFullscreen}
             />
+          )}
+
+          {fullscreen && showHelp && <RaceControlsHelp siren={hasSiren} />}
+
+          {fullscreen && !showHelp && !isTouch && (
+            <div className="pointer-events-none absolute bottom-3 left-3 rounded-full bg-black/50 px-3 py-1 text-xs text-white/90">
+              {t('race.help.hint')}
+            </div>
           )}
 
           {isTouch && isPortrait && (
@@ -245,6 +280,12 @@ export default function RaceGameStage({ config, onChange, onPickBody }: Props): 
               label={t('race.mapLabel')}
               className="pointer-events-none absolute top-20 right-3 size-28 rounded-full border-2 border-white/70 opacity-90 shadow-lg"
             />
+          )}
+
+          {hud && (isTouch || fullscreen) && (
+            <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-white/25">
+              <div className="h-full bg-[var(--color-primary)]" style={{ width: `${driveProgress(hud.km) * 100}%` }} />
+            </div>
           )}
 
           {hud && (
@@ -372,6 +413,17 @@ export default function RaceGameStage({ config, onChange, onPickBody }: Props): 
           )}
           <button
             type="button"
+            onClick={e => {
+              cycleView()
+              e.currentTarget.blur()
+            }}
+            title={t('race.view')}
+            className="shrink-0 cursor-pointer rounded-full border border-[var(--color-border)] px-3 py-0.5 hover:border-[var(--color-primary)]"
+          >
+            <span aria-hidden>👁</span> {t(`race.view.${config.view}`)}
+          </button>
+          <button
+            type="button"
             onClick={handleToggleMap}
             aria-pressed={showMap}
             className="shrink-0 cursor-pointer rounded-full border border-[var(--color-border)] px-3 py-0.5 hover:border-[var(--color-primary)]"
@@ -380,7 +432,16 @@ export default function RaceGameStage({ config, onChange, onPickBody }: Props): 
           </button>
           <button
             type="button"
+            onClick={handleShare}
+            title={t('race.shareHint')}
+            className="shrink-0 cursor-pointer rounded-full border border-[var(--color-border)] px-3 py-0.5 hover:border-[var(--color-primary)]"
+          >
+            <span aria-hidden>{copied ? '✅' : '🔗'}</span> {copied ? t('share.copied') : t('race.share')}
+          </button>
+          <button
+            type="button"
             onClick={handleRestart}
+            title={t('race.restartHint')}
             className="shrink-0 cursor-pointer rounded-full border border-[var(--color-border)] px-3 py-0.5 hover:border-[var(--color-primary)]"
           >
             {t('race.restart')}
@@ -408,6 +469,8 @@ export default function RaceGameStage({ config, onChange, onPickBody }: Props): 
               className="aspect-square w-full rounded-lg border border-[var(--color-border)]"
             />
           )}
+
+          {hud && <RaceProgress km={hud.km} />}
 
           <RaceGameSettings config={config} onChange={onChange} onPickBody={onPickBody} />
         </div>

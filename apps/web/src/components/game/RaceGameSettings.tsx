@@ -10,12 +10,16 @@ import RegionFlag from '@/components/RegionFlag'
 import { cn } from '@/lib/cn'
 import {
   GENERIC_BACKDROPS,
+  CAMERA_VIEWS,
   CAR_BODIES,
   LANE_OPTIONS,
+  MODE_SETTINGS,
+  RACE_MODES,
   QUALITIES,
   REGION_BACKDROP_IDS,
   SCENERIES,
   TRAFFIC_LEVELS,
+  activeMode,
   randomBackdrop,
   randomRegion,
   backdropRegion,
@@ -51,6 +55,8 @@ const BODY_EMOJI: Readonly<Record<CarBody, string>> = {
 
 /** Region backdrops visible while the section is collapsed. */
 const REGION_BACKDROPS_COLLAPSED = 3
+
+const MODE_EMOJI = { relax: '🌿', hardcore: '🔥' } as const
 
 const SCENERY_EMOJI: Readonly<Record<SceneryId, string>> = { day: '☀️', sunset: '🌇', night: '🌙', winter: '❄️' }
 
@@ -124,6 +130,14 @@ export default function RaceGameSettings({ config, onChange, onPickBody }: Props
         ))}
       </RaceGameGroup>
 
+      <RaceGameGroup label={t('race.view')}>
+        {CAMERA_VIEWS.map(view => (
+          <RaceGameChip key={view} active={config.view === view} onClick={() => onChange({ view })}>
+            {t(`race.view.${view}`)}
+          </RaceGameChip>
+        ))}
+      </RaceGameGroup>
+
       <RaceGameGroup label={t('race.backdrop')}>
         {GENERIC_BACKDROPS.map(backdrop => (
           <RaceGameChip key={backdrop} active={config.backdrop === backdrop} onClick={() => handleBackdrop(backdrop)}>
@@ -163,6 +177,18 @@ export default function RaceGameSettings({ config, onChange, onPickBody }: Props
         {SCENERIES.map(scenery => (
           <RaceGameChip key={scenery} active={config.scenery === scenery} onClick={() => onChange({ scenery })}>
             <span aria-hidden>{SCENERY_EMOJI[scenery]}</span> {t(`race.scenery.${scenery}`)}
+          </RaceGameChip>
+        ))}
+      </RaceGameGroup>
+
+      <RaceGameGroup label={t('race.mode')}>
+        {RACE_MODES.map(mode => (
+          <RaceGameChip
+            key={mode}
+            active={activeMode(config) === mode}
+            onClick={() => onChange({ ...MODE_SETTINGS[mode] })}
+          >
+            <span aria-hidden>{MODE_EMOJI[mode]}</span> {t(`race.mode.${mode}`)}
           </RaceGameChip>
         ))}
       </RaceGameGroup>

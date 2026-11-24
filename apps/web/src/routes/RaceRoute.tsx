@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useSearchParams } from 'react-router'
 
 import GamesNav from '@/components/game/GamesNav'
 import RaceCredits from '@/components/game/RaceCredits'
@@ -10,6 +11,9 @@ import Card from '@/components/ui/Card'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import {
   DEFAULT_AUTO,
+  DEFAULT_VIEW,
+  backdropRegion,
+  decodeRaceConfig,
   randomLanes,
   randomQuality,
   randomRegion,
@@ -42,8 +46,24 @@ function randomStart(): Start {
       plate: GENERIC_PLATE,
       region,
       brand: presetBrand(preset),
-      auto: DEFAULT_AUTO
+      auto: DEFAULT_AUTO,
+      view: DEFAULT_VIEW
     }
+  }
+}
+
+/** A shared link (`/race?tab=<settings>`) overrides the random start with the sharer's settings. */
+function sharedStart(token: string | null): Start {
+  const random = randomStart()
+  const shared = decodeRaceConfig(token)
+  if (Object.keys(shared).length === 0) return random
+  const config = { ...random.config, ...shared }
+  // a region backdrop brings its own region: the billboards follow it
+  const region = backdropRegion(config.backdrop)
+  return {
+    config: region ? { ...config, region } : config,
+    // the random example's name only fits its own paint and body
+    label: shared.color || shared.body ? '' : random.label
   }
 }
 
@@ -55,9 +75,10 @@ function randomStart(): Start {
 export default function RaceRoute(): ReactNode {
   const { t } = useTranslation()
   const online = useOnlineStatus()
-  const [start] = useState(randomStart)
+  const [searchParams] = useSearchParams()
+  const [start] = useState(() => sharedStart(searchParams.get('tab')))
   const [config, setConfig] = useState<RacerConfig>(start.config)
-  const [label, setLabel] = useState<string | null>(start.label)
+  const [label, setLabel] = useState<string | null>(start.label || null)
 
   const handleChange = (patch: Partial<RacerConfig>): void => {
     setConfig(c => ({ ...c, ...patch }))
