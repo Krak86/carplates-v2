@@ -4,6 +4,18 @@ import type { ReleaseDay } from './core.js'
 /** 2026-11: newest day first. */
 export const DAYS: readonly ReleaseDay[] = [
   {
+    date: '2026-11-24',
+    version: 'v2.1482',
+    items: [
+      item(
+        'improved',
+        'На телефоні таблиці за областями на /auctions, /stats і /wanted згорнуті, кнопка «Показати більше» плавно розкриває їх повністю; на /stats додано відступ перед блоком «Пов’язана статистика»',
+        'На телефоне таблицы по областям на /auctions, /stats и /wanted свернуты, кнопка «Показать больше» плавно раскрывает их полностью; на /stats добавлен отступ перед блоком «Связанная статистика»',
+        'On phones the region tables on /auctions, /stats and /wanted are collapsed and a Show more button smoothly opens them in full; /stats also gets a gap before the Related statistics block'
+      )
+    ]
+  },
+  {
     date: '2026-11-23',
     version: 'v2.1480',
     items: [

@@ -1979,6 +1979,7 @@
   "stats.vdb.rare": "Common here, rare elsewhere",
   "stats.vdb.uaOnly": "Only in Ukraine",
   "stats.noRows": "No rows",
+  "common.showMore": "Show more",
   "stats.spec.metric": "Spec",
   "stats.spec.metric.power": "Power",
   "stats.spec.metric.displacement": "Engine",

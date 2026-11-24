@@ -405,7 +405,9 @@ export default function StatsRoute(): ReactNode {
             )}
           </div>
 
-          <RelatedPages page="stats" />
+          <div className="mt-8">
+            <RelatedPages page="stats" />
+          </div>
         </>
       )}
     </div>
