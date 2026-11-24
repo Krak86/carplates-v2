@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useLocation } from 'react-router'
 
+import PageToc from '@/components/PageToc'
 import Card from '@/components/ui/Card'
 
 /** `tile`: a plain coloured square (Tailwind bg class) for a source whose logo we are not cleared to show. */
@@ -441,7 +442,16 @@ export default function AboutRoute(): ReactNode {
           </a>
         </p>
 
-        <div className="border-t border-[var(--color-border)] pt-4">
+        <PageToc
+          items={[
+            { id: 'license', label: t('about.licenseHeading') },
+            { id: 'brief', label: t('about.briefHeading') },
+            { id: 'features', label: t('about.featuresHeading') },
+            { id: 'sources', label: t('about.sourcesHeading') }
+          ]}
+        />
+
+        <div id="license" className="scroll-mt-20 border-t border-[var(--color-border)] pt-4">
           <h2 className="font-semibold">{t('about.licenseHeading')}</h2>
           <p className="mt-2">
             {t('about.copyright', { year })}{' '}
@@ -474,7 +484,7 @@ export default function AboutRoute(): ReactNode {
         </div>
       </Card>
 
-      <Card ref={briefRef} className="scroll-mt-20 space-y-3 text-sm text-[var(--color-fg)]">
+      <Card ref={briefRef} id="brief" className="scroll-mt-20 space-y-3 text-sm text-[var(--color-fg)]">
         <h2 className="font-semibold">{t('about.briefHeading')}</h2>
         <ul className="grid list-disc gap-x-6 gap-y-1 pl-5 sm:grid-cols-2 lg:grid-cols-3">
           {FEATURES.map(key => (
@@ -483,7 +493,7 @@ export default function AboutRoute(): ReactNode {
         </ul>
       </Card>
 
-      <Card className="space-y-3 text-sm text-[var(--color-fg)]">
+      <Card id="features" className="scroll-mt-20 space-y-3 text-sm text-[var(--color-fg)]">
         <h2 className="font-semibold">{t('about.featuresHeading')}</h2>
         <ul className="list-disc space-y-1.5 pl-5">
           {FEATURES.map(key => (
@@ -492,7 +502,7 @@ export default function AboutRoute(): ReactNode {
         </ul>
       </Card>
 
-      <Card ref={sourcesRef} className="scroll-mt-20 space-y-3 text-sm text-[var(--color-fg)]">
+      <Card ref={sourcesRef} id="sources" className="scroll-mt-20 space-y-3 text-sm text-[var(--color-fg)]">
         <h2 className="font-semibold">{t('about.sourcesHeading')}</h2>
         <ul className="space-y-3">
           {SOURCES.map(source => (
