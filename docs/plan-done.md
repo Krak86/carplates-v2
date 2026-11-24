@@ -5006,3 +5006,13 @@ Features reference: `docs/features-reference.md` "Prozorro.Sale lots in Auction 
 
 - **Bug:** property sales with one vehicle among other assets (the Illichivsk plant, 696 M UAH) were listed as cars and topped "sale price" sorting. **Fix:** `registry.prozorro_auctions.is_car` (migration 0105), set by the parser; list and stats are cars only by default, "Лише авто" checkbox (`?cars=0`), "Share filters" button. Release note v2.1480.
 - **Backfill:** local DB re-crawled 2017 to 2025-07 (1 173 of 14 407 rows false); VPS re-crawled by year with retries after deploy #244 (see the data guard for the commands and the Node 24 socket crash).
+
+## Phone-collapsed tables, unofficial PDR tests, "On this page" TOC, About refresh (2026-11-24) ✅
+
+Features reference: "Mobile collapsed tables and page TOC (2026-11-24)".
+
+- **`MobileCollapse`** (`components/MobileCollapse.tsx`): phone-only "Show more" frame clipping tall tables with a fade; used for the region tables on `/auctions`, `/stats`, `/wanted` (8 rows or fewer and the virtualized year table stay open). `common.showMore` (ua/ru/en). Release v2.1482.
+- **`latest.test.ts` guards:** first entry is the latest date, days strictly newest first, versions never drop, no future-dated day.
+- **pdr-testy.com.ua** (unofficial, more flexible practice tests, links only): Verification row after the official pdr.infotech.gov.ua one, About source tile, second credit line in `/race` and the plate modal. Logos: `pdr.svg`, `hsc.webp` (all mvs.gov.ua services), `pdrtesty.jpg`; unused `bdr.svg` removed. v2.1483.
+- **`PageToc`** (`components/PageToc.tsx`): "On this page" anchor list on `/install`, `/sitemap`, `/data-status` (and `/privacy`, `/terms`); i18n key `toc.title` is core. v2.1484.
+- **About page** (`AboutRoute.tsx`): `about.feature.verify|uaAuctions|stats|sitemap` extended for the above; the brief and detailed feature cards already sit between the main card and Sources. v2.1487.

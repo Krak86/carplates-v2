@@ -781,6 +781,13 @@ Plan: [compare-plan.md](compare-plan.md). Phases 1-3 and the client side of phas
 - **`PageSources`** (`components/PageSources.tsx`): the "Source data" card at the top of `/stats`, `/wanted`, `/auctions`, `/fuel`, `/safety`, `/road-safety` (road-safety's `SourceData` wraps it). A new statistics page passes `sources` (label, url, optional note), `lines` (plain text) and an optional `footer`; strings live under `pageSources.<page>.*`.
 - **`RelatedPages`** (`components/RelatedPages.tsx`) at the bottom: cross links driven by `lib/related-pages.ts` (`RELATED_PAGES`, `RELATED_TARGETS` for deep links such as the regional map). Every pair needs a hint `related.<from>.<to>` (ua/ru/en) that says what the other page answers; add a pair only where the comparison is real. Hints carry no numbers, so they never go stale.
 
+## Mobile collapsed tables and page TOC (2026-11-24)
+
+- **`MobileCollapse`** wraps a tall table on phones only (inert from `md`, respects reduced motion): clipped with a fade, opened by a "Show more" button with a height transition on its own compositing layer. Use it for region tables of more than 8 rows; never for virtualized tables (the year table). Key `common.showMore`.
+- **`PageToc`** is the shared "On this page" anchor list (`toc.title`, core pack). Target cards need an `id` and `scroll-mt-20`. On `/data-status` the summary, history and cadence entries appear only once the status has loaded.
+- **Unofficial PDR tests** (`pdr-testy.com.ua/ispyt`): links only, always labelled "unofficial"; the official `pdr.infotech.gov.ua` row stays first. All `mvs.gov.ua` services share `/icons/hsc.webp`.
+- **Release-log guards** in `routes/releases/latest.test.ts`: add a new day at the top and bump `LATEST_RELEASE_DATE`, or the tests fail.
+
 ## Sitemap page (`/sitemap`, 2026-11-01)
 
 - `routes/sitemap/`: `helpers.ts` holds the tree (`SITEMAP_GROUPS` links, `SITEMAP_TIPS` for URL-less features, `HIDDEN_ROUTES`, `CATALOG_ROUTES`), `SitemapRoute.tsx` renders it. Guide links come from `GUIDE_META` and game links from `QUIZ_IDS` / `RACER_LINKS`, so a new article or game appears by itself.

@@ -5,8 +5,14 @@ import type { ReleaseDay } from './core.js'
 export const DAYS: readonly ReleaseDay[] = [
   {
     date: '2026-11-24',
-    version: 'v2.1484',
+    version: 'v2.1487',
     items: [
+      item(
+        'improved',
+        'Розділ «Про додаток» оновлено: опис перевірки (офіційні й неофіційні тести ПДР), аукціонів (лише авто, «Поділитися фільтрами»), статистики (згорнуті таблиці на телефоні) і карти сайту (зміст «На цій сторінці»)',
+        'Раздел «О приложении» обновлен: описание проверки (официальные и неофициальные тесты ПДД), аукционов (только авто, «Поделиться фильтрами»), статистики (свернутые таблицы на телефоне) и карты сайта (оглавление «На этой странице»)',
+        'The About page is up to date: the descriptions of verification (official and unofficial traffic-rules tests), auctions (cars only, Share filters), statistics (collapsed tables on phones) and the site map (On this page contents)'
+      ),
       item(
         'improved',
         'На сторінках /install, /sitemap і /data-status з’явився зміст «На цій сторінці» з посиланнями на розділи',

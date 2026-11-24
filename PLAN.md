@@ -1674,6 +1674,8 @@ trigger above · NestJS 12 bump when `nestjs-zod` supports it · TypeScript 7 wh
 
 ✅ 2026-11-21: hero photos page with arrows/dots/swipe, thumbnail strip no longer scrolls (fixed height, skeleton in step), "Save as image" moved into the chips list. Write-up `docs/plan-done.md` "Hero photo carousel without a scrolling strip".
 
+✅ 2026-11-24: phone-collapsed region tables (`MobileCollapse`), unofficial pdr-testy.com.ua tests link, "On this page" TOC (`PageToc`), About page refresh. Write-up `docs/plan-done.md` "Phone-collapsed tables, unofficial PDR tests, "On this page" TOC, About refresh".
+
 ## VPS disk: old Docker images pruned on every deploy (2026-11-21, awaiting deploy)
 
 Admin Server tab showed 157.5 GB of 192.7 GB used. Found: 131.7 GB of Docker images (259, tagged sha images never pruned), DB 23 GB, `/opt/carsua` 3.3 GB. `prune_images` in `infra/vps/lib.sh` now keeps the 3 newest tags per `carsua-*` repo plus anything in use (details: `docs/deploy.md` "Disk usage and image cleanup").
