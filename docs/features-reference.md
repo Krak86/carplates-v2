@@ -784,7 +784,7 @@ Plan: [compare-plan.md](compare-plan.md). Phases 1-3 and the client side of phas
 ## Mobile collapsed tables and page TOC (2026-11-24)
 
 - **`MobileCollapse`** wraps a tall table on phones only (inert from `md`, respects reduced motion): clipped with a fade, opened by a "Show more" button with a height transition on its own compositing layer. Use it for region tables of more than 8 rows; never for virtualized tables (the year table). Key `common.showMore`.
-- **`PageToc`** is the shared "On this page" anchor list (`toc.title`, core pack). Target cards need an `id` and `scroll-mt-20`. On `/data-status` the summary, history and cadence entries appear only once the status has loaded.
+- **`PageToc`** is the shared "On this page" anchor list (`toc.title`, core pack). Target cards need an `id` and `scroll-mt-20`. On `/data-status` the summary, history and cadence entries appear only once the status has loaded. `/about` has it too (license, brief, features, sources; ids `license`, `brief`, `features`, `sources`, the latter two also drive the `#brief` / `#sources` scroll effect).
 - **Unofficial PDR tests** (`pdr-testy.com.ua/ispyt`): links only, always labelled "unofficial"; the official `pdr.infotech.gov.ua` row stays first. All `mvs.gov.ua` services share `/icons/hsc.webp`.
 - **Release-log guards** in `routes/releases/latest.test.ts`: add a new day at the top and bump `LATEST_RELEASE_DATE`, or the tests fail.
 
