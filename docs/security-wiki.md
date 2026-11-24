@@ -10,20 +10,20 @@ As of **2026-11-24**. Source: three read-only surveys of the repo (infra, API, w
 
 Legend: ✅ done · ❌ open (step #) · 🔍 verify · 🤖 code/config (diff shown first) · 👤 owner action (dashboard, VPS, account) · effort **S** < 1 h, **M** half a day, **L** 1-2 days.
 
-| #   | Layer                | Done    | Open steps        |
-| --- | -------------------- | ------- | ----------------- |
-| 1   | User OS and device   | D1-D2   | 29                |
-| 2   | Browser and frontend | D3-D11  | 1, 27, 28, 31, 32 |
-| 3   | Cloudflare, CDN, DNS | D12-D14 | 32                |
-| 4   | Network and provider | D15     | 32                |
-| 5   | Ubuntu host          | D16-D19 | 19, 25            |
-| 6   | Docker               | D20-D23 | 13, 14, 15, 19    |
-| 7   | Caddy                | D24-D26 | 16, 17, 18        |
-| 8   | API (NestJS)         | D27-D40 | 2, 3, 5-10        |
-| 9   | Postgres and Redis   | D41-D44 | 11, 12, 15, 20    |
-| 10  | ALPR (Python)        | D45     | 4, 21             |
-| 11  | Supply chain and CI  | D46-D49 | 21-24, 26, 30     |
-| 12  | Accounts and people  | D50     | 32                |
+| #   | Layer                | Done    | Open steps     |
+| --- | -------------------- | ------- | -------------- |
+| 1   | User OS and device   | D1-D2   | 29             |
+| 2   | Browser and frontend | D3-D12  | 27, 28, 31, 32 |
+| 3   | Cloudflare, CDN, DNS | D12-D14 | 32             |
+| 4   | Network and provider | D15     | 32             |
+| 5   | Ubuntu host          | D16-D19 | 19, 25         |
+| 6   | Docker               | D20-D23 | 13, 14, 15, 19 |
+| 7   | Caddy                | D24-D26 | 16, 17, 18     |
+| 8   | API (NestJS)         | D27-D40 | 2, 3, 5-10     |
+| 9   | Postgres and Redis   | D41-D44 | 11, 12, 15, 20 |
+| 10  | ALPR (Python)        | D45     | 4, 21          |
+| 11  | Supply chain and CI  | D46-D49 | 21-24, 26, 30  |
+| 12  | Accounts and people  | D50     | 32             |
 
 ## 2. Twelve-Factor and security
 
@@ -92,19 +92,20 @@ Open: history, favorites and offline cache survive sign-out → step 29.
 
 ### Layer 2 - Browser and frontend
 
-| ID  | Control                                                                                                                                     | Where                                                 | Why it matters                      |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- | ----------------------------------- |
-| D3  | CSP enforced since 2026-11-21: no `unsafe-inline` for scripts, `frame-ancestors 'self'`, `object-src 'none'`, report sink `/api/csp-report` | `infra/Caddyfile:48-81`                               | British Airways Magecart (2018)     |
-| D4  | Fonts self-hosted; third-party script hosts allow-listed                                                                                    | `Caddyfile` CSP                                       | Polyfill.io takeover (2024)         |
-| D5  | No `dangerouslySetInnerHTML`, `eval`, `new Function`, markdown renderer                                                                     | grep, `apps/web`                                      | CVE-2018-6341 class (React SSR XSS) |
-| D6  | Zod `jitless`, `zod-config` first import                                                                                                    | `lib/zod-config.ts`, `main.tsx:1`                     | Lets CSP forbid `eval`              |
-| D7  | Service worker never caches `/api`; prompted update                                                                                         | `vite.config.ts:150-297`                              | No stale or poisoned personal data  |
-| D8  | No production source maps                                                                                                                   | `vite.config.ts`                                      | No source disclosure                |
-| D9  | Every `target=_blank` has `noopener`/`noreferrer`                                                                                           | `components/ExternalLink.tsx:19`                      | Reverse tabnabbing (CWE-1022)       |
-| D10 | Telegram widget isolated in its own page with its own CSP, origin-checked `postMessage`                                                     | `public/telegram-frame.*`, `lib/telegram-login.ts:24` | Contains the one `eval`             |
-| D11 | SPA, no React Server Components, so not exposed to CVE-2025-55182                                                                           | architecture                                          | RSC deserialization RCE             |
+| ID  | Control                                                                                                                                                                                                                                                                | Where                                                               | Why it matters                      |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- | ----------------------------------- |
+| D3  | CSP enforced since 2026-11-21: no `unsafe-inline` for scripts, `frame-ancestors 'self'`, `object-src 'none'`, report sink `/api/csp-report`                                                                                                                            | `infra/Caddyfile:48-81`                                             | British Airways Magecart (2018)     |
+| D4  | Fonts self-hosted; third-party script hosts allow-listed                                                                                                                                                                                                               | `Caddyfile` CSP                                                     | Polyfill.io takeover (2024)         |
+| D5  | No `dangerouslySetInnerHTML`, `eval`, `new Function`, markdown renderer                                                                                                                                                                                                | grep, `apps/web`                                                    | CVE-2018-6341 class (React SSR XSS) |
+| D6  | Zod `jitless`, `zod-config` first import                                                                                                                                                                                                                               | `lib/zod-config.ts`, `main.tsx:1`                                   | Lets CSP forbid `eval`              |
+| D7  | Service worker never caches `/api`; prompted update                                                                                                                                                                                                                    | `vite.config.ts:150-297`                                            | No stale or poisoned personal data  |
+| D8  | No production source maps                                                                                                                                                                                                                                              | `vite.config.ts`                                                    | No source disclosure                |
+| D9  | Every `target=_blank` has `noopener`/`noreferrer`                                                                                                                                                                                                                      | `components/ExternalLink.tsx:19`                                    | Reverse tabnabbing (CWE-1022)       |
+| D10 | Telegram widget isolated in its own page with its own CSP, origin-checked `postMessage`                                                                                                                                                                                | `public/telegram-frame.*`, `lib/telegram-login.ts:24`               | Contains the one `eval`             |
+| D11 | SPA, no React Server Components, so not exposed to CVE-2025-55182                                                                                                                                                                                                      | architecture                                                        | RSC deserialization RCE             |
+| D12 | `?p=<token>` removed from the address bar after reading (Chrome still keeps the original URL in its history, which JS cannot erase); token, plate and VIN scrubbed from PostHog and Sentry URLs, breadcrumbs, transactions; Sentry `share_ref` tag is a SHA-256 prefix | `use-shared-photo.ts`, `lib/telemetry-scrub.ts`, `lib/telemetry.ts` | CWE-598, CWE-359                    |
 
-Open: step 1 (share token and plate leak to PostHog/Sentry), 27 (lint rules), 28 (iframe sandbox), 31 (Trusted Types), 32 (Maps key restriction).
+Open: 27 (lint rules), 28 (iframe sandbox), 31 (Trusted Types), 32 (Maps key restriction).
 
 ### Layer 3 - Cloudflare, CDN, DNS
 
@@ -158,24 +159,25 @@ Open: CORP, Server header, admin off, body limit, access log → 16; HSTS flags 
 
 ### Layer 8 - API (NestJS on Fastify)
 
-| ID  | Control                                                                                                                                 | Where                                                                | Why it matters                                                   |
-| --- | --------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| D27 | Global `ZodValidationPipe` + `zodParam`                                                                                                 | `app.module.ts:126`                                                  | CWE-20                                                           |
-| D28 | Global CSRF `OriginGuard` (`Sec-Fetch-Site`, `Origin` fallback)                                                                         | `common/origin.guard.ts`                                             | CWE-352                                                          |
-| D29 | `SudoGuard` (recent re-auth) for destructive account changes; `AdminGuard` with the role only in the DB                                 | `auth/session.guard.ts:33-58`                                        | CWE-269                                                          |
-| D30 | Google ID token (RS256, iss, aud, exp, `email_verified`); Telegram HMAC + `timingSafeEqual` + 24 h; email code HMAC, 5 attempts, 15 min | `auth/google-id-token.ts`, `telegram-login.ts`, `email-challenge.ts` | CVE-2015-9235 (alg confusion) is not applicable: no JWT sessions |
-| D31 | Global throttle (30/s, 150/min, 1500/h) in Redis with per-route overrides; Turnstile on email code and contact                          | `common/throttle.ts`, `auth/turnstile.ts`                            | CWE-307                                                          |
-| D32 | No `sql.raw` fed by request text; Drizzle parameterizes                                                                                 | grep `sql.raw`                                                       | CWE-89                                                           |
-| D33 | HTML escaping in meta and OG, `<` escaped in JSON-LD                                                                                    | `spa/meta.ts:38-79`, `og-card.ts:28`                                 | CWE-79                                                           |
-| D34 | Static path: safe decode, `..` rejected, `distDir + sep`                                                                                | `spa.controller.ts:147-163`                                          | CVE-2021-41773 class                                             |
-| D35 | Generic 5xx body, stack only to log and Sentry                                                                                          | `common/all-exceptions.filter.ts:144`                                | CWE-209                                                          |
-| D36 | Swagger off in production; public OpenAPI is a curated read-only subset                                                                 | `env.ts:185`, `main.ts:62`                                           | Smaller attack surface                                           |
-| D37 | CORS pinned to `PUBLIC_SITE_URL` in production                                                                                          | `main.ts:45-48`                                                      | Credentialed cross-origin reads                                  |
-| D38 | JSON body 1 MiB, multipart 4 MB / 1 file, request timeout 60 s                                                                          | `main.ts:23-43`                                                      | CWE-770                                                          |
-| D39 | Share uploads: magic bytes, EXIF stripped, sharp pixel limit                                                                            | `shares/helpers.ts:20-36`                                            | CVE-2023-4863, CVE-2016-3714                                     |
-| D40 | `fastify` 5.12.7 / `@nestjs/platform-fastify` 11.2.7 via `pnpm.overrides` (finding #1, fixed 2026-10-13)                                | `pnpm-workspace.yaml:29-35`                                          | Known high advisories                                            |
+| ID  | Control                                                                                                                                                                                                | Where                                                                | Why it matters                                                   |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| D27 | Global `ZodValidationPipe` + `zodParam`                                                                                                                                                                | `app.module.ts:126`                                                  | CWE-20                                                           |
+| D28 | Global CSRF `OriginGuard` (`Sec-Fetch-Site`, `Origin` fallback)                                                                                                                                        | `common/origin.guard.ts`                                             | CWE-352                                                          |
+| D29 | `SudoGuard` (recent re-auth) for destructive account changes; `AdminGuard` with the role only in the DB                                                                                                | `auth/session.guard.ts:33-58`                                        | CWE-269                                                          |
+| D30 | Google ID token (RS256, iss, aud, exp, `email_verified`); Telegram HMAC + `timingSafeEqual` + 24 h; email code HMAC, 5 attempts, 15 min                                                                | `auth/google-id-token.ts`, `telegram-login.ts`, `email-challenge.ts` | CVE-2015-9235 (alg confusion) is not applicable: no JWT sessions |
+| D31 | Global throttle (30/s, 150/min, 1500/h) in Redis with per-route overrides; Turnstile on email code and contact                                                                                         | `common/throttle.ts`, `auth/turnstile.ts`                            | CWE-307                                                          |
+| D32 | No `sql.raw` fed by request text; Drizzle parameterizes                                                                                                                                                | grep `sql.raw`                                                       | CWE-89                                                           |
+| D33 | HTML escaping in meta and OG, `<` escaped in JSON-LD                                                                                                                                                   | `spa/meta.ts:38-79`, `og-card.ts:28`                                 | CWE-79                                                           |
+| D34 | Static path: safe decode, `..` rejected, `distDir + sep`                                                                                                                                               | `spa.controller.ts:147-163`                                          | CVE-2021-41773 class                                             |
+| D35 | Generic 5xx body, stack only to log and Sentry                                                                                                                                                         | `common/all-exceptions.filter.ts:144`                                | CWE-209                                                          |
+| D36 | Swagger off in production; public OpenAPI is a curated read-only subset                                                                                                                                | `env.ts:185`, `main.ts:62`                                           | Smaller attack surface                                           |
+| D37 | CORS pinned to `PUBLIC_SITE_URL` in production                                                                                                                                                         | `main.ts:45-48`                                                      | Credentialed cross-origin reads                                  |
+| D38 | JSON body 1 MiB, multipart 4 MB / 1 file, request timeout 60 s                                                                                                                                         | `main.ts:23-43`                                                      | CWE-770                                                          |
+| D39 | Share uploads: magic bytes, EXIF stripped, sharp pixel limit                                                                                                                                           | `shares/helpers.ts:20-36`                                            | CVE-2023-4863, CVE-2016-3714                                     |
+| D40 | `fastify` 5.12.7 / `@nestjs/platform-fastify` 11.2.7 via `pnpm.overrides` (finding #1, fixed 2026-10-13)                                                                                               | `pnpm-workspace.yaml:29-35`                                          | Known high advisories                                            |
+| D41 | Sentry `beforeSend`/`beforeSendTransaction` drop body, query, cookies, Cookie/Authorization headers; plate, VIN, card and share paths, Referer, transaction and breadcrumb URLs become route templates | `apps/api/src/sentry-scrub.ts`, `instrument.ts`                      | CWE-532                                                          |
 
-Open: 2, 3, 5-10.
+Open: 3, 5-10.
 
 ### Layer 9 - Postgres and Redis
 
@@ -222,15 +224,16 @@ Tick the box and add a `docs/plan-done.md` entry when a step is finished. "Verif
 
 ### A. Privacy and fail-closed config
 
-### Step 1 - Strip the share token and scrub web telemetry [ ] · S · 🤖 · layer 2
+### Step 1 - Strip the share token and scrub web telemetry [x] · S · 🤖 · layer 2
 
 - **What:** the share link `/<plate>?p=<token>` keeps the bearer token in the address bar, and PostHog sends the full URL on every page view (`telemetry.ts:55`); Sentry's `beforeSend` drops only `query_string`. Remove `?p=` with `replaceState` after reading it; scrub token, plate and VIN from the URL in PostHog `before_send` and Sentry `beforeSend`/`beforeBreadcrumb`. Confirm the Sentry `request.url` claim while doing it (it was not verified).
 - **Files:** `apps/web/src/routes/SearchRoute.tsx:253`, `apps/web/src/lib/telemetry.ts:27-64`, release version in `packages/shared/src/releases/<yyyy-mm>.ts`.
 - **Why:** CWE-598 (sensitive data in a query string), CWE-359.
 - **Alternatives:** token in `#fragment` (never sent to servers; breaks server-side OG previews that read `?p=`) · PostHog `property_denylist` (no code; misses Sentry and breadcrumbs).
+- **Known limit:** the browser logs the URL at navigation, before JS runs, so the recipient device history keeps the original `?p=` entry (a `#fragment` is stored too). Only a server-side cookie + 302 redirect would keep it out of the visible history; not done.
 - **Verify:** unit test for the scrubbers; local run with telemetry on, open a share link, DevTools network shows no token in PostHog/Sentry payloads.
 
-### Step 2 - Scrub plates and VINs from API Sentry events [ ] · S · 🤖 · layer 8 (bundle with step 1)
+### Step 2 - Scrub plates and VINs from API Sentry events [x] · S · 🤖 · layer 8 (bundle with step 1)
 
 - **What:** `beforeSend` removes body, query string and cookies but not the path, so `/api/plate/:plate` and `/api/vin/:vin` reach Sentry on 5xx. Rewrite to route templates.
 - **Files:** `apps/api/src/instrument.ts`.

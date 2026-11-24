@@ -3,13 +3,23 @@
  * relevant key/DSN is set. The SDKs are dynamically imported so they stay out
  * of the main bundle when telemetry is off (the default, and always in dev).
  */
+import { scrubBreadcrumb, scrubPostHogEvent, scrubSentryEvent, shareRef } from '@/lib/telemetry-scrub'
+
 const env = import.meta.env
 // A local dev server / preview build with the prod .env must not report (CARSUA-3: Vite HMR import errors from localhost).
 const isLocalHost = ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname)
 const enabled = env.VITE_ENABLE_TELEMETRY === 'true'
 
 let posthogRef: typeof import('posthog-js').default | null = null
+let sentryRef: typeof import('@sentry/react') | null = null
+let pendingShareRef = ''
 let lastPageview = { url: '', at: 0 }
+
+/** Tags Sentry events with a one-way fingerprint of the share token (never the token), so one share's errors can be correlated. */
+export async function tagShare(token: string): Promise<void> {
+  pendingShareRef = await shareRef(token)
+  sentryRef?.setTag('share_ref', pendingShareRef)
+}
 
 export async function initTelemetry(): Promise<void> {
   if (!enabled) return
@@ -24,11 +34,12 @@ export async function initTelemetry(): Promise<void> {
       environment: env.MODE,
       release: env.VITE_GIT_SHA,
       tracesSampleRate: 0.1,
-      beforeSend(event) {
-        if (event.request) delete event.request.query_string
-        return event
-      }
+      beforeSend: scrubSentryEvent,
+      beforeSendTransaction: scrubSentryEvent,
+      beforeBreadcrumb: scrubBreadcrumb
     })
+    sentryRef = Sentry
+    if (pendingShareRef) Sentry.setTag('share_ref', pendingShareRef)
   }
 
   if (env.VITE_POSTHOG_KEY) {
@@ -54,7 +65,8 @@ export async function initTelemetry(): Promise<void> {
       // SPA: fire $pageview on every router navigation (history API), not only the first load.
       capture_pageview: 'history_change',
       // Drops a second $pageview for the same URL fired right after the first (the explicit initial one below vs. the SDK's own).
-      before_send: event => {
+      before_send: raw => {
+        const event = scrubPostHogEvent(raw)
         if (event?.event !== '$pageview') return event
         const url = String(event.properties?.$current_url ?? '')
         const now = Date.now()
