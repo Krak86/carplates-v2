@@ -17,7 +17,7 @@ const savedQuery = {
 
 type SaveProps = { a: string; b: string; labelA: string; labelB: string }
 
-/** "Save" toggle for the comparison on screen (kept in this browser only). */
+/** "Save" toggle for the comparison on screen (synced for signed-in users). */
 export function CompareSaveButton({ a, b, labelA, labelB }: SaveProps): ReactNode {
   const { t } = useTranslation()
   const client = useQueryClient()

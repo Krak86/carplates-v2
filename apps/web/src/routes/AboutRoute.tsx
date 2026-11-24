@@ -187,6 +187,18 @@ const SOURCES: readonly Source[] = [
     url: 'https://finance.yahoo.com',
     icon: '/icons/sources/yahoofinance.webp'
   },
+  // Link-outs only, no logos: commercial marks with no licence found; plain tiles.
+  { key: 'tradingview', label: 'TradingView', url: 'https://www.tradingview.com', tile: 'bg-slate-500' },
+  { key: 'rst', label: 'RST', url: 'https://rst.ua', tile: 'bg-slate-500' },
+  { key: 'bazagai', label: 'baza-gai.com.ua', url: 'https://baza-gai.com.ua', tile: 'bg-slate-500' },
+  { key: 'opendatabot', label: 'Opendatabot', url: 'https://opendatabot.ua', tile: 'bg-slate-500' },
+  { key: 'icct', label: 'ICCT', url: 'https://theicct.org/pv-fuel-economy/', tile: 'bg-slate-500' },
+  {
+    key: 'parkingNorms',
+    label: 'DBN, Saxony, Lindon parking norms',
+    url: 'https://e-construction.gov.ua/laws_detail/2845786368808847244?doc_type=2',
+    tile: 'bg-blue-700'
+  },
   { key: 'travic', label: 'Travic', url: 'https://travic.app', icon: '/icons/sources/travic.webp' },
   {
     key: 'googleMaps',
