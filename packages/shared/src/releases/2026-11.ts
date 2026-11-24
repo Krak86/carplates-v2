@@ -5,8 +5,14 @@ import type { ReleaseDay } from './core.js'
 export const DAYS: readonly ReleaseDay[] = [
   {
     date: '2026-11-24',
-    version: 'v2.1482',
+    version: 'v2.1483',
     items: [
+      item(
+        'improved',
+        'У «Перевірці» поруч з офіційними тестами ПДР (.gov.ua) додано неофіційні тренувальні тести pdr-testy.com.ua (гнучкіші), з позначками, посиланням у розділі «Про додаток» і в іграх «Гонки»; сервіси mvs.gov.ua тепер з логотипом ГСЦ МВС, а офіційні тести ПДР - з власним логотипом',
+        'В «Проверке» рядом с официальными тестами ПДД (.gov.ua) добавлены неофициальные тренировочные тесты pdr-testy.com.ua (более гибкие), с пометками, ссылкой в разделе «О приложении» и в игре «Гонки»; сервисы mvs.gov.ua теперь с логотипом ГСЦ МВД, а официальные тесты ПДД - с собственным логотипом',
+        'Verification now lists the unofficial, more flexible pdr-testy.com.ua practice tests next to the official .gov.ua traffic-rules tests, with notes, an About page link and a link under the race game; mvs.gov.ua services now show the HSC logo and the official tests their own logo'
+      ),
       item(
         'improved',
         'На телефоні таблиці за областями на /auctions, /stats і /wanted згорнуті, кнопка «Показати більше» плавно розкриває їх повністю; на /stats додано відступ перед блоком «Пов’язана статистика»',
