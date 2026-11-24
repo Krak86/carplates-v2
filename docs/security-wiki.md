@@ -241,7 +241,7 @@ Tick the box and add a `docs/plan-done.md` entry when a step is finished. "Verif
 - **Alternatives:** Sentry server-side scrubbing rules (no code; data still leaves the VPS).
 - **Verify:** unit test; a forced 5xx locally shows `/api/plate/:plate`.
 
-### Step 3 - Fail-closed production secrets [ ] · S · 🤖 · layer 8
+### Step 3 - Fail-closed production secrets [x] · S · 🤖 · layer 8
 
 - **What:** `assertProductionEnv` requires `TURNSTILE_SECRET_KEY` and `ALPR_API_KEY`. Today an unset Turnstile key passes every token (`auth/turnstile.ts:19`) and an unset ALPR key leaves ALPR open.
 - **Files:** `apps/api/src/env.ts`, its test, `infra/` env docs.

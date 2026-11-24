@@ -37,7 +37,7 @@ const envSchema = z.object({
 
   /** Own-model ALPR container (services/alpr, `pnpm alpr:up`). Absent → the local recognize route answers 503. */
   ALPR_LOCAL_URL: z.string().optional(),
-  /** Shared secret the ALPR container requires in `x-alpr-key` (same `ALPR_API_KEY` on both sides). Unset → no header, ALPR open. */
+  /** Shared secret the ALPR container requires in `x-alpr-key` (same `ALPR_API_KEY` on both sides). Unset → no header, ALPR open; required in production. */
   ALPR_API_KEY: z.string().optional(),
 
   /** Private R2 bucket for shared photo links (S3 API). All of endpoint + both keys needed (and ALPR_LOCAL_URL for the face blur),
@@ -173,6 +173,9 @@ function assertProductionEnv(env: Env): void {
   if (env.MAIL_TRANSPORT === 'log') problems.push('MAIL_TRANSPORT must be smtp or resend')
   if (env.MAIL_QUEUE && !env.REDIS_URL) problems.push('REDIS_URL is required for MAIL_QUEUE')
   if (env.MAIL_TRANSPORT === 'resend' && !env.RESEND_API_KEY) problems.push('RESEND_API_KEY is required for resend')
+  // Fail closed: an unset Turnstile secret passes every token, an unset ALPR key leaves the container open.
+  if (!env.TURNSTILE_SECRET_KEY) problems.push('TURNSTILE_SECRET_KEY is required')
+  if (!env.ALPR_API_KEY) problems.push('ALPR_API_KEY is required')
   if (problems.length) throw new Error(`Invalid production environment:\n${problems.map(p => `  ${p}`).join('\n')}`)
 }
 
