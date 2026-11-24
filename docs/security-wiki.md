@@ -1,0 +1,592 @@
+# Security wiki - carsua.app v2
+
+Status of every security control and every open step, layer by layer. **Grep `^## ` and `^### Step`, never read whole.**
+Companions: [security-checklist.md](security-checklist.md) (pre-deploy gate, findings table), [pentest-lab.md](pentest-lab.md) (local attack runbook),
+[origin-hardening-plan.md](origin-hardening-plan.md) (origin lockdown), [deploy.md](deploy.md). Cloud ALPR (Plate Recognizer) is out of scope (not in use).
+
+## 1. Status and legend
+
+As of **2026-11-24**. Source: three read-only surveys of the repo (infra, API, web and supply chain). Nothing was probed on production.
+
+Legend: ✅ done · ❌ open (step #) · 🔍 verify · 🤖 code/config (diff shown first) · 👤 owner action (dashboard, VPS, account) · effort **S** < 1 h, **M** half a day, **L** 1-2 days.
+
+| #   | Layer                | Done    | Open steps        |
+| --- | -------------------- | ------- | ----------------- |
+| 1   | User OS and device   | D1-D2   | 29                |
+| 2   | Browser and frontend | D3-D11  | 1, 27, 28, 31, 32 |
+| 3   | Cloudflare, CDN, DNS | D12-D14 | 32                |
+| 4   | Network and provider | D15     | 32                |
+| 5   | Ubuntu host          | D16-D19 | 19, 25            |
+| 6   | Docker               | D20-D23 | 13, 14, 15, 19    |
+| 7   | Caddy                | D24-D26 | 16, 17, 18        |
+| 8   | API (NestJS)         | D27-D40 | 2, 3, 5-10        |
+| 9   | Postgres and Redis   | D41-D44 | 11, 12, 15, 20    |
+| 10  | ALPR (Python)        | D45     | 4, 21             |
+| 11  | Supply chain and CI  | D46-D49 | 21-24, 26, 30     |
+| 12  | Accounts and people  | D50     | 32                |
+
+## 2. Twelve-Factor and security
+
+Twelve-Factor is about **operability**, not security. It helps only through III (config), V (build/release/run), X (parity), XI (logs). It says nothing
+about authentication, input handling, least privilege, the network or the supply chain. The app is compliant (audit: PLAN.md "Twelve-Factor audit").
+
+| #    | Factor              | Status           | How the app uses it                                                                                                     | Security relevance                 |
+| ---- | ------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
+| I    | Codebase            | Fully            | One monorepo, many deploys (blue/green, `stage` branch)                                                                 | Traceable code, one place to scan  |
+| II   | Dependencies        | Partly           | `pnpm-lock.yaml` frozen, `packageManager` pinned. ALPR `requirements.txt` unpinned → step 21                            | Reproducible builds, supply chain  |
+| III  | Config              | Fully, with gaps | Zod `env.ts` + `assertProductionEnv`. Some secrets fail open → steps 3-4. Secrets visible in `docker inspect` → step 15 | Secrets out of code                |
+| IV   | Backing services    | Fully            | Postgres, Redis, ALPR, mail, R2 all by URL                                                                              | Swappable and isolatable → step 13 |
+| V    | Build, release, run | Fully            | SHA-tagged images, rollback by `image_tag`, immutable web build. `:latest` also pushed → step 26                        | Integrity, provenance              |
+| VI   | Processes           | Partly           | Stateless API, sessions in DB, throttle counters in Redis. `contact-limiter` in memory by design                        | Scale without sticky state         |
+| VII  | Port binding        | Fully            | `PORT`; only Caddy publishes 443                                                                                        | Small exposed surface              |
+| VIII | Concurrency         | Partly           | Ingest is its own process (advisory lock). Timers run inside the API (fine at one replica)                              | n/a                                |
+| IX   | Disposability       | Fully            | `enableShutdownHooks`, exec-form `CMD`, healthchecks, `stop_grace_period: 30s`                                          | Fast patch rollout                 |
+| X    | Dev/prod parity     | Fully            | Same Postgres 18.6 and Redis in dev and prod; dev binds 127.0.0.1                                                       | Bugs reproducible locally          |
+| XI   | Logs                | Partly           | stdout JSON, rotated json-file, Sentry. No Caddy access log → step 16. PII scrubbing → steps 1-2                        | Audit trail vs PII leak            |
+| XII  | Admin processes     | Fully            | Migrations, seed, ingest as one-off `compose run --rm` with the release image                                           | Same audited image for admin tasks |
+
+"Beyond the Twelve-Factor App" (Hoffman, 2016) adds **API first**, **Telemetry**, **Authentication and authorization**. Mapped here: curated public OpenAPI
+subset (D36); Sentry + PostHog (D47 area, step 1); sessions, guards, sudo mode (D28-D30).
+
+## 3. Standards and tools
+
+Yardsticks: **OWASP Top 10** and **ASVS 5.0 L2** (mapped in security-checklist §2), **CIS Docker and Ubuntu benchmarks** (Lynis, docker-bench), **OpenSSF Scorecard**.
+
+**Trivy vs Lynis: keep both, they do not overlap.**
+
+|              | Trivy                                                                                      | Lynis                                                                                |
+| ------------ | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ |
+| Checks       | Artifacts: npm/pip CVEs, image OS packages, Dockerfile/compose misconfig, secrets in files | The running Ubuntu host: SSH, PAM, sysctl, permissions, services, firewall, auditing |
+| When / where | Build time, in CI, every PR and weekly                                                     | Run time, on the VPS only (on a CI runner it would audit GitHub's VM)                |
+| Licence      | Apache-2.0                                                                                 | GPL-3.0                                                                              |
+
+docker-bench-security covers the gap between them (CIS Docker daemon and runtime) and runs on the VPS with Lynis.
+
+- **Lynis in CI: no.** Monthly cron on the VPS (step 25).
+- **ZAP baseline in CI: yes**, weekly and `workflow_dispatch`, against the local stack inside CI, never carsua.app (step 24). `.zap/rules.tsv` ignores the header rules Caddy owns (guarded by `caddyfile-headers.test.ts`). Active scans stay manual, local only.
+
+| Need                 | Tool                                    | Licence             | Alternatives (pros / cons)                                                                                                                                                             |
+| -------------------- | --------------------------------------- | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Secrets in git       | gitleaks (CLI or image)                 | MIT                 | trufflehog: verifies secrets live, more noise · GitHub secret scanning: free on public repos, cloud-side only. The official gitleaks-action needs a licence key for organisation repos |
+| Deps, images, IaC    | Trivy                                   | Apache-2.0          | Grype (+Syft): simpler, no IaC · Docker Scout: not fully OSS                                                                                                                           |
+| Second advisory feed | OSV-Scanner                             | Apache-2.0          | `pnpm audit` only: GitHub advisories only                                                                                                                                              |
+| SAST                 | Opengrep (or Semgrep CE)                | LGPL-2.1            | CodeQL: deeper, free only on public repos · SonarQube Community: needs a server                                                                                                        |
+| DAST                 | OWASP ZAP baseline                      | Apache-2.0          | Nuclei (MIT): fast CVE templates, less app-logic · Nikto: dated                                                                                                                        |
+| Host audit           | Lynis, docker-bench-security            | GPL-3.0, Apache-2.0 | OpenSCAP + CIS profile: formal, heavy · Wazuh: full SIEM, too heavy for one VPS                                                                                                        |
+| SBOM, provenance     | Syft, `actions/attest-build-provenance` | Apache-2.0, free    | cosign keyless: also verifies at deploy, more scripting                                                                                                                                |
+| Backup encryption    | age                                     | BSD                 | rclone crypt: transparent, key on the VPS · gpg: clunky                                                                                                                                |
+| Supply-chain score   | OpenSSF Scorecard                       | Apache-2.0          | none needed                                                                                                                                                                            |
+
+## 4. Layer wiki (done items, D-n)
+
+Each row: what is in place, where, and the real-world reason it matters. CVE status is in section 6.
+
+### Layer 1 - User OS and device
+
+| ID  | Control                                                                                         | Where                                    | Why it matters                                |
+| --- | ----------------------------------------------------------------------------------------------- | ---------------------------------------- | --------------------------------------------- |
+| D1  | Session cookie `carsua_sid` HttpOnly, SameSite=Lax; DB stores only a SHA-256 of a 256-bit token | `apps/api/src/auth/session-cookie.ts`    | Firesheep (2010) cookie hijack; CWE-1004      |
+| D2  | No auth token in JS storage; share tokens cleared on sign-out                                   | `components/auth/use-auth-actions.ts:58` | Malware or extensions cannot read the session |
+
+Open: history, favorites and offline cache survive sign-out → step 29.
+
+### Layer 2 - Browser and frontend
+
+| ID  | Control                                                                                                                                     | Where                                                 | Why it matters                      |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- | ----------------------------------- |
+| D3  | CSP enforced since 2026-11-21: no `unsafe-inline` for scripts, `frame-ancestors 'self'`, `object-src 'none'`, report sink `/api/csp-report` | `infra/Caddyfile:48-81`                               | British Airways Magecart (2018)     |
+| D4  | Fonts self-hosted; third-party script hosts allow-listed                                                                                    | `Caddyfile` CSP                                       | Polyfill.io takeover (2024)         |
+| D5  | No `dangerouslySetInnerHTML`, `eval`, `new Function`, markdown renderer                                                                     | grep, `apps/web`                                      | CVE-2018-6341 class (React SSR XSS) |
+| D6  | Zod `jitless`, `zod-config` first import                                                                                                    | `lib/zod-config.ts`, `main.tsx:1`                     | Lets CSP forbid `eval`              |
+| D7  | Service worker never caches `/api`; prompted update                                                                                         | `vite.config.ts:150-297`                              | No stale or poisoned personal data  |
+| D8  | No production source maps                                                                                                                   | `vite.config.ts`                                      | No source disclosure                |
+| D9  | Every `target=_blank` has `noopener`/`noreferrer`                                                                                           | `components/ExternalLink.tsx:19`                      | Reverse tabnabbing (CWE-1022)       |
+| D10 | Telegram widget isolated in its own page with its own CSP, origin-checked `postMessage`                                                     | `public/telegram-frame.*`, `lib/telegram-login.ts:24` | Contains the one `eval`             |
+| D11 | SPA, no React Server Components, so not exposed to CVE-2025-55182                                                                           | architecture                                          | RSC deserialization RCE             |
+
+Open: step 1 (share token and plate leak to PostHog/Sentry), 27 (lint rules), 28 (iframe sandbox), 31 (Trusted Types), 32 (Maps key restriction).
+
+### Layer 3 - Cloudflare, CDN, DNS
+
+| ID  | Control                                                                                                 | Where                                  | Why it matters                                                |
+| --- | ------------------------------------------------------------------------------------------------------- | -------------------------------------- | ------------------------------------------------------------- |
+| D12 | SSL Full (strict), Always HTTPS, min TLS 1.2                                                            | `origin-hardening-plan.md` §4          | Prevents edge-to-origin downgrade                             |
+| D13 | Authenticated Origin Pulls (mTLS), per-zone CA, cert valid to 2036                                      | `Caddyfile:14-17`, `secrets/README.md` | Origin reachable only through Cloudflare (CWE-693 WAF bypass) |
+| D14 | WAF rate rule `api-lookup-limit` 30 req / 10 s on `/api/plate`, `/api/vin`; Bot Fight Mode; cache rules | dashboard                              | Scraping and enumeration                                      |
+
+Open: DNSSEC, CAA, origin IP change (H7), account hardening → step 32.
+
+### Layer 4 - Network and provider (Contabo)
+
+| ID  | Control                                                                                                                        | Where                      | Why it matters                              |
+| --- | ------------------------------------------------------------------------------------------------------------------------------ | -------------------------- | ------------------------------------------- |
+| D15 | ufw: only 22 and 443; `cf-firewall.sh` admits Cloudflare ranges only (ipset, `DOCKER-USER` chain, IPv6 `INPUT`), daily refresh | `infra/vps/cf-firewall.sh` | Docker publishes ports around ufw (CWE-284) |
+
+Open: IPv6 lockdown not tested from outside, SSH tunnel decision (H11) → step 32.
+
+### Layer 5 - Ubuntu host
+
+| ID  | Control                                                        | Where                          | Why it matters                                  |
+| --- | -------------------------------------------------------------- | ------------------------------ | ----------------------------------------------- |
+| D16 | SSH: keys only, no root, `AllowUsers deploy`, `MaxAuthTries 3` | `infra/vps/bootstrap.sh:36-45` | CVE-2024-6387 regreSSHion                       |
+| D17 | unattended-upgrades                                            | `bootstrap.sh:59`              | CVE-2024-3094 xz backdoor was fixed by upgrades |
+| D18 | fail2ban (stock config)                                        | `bootstrap.sh:58`              | SSH brute force                                 |
+| D19 | `deploy` user has no sudo                                      | `bootstrap.sh:26`              | CVE-2021-3156 class (sudo privilege escalation) |
+
+Open: CI key restrictions, reboot policy, auditd, logrotate → step 19. Lynis baseline → step 25. Note: `deploy` is in the docker group, which is effectively root (CWE-250).
+
+### Layer 6 - Docker
+
+| ID  | Control                                                                                                      | Where                            | Why it matters                                         |
+| --- | ------------------------------------------------------------------------------------------------------------ | -------------------------------- | ------------------------------------------------------ |
+| D20 | api, alpr, ingest, redis: `cap_drop: ALL`, `no-new-privileges`; api, alpr non-root; alpr `read_only` + tmpfs | `docker-compose.prod.yml:27-107` | CVE-2019-5736, CVE-2024-21626 runc escapes are blunted |
+| D21 | Exact image tags (`caddy:2.11.9`, `redis:8.10.3-alpine`, `postgres:18.6`), no `latest` in prod compose       | `docker-compose.prod.yml`        | Surprise upgrades                                      |
+| D22 | Only Caddy publishes a port; dev ports bound to 127.0.0.1                                                    | compose files                    | Postgres exposure                                      |
+| D23 | json-file rotation 10m x 5, memory limits on api, alpr, redis, ingest                                        | `docker-compose.prod.yml:9-11`   | Log disk exhaustion                                    |
+
+Open: segmentation → 13; Caddy and Postgres hardening, pids limits → 14; digests, Redis password → 15; `daemon.json` → 19.
+
+### Layer 7 - Caddy
+
+| ID  | Control                                                                                                    | Where               | Why it matters                                                    |
+| --- | ---------------------------------------------------------------------------------------------------------- | ------------------- | ----------------------------------------------------------------- |
+| D24 | `trusted_proxies` = Cloudflare ranges, `client_ip_headers CF-Connecting-IP`, `X-Forwarded-For` overwritten | `Caddyfile:4-7,110` | Header-trust bypass class (CVE-2025-29927 is the Next.js example) |
+| D25 | HSTS 1 year, Permissions-Policy, COOP, Origin-Agent-Cluster                                                | `Caddyfile:37-44`   | Downgrade and cross-origin isolation                              |
+| D26 | Maintenance flag and `handle_errors`                                                                       | `Caddyfile:90-131`  | Controlled failure pages                                          |
+
+Open: CORP, Server header, admin off, body limit, access log → 16; HSTS flags → 17; IP list drift → 18.
+
+### Layer 8 - API (NestJS on Fastify)
+
+| ID  | Control                                                                                                                                 | Where                                                                | Why it matters                                                   |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| D27 | Global `ZodValidationPipe` + `zodParam`                                                                                                 | `app.module.ts:126`                                                  | CWE-20                                                           |
+| D28 | Global CSRF `OriginGuard` (`Sec-Fetch-Site`, `Origin` fallback)                                                                         | `common/origin.guard.ts`                                             | CWE-352                                                          |
+| D29 | `SudoGuard` (recent re-auth) for destructive account changes; `AdminGuard` with the role only in the DB                                 | `auth/session.guard.ts:33-58`                                        | CWE-269                                                          |
+| D30 | Google ID token (RS256, iss, aud, exp, `email_verified`); Telegram HMAC + `timingSafeEqual` + 24 h; email code HMAC, 5 attempts, 15 min | `auth/google-id-token.ts`, `telegram-login.ts`, `email-challenge.ts` | CVE-2015-9235 (alg confusion) is not applicable: no JWT sessions |
+| D31 | Global throttle (30/s, 150/min, 1500/h) in Redis with per-route overrides; Turnstile on email code and contact                          | `common/throttle.ts`, `auth/turnstile.ts`                            | CWE-307                                                          |
+| D32 | No `sql.raw` fed by request text; Drizzle parameterizes                                                                                 | grep `sql.raw`                                                       | CWE-89                                                           |
+| D33 | HTML escaping in meta and OG, `<` escaped in JSON-LD                                                                                    | `spa/meta.ts:38-79`, `og-card.ts:28`                                 | CWE-79                                                           |
+| D34 | Static path: safe decode, `..` rejected, `distDir + sep`                                                                                | `spa.controller.ts:147-163`                                          | CVE-2021-41773 class                                             |
+| D35 | Generic 5xx body, stack only to log and Sentry                                                                                          | `common/all-exceptions.filter.ts:144`                                | CWE-209                                                          |
+| D36 | Swagger off in production; public OpenAPI is a curated read-only subset                                                                 | `env.ts:185`, `main.ts:62`                                           | Smaller attack surface                                           |
+| D37 | CORS pinned to `PUBLIC_SITE_URL` in production                                                                                          | `main.ts:45-48`                                                      | Credentialed cross-origin reads                                  |
+| D38 | JSON body 1 MiB, multipart 4 MB / 1 file, request timeout 60 s                                                                          | `main.ts:23-43`                                                      | CWE-770                                                          |
+| D39 | Share uploads: magic bytes, EXIF stripped, sharp pixel limit                                                                            | `shares/helpers.ts:20-36`                                            | CVE-2023-4863, CVE-2016-3714                                     |
+| D40 | `fastify` 5.12.7 / `@nestjs/platform-fastify` 11.2.7 via `pnpm.overrides` (finding #1, fixed 2026-10-13)                                | `pnpm-workspace.yaml:29-35`                                          | Known high advisories                                            |
+
+Open: 2, 3, 5-10.
+
+### Layer 9 - Postgres and Redis
+
+| ID  | Control                                                                                          | Where                            | Why it matters                                                                    |
+| --- | ------------------------------------------------------------------------------------------------ | -------------------------------- | --------------------------------------------------------------------------------- |
+| D41 | Internal network only, no published port                                                         | `docker-compose.prod.yml`        | Direct DB access                                                                  |
+| D42 | `assertProductionEnv` refuses dev credentials                                                    | `env.ts:165-177`                 | Default-credential boot                                                           |
+| D43 | Nightly dump to R2 (14 days), full dump after ingest, restore tested 2026-10-28, healthchecks.io | `infra/vps/backup.sh`            | Ransomware and loss                                                               |
+| D44 | Redis: password, AOF, `noeviction`, no published port                                            | `docker-compose.prod.yml:87-107` | CVE-2025-49844 needs auth and network reach; both blocked. Keep the image patched |
+
+Open: timeouts → 11; roles → 12; Redis password on command line → 15; backup encryption → 20.
+
+### Layer 10 - ALPR service (Python, `services/alpr`)
+
+| ID  | Control                                                                                           | Where                                           | Why it matters                          |
+| --- | ------------------------------------------------------------------------------------------------- | ----------------------------------------------- | --------------------------------------- |
+| D45 | Non-root uid 10001, read-only, internal network, 6 MB upload cap, `hmac.compare_digest` key check | `services/alpr/app.py:408-422`, `Dockerfile:28` | Image parsers are a classic RCE surface |
+
+Open: fail-open without key, docs exposed → 4; unpinned requirements, no Dependabot `pip` → 21.
+
+### Layer 11 - Supply chain and CI
+
+| ID  | Control                                                                                                                             | Where                                  | Why it matters                               |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- | -------------------------------------------- |
+| D46 | Frozen lockfile in CI, `allowBuilds` (install scripts blocked by default)                                                           | `pnpm-workspace.yaml:7-16`             | event-stream (2018), ua-parser-js (2021)     |
+| D47 | `pnpm audit --prod --audit-level=high` in CI, Dependabot npm/docker/actions                                                         | `ci.yml:28`, `.github/dependabot.yml`  | Log4Shell (CVE-2021-44228) is why SCA exists |
+| D48 | `permissions: contents: read`, `production` environment, pinned SSH host key, `umask 077` env files, 40-char SHA regex for rollback | `.github/workflows`, `infra/ci/lib.sh` | Least privilege in CI                        |
+| D49 | No secret ever committed (history checked), `.gitignore` and `.dockerignore` cover env, keys, secrets                               | `.gitignore`                           | Uber (2016) keys on GitHub                   |
+
+Open: 21, 22, 23, 24, 26, 30.
+
+### Layer 12 - Accounts and people
+
+| ID  | Control                      | Where                | Why it matters    |
+| --- | ---------------------------- | -------------------- | ----------------- |
+| D50 | VPS and CI use SSH keys only | `bootstrap.sh:36-45` | Password spraying |
+
+Open: 2FA on every account, branch protection, secret scanning → step 32.
+
+## 5. Steps (open items)
+
+Tick the box and add a `docs/plan-done.md` entry when a step is finished. "Verify" is the concrete check. Suggested order:
+**1-4 → 21-22 → 23 → 5-6 → 11 → 13-15 → 7-10 → 16-18 → 19-20 → 25 → 24 → 26 → 27-30 → 12 → 31**; step 32 runs in parallel at any time.
+
+### A. Privacy and fail-closed config
+
+### Step 1 - Strip the share token and scrub web telemetry [ ] · S · 🤖 · layer 2
+
+- **What:** the share link `/<plate>?p=<token>` keeps the bearer token in the address bar, and PostHog sends the full URL on every page view (`telemetry.ts:55`); Sentry's `beforeSend` drops only `query_string`. Remove `?p=` with `replaceState` after reading it; scrub token, plate and VIN from the URL in PostHog `before_send` and Sentry `beforeSend`/`beforeBreadcrumb`. Confirm the Sentry `request.url` claim while doing it (it was not verified).
+- **Files:** `apps/web/src/routes/SearchRoute.tsx:253`, `apps/web/src/lib/telemetry.ts:27-64`, release version in `packages/shared/src/releases/<yyyy-mm>.ts`.
+- **Why:** CWE-598 (sensitive data in a query string), CWE-359.
+- **Alternatives:** token in `#fragment` (never sent to servers; breaks server-side OG previews that read `?p=`) · PostHog `property_denylist` (no code; misses Sentry and breadcrumbs).
+- **Verify:** unit test for the scrubbers; local run with telemetry on, open a share link, DevTools network shows no token in PostHog/Sentry payloads.
+
+### Step 2 - Scrub plates and VINs from API Sentry events [ ] · S · 🤖 · layer 8 (bundle with step 1)
+
+- **What:** `beforeSend` removes body, query string and cookies but not the path, so `/api/plate/:plate` and `/api/vin/:vin` reach Sentry on 5xx. Rewrite to route templates.
+- **Files:** `apps/api/src/instrument.ts`.
+- **Why:** CWE-532 (sensitive data in logs).
+- **Alternatives:** Sentry server-side scrubbing rules (no code; data still leaves the VPS).
+- **Verify:** unit test; a forced 5xx locally shows `/api/plate/:plate`.
+
+### Step 3 - Fail-closed production secrets [ ] · S · 🤖 · layer 8
+
+- **What:** `assertProductionEnv` requires `TURNSTILE_SECRET_KEY` and `ALPR_API_KEY`. Today an unset Turnstile key passes every token (`auth/turnstile.ts:19`) and an unset ALPR key leaves ALPR open.
+- **Files:** `apps/api/src/env.ts`, its test, `infra/` env docs.
+- **Why:** CWE-636 (not failing securely).
+- **Alternatives:** switch the feature off when the secret is unset (app still boots; silent feature loss).
+- **Verify:** env test: production without either key throws.
+
+### Step 4 - ALPR fails closed and hides its docs [ ] · S · 🤖 · layer 10 (bundle with step 3)
+
+- **What:** exit at startup when `ALPR_API_KEY` is unset; `FastAPI(docs_url=None, redoc_url=None, openapi_url=None)`.
+- **Files:** `services/alpr/app.py:37,408`; add a pytest.
+- **Why:** CWE-636, CWE-200.
+- **Verify:** pytest; `curl localhost:8088/docs` is 404.
+
+### B. API input and output
+
+### Step 5 - Recognize upload checks (local and VIN) [ ] · S-M · 🤖 · layer 8
+
+- **What:** recognize trusts the client MIME type, accepts any multipart field name, forwards the client filename and echoes upstream `err.message` in 502s (`local-recognize.service.ts:60`, same pattern in Pixabay and NHTSA). Reuse the magic-byte check from shares, require the field name, drop the filename, return generic 502 text.
+- **Files:** `apps/api/src/recognize/read-upload.ts`, `local-recognize.service.ts`, `vin-recognize.service.ts`, `shares/helpers.ts` (reuse), `photos`, `nhtsa` services.
+- **Why:** CVE-2023-4863 libwebp, CVE-2016-3714 ImageTragick, CWE-209.
+- **Alternatives:** re-encode with sharp before forwarding (strongest, strips polyglots; CPU and latency) · `file-type` package (more formats; new dependency).
+- **Verify:** tests: a text file renamed `.jpg` is rejected; 502 body is generic.
+
+### Step 6 - Hostile-input tests [ ] · S · 🤖 · layer 8 (bundle with step 5)
+
+- **What:** missing tests: `<script>` and `"` in a plate through `renderMetaTags` title and description; `../` and encoded traversal against SPA static serving.
+- **Files:** `apps/api/src/spa/meta.test.ts`, a new spa controller test.
+- **Why:** CWE-79, CVE-2021-41773.
+- **Verify:** tests pass, and fail when the escaping is removed.
+
+### Step 7 - `fetchJson` helper (timeout, byte cap, Zod) [ ] · M · 🤖 · layer 8
+
+- **What:** one helper `fetchJson(url, schema, { timeoutMs, maxBytes })`. Today `vin/vin.service.ts:44` has no timeout, nothing caps response size (checklist rule 3), and recognize, `photos.service.ts:57`, `safety.service.ts:139`, `turnstile.ts:26` use plain `as` casts.
+- **Files:** new `apps/api/src/common/fetch-json.ts`; migrate the callers above (cloud recognize is skipped).
+- **Why:** CWE-400, CWE-770, CWE-20.
+- **Alternatives:** `ky` or `got` with hooks (battle-tested; new dependency, Zod still manual) · undici `Agent` limits (no schema validation).
+- **Verify:** tests: timeout, oversize body, schema failure each reject; existing service tests green.
+
+### Step 8 - Throttle the expensive routes [ ] · S · 🤖 · layer 8
+
+- **What:** `safety/video` (downloads a file and runs ffmpeg) and `photos` (spends Pixabay quota) only have the global limit. Add `@Throttle` values in `common/throttle.ts`.
+- **Files:** `safety/safety.controller.ts:118`, `photos` controller, `common/throttle.ts`.
+- **Why:** CVE-2016-1897/1898 show the ffmpeg attack surface; CWE-770.
+- **Alternatives:** Cloudflare WAF rate rule (blocks at the edge; free plan has few rules).
+- **Verify:** throttle test; follow the checklist "new `/api/*` endpoint" item.
+
+### Step 9 - Host allowlist on the `/go/:id` redirect [ ] · S · 🤖 · layer 8 (bundle with step 8)
+
+- **What:** the redirect only checks `https:`. Add an allowlist of upstream hosts.
+- **Files:** `apps/api/src/market/carapis-parse.ts:73,145`, `market.controller.ts:26-33`.
+- **Why:** CWE-601 (open redirect).
+- **Alternatives:** interstitial "leaving carsua.app" page (visible to users; extra click).
+- **Verify:** test: an off-list host is refused.
+
+### Step 10 - Origin fallback headers [ ] · S · 🤖 · layer 8
+
+- **What:** if a request reaches the API without Caddy, HSTS and CSP are missing. Set a minimal HSTS and CSP in the Fastify `onSend` hook only when absent, so `csp/caddyfile-headers.test.ts` "no duplicates" stays green.
+- **Files:** `apps/api/src/main.ts:34-42`.
+- **Why:** defence in depth; origin is already behind mTLS (D13).
+- **Alternatives:** `@fastify/helmet` (complete; duplicates Caddy, breaks the no-duplicates test).
+- **Verify:** direct hit on the API port locally shows the headers; behind Caddy they are not doubled.
+
+### C. Database
+
+### Step 11 - Postgres timeouts and pool limits [ ] · S · 🤖 · layer 9
+
+- **What:** `new Pool({ connectionString })` has no `max`, `connectionTimeoutMillis`, `idleTimeoutMillis` or timeouts. Set them and `options: '-c statement_timeout=15000 -c idle_in_transaction_session_timeout=30000 -c lock_timeout=5000'`; ingest overrides through env.
+- **Files:** `packages/db/src/client.ts:54-57`, ingest env.
+- **Why:** CWE-400.
+- **Alternatives:** `ALTER ROLE ... SET statement_timeout` after step 12 (enforced server-side; needs roles first) · PgBouncer (rejected in origin-hardening §5).
+- **Verify:** test: `SELECT pg_sleep(60)` is cancelled; ingest still completes.
+
+### Step 12 - Least-privilege roles [ ] · L · 🤖👤 · layer 9
+
+- **What:** today one superuser (`carplates`) serves api, ingest, migrations and `pg_dump`. Create `carsua_owner` (migrations), `carsua_app` (DML on `app.*`, SELECT on `registry.*`), `carsua_ingest` (DML on `registry.*`); `REVOKE CREATE ON SCHEMA public`; separate `DATABASE_URL`s; passwords set by a VPS runbook, never in SQL.
+- **Files:** new `packages/db/migrations/NNNN_roles.sql` (table-level named FKs rule not relevant; no applied migration is edited), `deploy-api.yml`, `infra/vps/run-ingest.sh`, `docs/deploy.md`, PLAN.md "After deploy" boxes.
+- **Why:** CVE-2019-9193 (`COPY ... FROM PROGRAM` runs OS commands for a superuser), CVE-2018-1058 (search_path).
+- **Alternatives:** row-level security (overkill, single tenant) · read-only role for the API only (simpler; the API writes `app.*`).
+- **Verify:** as `carsua_app`, `DROP TABLE` and `TRUNCATE registry.*` fail; app and ingest still work; **never run against a real-data DB without the row-count check in CLAUDE.md**.
+
+### D. Containers and edge
+
+### Step 13 - Network segmentation [ ] · M · 🤖 · layer 6
+
+- **What:** no `networks:` block today, so alpr (parses untrusted images) can reach Postgres and Redis. Add `edge` (caddy, api), `backend` (api, postgres, redis, ingest), `alpr_net` (api, alpr, `internal: true`).
+- **Files:** `infra/docker-compose.prod.yml`, `docs/deploy.md`.
+- **Why:** CWE-923 lateral movement.
+- **Alternatives:** separate compose projects (more deploy complexity).
+- **Verify:** `docker compose exec alpr nc -z postgres 5432` fails; `/healthz` and plate lookup work; blue/green still switches.
+
+### Step 14 - Harden Caddy and Postgres containers [ ] · M · 🤖 · layer 6
+
+- **What:** Caddy and Postgres lack `cap_drop`, `no-new-privileges`, memory limits; nothing sets `pids_limit`; api is not `read_only`. Caddy: `cap_drop: [ALL]` + `NET_BIND_SERVICE`. Postgres: drop all, add back `CHOWN`, `SETUID`, `SETGID`, `FOWNER`, `DAC_READ_SEARCH`. api: `read_only` + tmpfs `/tmp`.
+- **Files:** `infra/docker-compose.prod.yml`.
+- **Why:** Kinsing cryptominer campaigns (binary drops), CWE-400 (fork bombs).
+- **Alternatives:** rootless Docker (strongest; networking and port 443 friction).
+- **Verify:** `docker compose config -q`; stack boots and passes healthchecks; `docker-bench-security` before and after.
+
+### Step 15 - Pin image digests, hide the Redis password [ ] · S-M · 🤖 · layer 6, 9
+
+- **What:** base images are floating tags (`node:24-slim`, `python:3.12-slim`) and compose images are exact tags, none by digest. The Redis password is on a `sh -c` command line (`compose:93`). Pin digests (Dependabot bumps them); read the Redis password from a mounted file.
+- **Files:** `apps/api/Dockerfile`, `scripts/Dockerfile`, `services/alpr/Dockerfile`, `docker-compose.prod.yml`.
+- **Why:** CWE-494, tag mutability.
+- **Alternatives:** exact tags only (readable; a tag can be repointed) · Compose `secrets:` for all secrets (hidden from `docker inspect`; app must read `*_FILE`).
+- **Verify:** `docker inspect` does not show the Redis password; images build; Dependabot opens a digest PR.
+
+### Step 16 - Caddyfile hardening [ ] · S · 🤖 · layer 7
+
+- **What:** add `Cross-Origin-Resource-Policy: same-site`, `-Server`, global `admin off`, `request_body { max_size 5MB }`, a JSON access log with roll. Today there is no access log and the body limit is Fastify's alone.
+- **Files:** `infra/Caddyfile`, `apps/api/src/csp/caddyfile-headers.test.ts`.
+- **Why:** CVE-2023-44487 Rapid Reset (resource exhaustion class), CWE-770.
+- **Alternatives:** Cloudflare Transform Rules for headers (config lives outside the repo).
+- **Verify:** extended header test; `curl -sI` locally; reload Caddy, then passive check on live.
+
+### Step 17 - HSTS `includeSubDomains; preload` [ ] · S · 👤🤖 · layer 7
+
+- **What:** currently `max-age=31536000` only. Confirm every subdomain serves HTTPS, then add the flags; submit to hstspreload.org after a month of stable running.
+- **Files:** `infra/Caddyfile:38`, header test.
+- **Why:** sslstrip (2009), CWE-319.
+- **Alternatives / con:** preloading is hard to undo; skip the preload flag if any subdomain may ever be plain HTTP.
+- **Verify:** `curl -sI` shows the flags; hstspreload.org check is green.
+
+### Step 18 - Single source for the Cloudflare IP list [ ] · M · 🤖 · layer 7
+
+- **What:** `trusted_proxies` in the Caddyfile is hard-coded while the firewall refreshes daily, so they can drift. Let `cf-firewall.sh` write a Caddy snippet that the Caddyfile imports.
+- **Files:** `infra/vps/cf-firewall.sh`, `infra/Caddyfile`, `deploy.md`.
+- **Why:** drift loses the real client IP or lets it be spoofed.
+- **Alternatives:** `caddy-cloudflare-ip` module (custom Caddy build) · **Cloudflare Tunnel** (no public origin IP at all, which also settles H7 and H11; adds a cloudflared container and full dependence on Cloudflare).
+- **Verify:** change the snippet, reload, `req.ip` stays correct behind Cloudflare.
+
+### E. VPS and backups
+
+### Step 19 - Host hardening [ ] · M · 🤖👤 · layer 5, 6
+
+- **What:** `restrict,command=` on the CI key in `authorized_keys`; `/etc/docker/daemon.json` (`no-new-privileges`, `live-restore`, `icc: false`, log options); unattended-upgrades `Automatic-Reboot "true"` at 04:00; auditd with basic rules; logrotate for `backup.log` and `cf-firewall.log`; sshd `LoginGraceTime`.
+- **Files:** `infra/vps/bootstrap.sh`; owner re-runs the relevant parts on the VPS.
+- **Why:** CVE-2024-6387 (`LoginGraceTime 0` mitigation), CVE-2022-0847 Dirty Pipe (kernel patches need a reboot), CWE-250 (docker group = root).
+- **Alternatives:** userns-remap (container root ≠ host root; volume ownership pain) · Livepatch (no reboot; Ubuntu Pro, free on up to 5 machines).
+- **Verify:** `sshd -T`, `docker info`, a forced CI deploy still works, `lynis` index rises (step 25).
+
+### Step 20 - Encrypted, immutable backups [ ] · M · 🤖👤 · layer 9
+
+- **What:** dumps go to R2 as plain `pg_dump -Fc` with no encryption, versioning or object lock. Encrypt with `age` (private key offline), turn on R2 versioning or object lock, do a decrypt-and-restore drill.
+- **Files:** `infra/vps/backup.sh`, `docs/deploy.md`.
+- **Why:** LastPass (2022), backups stolen from cloud storage.
+- **Alternatives:** rclone crypt (transparent; key sits on the VPS) · gpg (clunky) · second provider such as Backblaze B2 (provider redundancy).
+- **Verify:** a downloaded dump is unreadable without the key; restore into a scratch DB passes.
+
+### F. Supply chain and CI
+
+### Step 21 - Package-config hygiene [ ] · S-M · 🤖 · layer 10, 11
+
+- **What:** `minimumReleaseAge: 1440` (today 0, `pnpm-workspace.yaml:26`); add `*.pem`, `*.crt`, `id_*`, `ci_key` to `.gitignore`; Dependabot `pip` for `services/alpr`, docker for `/scripts` and `/infra`; hash-pinned `requirements.txt` (`pip-compile --generate-hashes`); check whether stable `onnxruntime-web` can replace the nightly `onnxruntime-web-dev` (`apps/web/package.json:31`).
+- **Why:** Shai-Hulud npm worm (2025), chalk/debug compromise (2025), PyTorch nightly `torchtriton` dependency confusion (2022).
+- **Alternatives:** Renovate `minimumReleaseAge` (richer grouping; replaces Dependabot) · Socket.dev (free tier only, not OSS).
+- **Verify:** `pnpm install --frozen-lockfile`, ALPR image builds with `--require-hashes`, Dependabot config validates.
+
+### Step 22 - Pin Actions to commit SHAs [ ] · S · 🤖 · layer 11
+
+- **What:** `actions/checkout@v7`, `docker/build-push-action@v7` and the composite actions use tags. Pin to SHAs with the tag in a comment; Dependabot's `github-actions` ecosystem keeps them current.
+- **Files:** `.github/workflows/*`, `.github/actions/*/action.yml`.
+- **Why:** CVE-2025-30066 tj-actions/changed-files (tags repointed), Ultralytics (2024, Actions cache poisoning).
+- **Alternatives:** `pinact` or `ratchet` CLI (automates pinning) · forking the Actions (maintenance).
+- **Verify:** `grep -rn "uses:" .github | grep -v "@[0-9a-f]\{40\}"` is empty for third-party actions; CI green.
+
+### Step 23 - `security.yml` workflow [ ] · M · 🤖 · layer 11
+
+- **What:** per PR, to `main` and weekly: gitleaks (full history once), `trivy fs` and `trivy config` (fail on HIGH and CRITICAL), OSV-Scanner, Opengrep with OWASP and Node rules (SARIF to the Security tab on public repos, otherwise an artifact). Weekly: `trivy image` on api, alpr, ingest from GHCR. CodeQL only if the repo is public. Add a root `pnpm security:check` running the local equivalents. Repo visibility was not checked (`gh` is not logged in here).
+- **Files:** `.github/workflows/security.yml`, root `package.json`.
+- **Why:** Codecov bash uploader (2021), Toyota key on GitHub (2022), Log4Shell.
+- **Alternatives:** Grype instead of Trivy · SonarQube Community (needs a server) · GitHub secret scanning (free on public repos; cloud-side only).
+- **Verify:** a planted test secret on a branch fails gitleaks; a known-vulnerable dev dependency fails OSV; run `pnpm security:check` locally.
+
+### Step 24 - ZAP baseline workflow [ ] · M · 🤖 · layer 8, 2
+
+- **What:** weekly and `workflow_dispatch`. CI starts Postgres with `db:seed` (synthetic data only) and the API serving the built SPA, then runs `zaproxy/action-baseline` against localhost. `.zap/rules.tsv` ignores header rules Caddy owns. Report kept as an artifact. Never targets carsua.app.
+- **Files:** `.github/workflows/zap-baseline.yml`, `.zap/rules.tsv`.
+- **Why:** OWASP Top 10 classes, passive only.
+- **Alternatives:** Nuclei (fast templates; more CVE-oriented than app-oriented).
+- **Verify:** manual dispatch produces a report; no finding on the SPA or API is new noise.
+
+### Step 25 - Host audit cron [ ] · S · 🤖👤 · layer 5, 6
+
+- **What:** `infra/vps/host-audit.sh` runs `lynis audit system --quick --cronjob` and `docker-bench-security` monthly, saves reports under `/opt/carsua/audit/`, diffs the Hardening Index against the last run, pings healthchecks.io. Owner records the first baseline and the waiver list.
+- **Why:** drift detection against CIS.
+- **Alternatives:** OpenSCAP + CIS profile (formal; heavy).
+- **Verify:** first run produces a report; second run shows a diff line.
+
+### Step 26 - Release integrity [ ] · S-M · 🤖 · layer 11
+
+- **What:** stop pushing `:latest` to GHCR; add `actions/attest-build-provenance` and a Syft SBOM to `build-image/action.yml`. 👤 optional: private GHCR (needs a pull token on the VPS; packages are public today, `deploy.md:123`).
+- **Why:** SolarWinds (2020, build tampering).
+- **Alternatives:** cosign keyless signing with verification on the VPS (deploy rejects unsigned images; more scripting).
+- **Verify:** `gh attestation verify` on a built image; prod compose still pins by SHA.
+
+### G. Frontend guards
+
+### Step 27 - ESLint security rules [ ] · S-M · 🤖 · layer 2
+
+- **What:** `no-eval`, `no-implied-eval`, `no-new-func`, `no-script-url`, and a local `jsx-no-target-blank` rule (`eslint-plugin-react` does not support ESLint 10, see `eslint.config.mjs:112`). Fix whatever they flag. Also closes security-checklist finding #9 guard.
+- **Why:** CWE-95, CWE-1022.
+- **Alternatives:** `@eslint-react/eslint-plugin` `dom/no-unsafe-target-blank` (check ESLint 10 support first).
+- **Verify:** `pnpm lint` fails on a planted `eval` and on a `target="_blank"` without `rel`.
+
+### Step 28 - Sandbox the iframes [ ] · S · 🤖 · layer 2 (bundle with step 27)
+
+- **What:** only `routes/play/ExternalGameModal.tsx:60` is sandboxed. Add `sandbox` and `referrerpolicy="strict-origin-when-cross-origin"` to YouTube, Maps, Model360, Model3d, RegionMap, LiveBackground; check each embed by hand since `sandbox` can break them.
+- **Why:** CWE-1021 (clickjacking, embed abuse).
+- **Alternatives:** click-to-load facade, e.g. lite-youtube (privacy and speed; one extra click).
+- **Verify:** manual embed walk (section 8d item 6).
+
+### Step 29 - Opt-in "clear this device" on sign-out [ ] · M · 🤖 · layer 1
+
+- **What:** a checkbox in the sign-out dialog that also clears history, favorites and the offline cache (today these survive deliberately, `SignOutDialog.tsx:51-62`). Needs i18n keys in the matching pack and a release version bump.
+- **Why:** shared-device privacy, CWE-922.
+- **Alternatives:** always clear (users lose offline data) · a "don't save history" toggle.
+- **Verify:** component test; manual: after sign-out with the box ticked, IndexedDB `carplates.*` stores are empty.
+
+### Step 30 - `SECURITY.md` and `security.txt` [ ] · S · 🤖 · layer 11
+
+- **What:** `SECURITY.md` at the root and `apps/web/public/.well-known/security.txt` (Contact, Expires, Preferred-Languages, Canonical). Today only `ai-catalog.json` and `ard.json` live in `.well-known`.
+- **Why:** RFC 9116.
+- **Alternatives:** a bug-bounty platform (overkill).
+- **Verify:** `/.well-known/security.txt` is served by the SPA fallback and not rewritten to `index.html`.
+
+### Step 31 - Trusted Types [ ] · M · 🤖 · layer 2 (later)
+
+- **What:** `Content-Security-Policy-Report-Only: require-trusted-types-for 'script'` through the Caddyfile and the existing `/api/csp-report` sink; enforce after a clean week.
+- **Why:** DOM XSS, CWE-79.
+- **Alternatives:** skip it: React already escapes and CSP blocks inline scripts; the gain is mostly for third-party code.
+- **Verify:** Sentry shows no violations from first-party code over a week.
+
+### H. Owner-only
+
+### Step 32 - Dashboards and accounts [ ] · S each · 👤 · layers 2, 3, 4, 12
+
+- [ ] Cloudflare DNSSEC on (CVE-2008-1447 Kaminsky) and a CAA record (letsencrypt.org, pki.goog, digicert.com plus what Cloudflare needs).
+- [ ] Change the origin IP (H7), then test the IPv6 lockdown from outside.
+- [ ] Decide H11 (SSH over Cloudflare Tunnel or Tailscale).
+- [ ] Least-scope Cloudflare purge token; optional cf-terraforming export of the zone.
+- [ ] Google Cloud: HTTP-referrer restriction on the Maps embed key (`lib/maps.ts:10,26`).
+- [ ] 2FA with hardware keys or TOTP and stored recovery codes on GitHub, Cloudflare, registrar, Contabo, R2, Google Cloud, Sentry, PostHog, Resend, Telegram BotFather (0ktapus phishing, 2022).
+- [ ] GitHub: branch protection on `main`, required reviewer on the `production` environment, secret scanning and push protection on.
+
+### I. Docs
+
+### Step 33 - Doc close-out [x] · S · 🤖
+
+- Done with this wiki: pointer from `security-checklist.md`, deleted the superseded `security-hardening-plan-2026-11.md`, `[ ]` boxes in PLAN.md. Open from then on: tick each step here and add a `docs/plan-done.md` entry when a step ships. Security-checklist finding #9 is stale (the lint guard is step 27).
+
+## 6. CVE and incident index
+
+"Verified" = the ID exists and the NVD record matches the summary (fetched 2026-11-24). **⏳ = not yet checked: NVD rate-limited the check, so treat as unverified until re-run.**
+
+| Reference                                               | Year            | Summary                                                                                                                                                                                                                                                                                                                                                                                               | Used by      | Verified                                                                                        |
+| ------------------------------------------------------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ | ----------------------------------------------------------------------------------------------- |
+| CVE-2018-6341                                           | 2018            | React DOM server did not escape attribute names, XSS                                                                                                                                                                                                                                                                                                                                                  | D5           | ✅                                                                                              |
+| CVE-2025-55182                                          | 2025            | React Server Components pre-auth RCE, "React2Shell"                                                                                                                                                                                                                                                                                                                                                   | D11          | ✅                                                                                              |
+| CVE-2024-6387                                           | 2024            | OpenSSH sshd signal-handler race, "regreSSHion"                                                                                                                                                                                                                                                                                                                                                       | D16, step 19 | ✅                                                                                              |
+| CVE-2024-3094                                           | 2024            | Backdoor in xz/liblzma 5.6.0 and 5.6.1                                                                                                                                                                                                                                                                                                                                                                | D17          | ✅                                                                                              |
+| CVE-2021-3156                                           | 2021            | sudo heap overflow, root escalation                                                                                                                                                                                                                                                                                                                                                                   | D19          | ✅                                                                                              |
+| CVE-2019-5736                                           | 2019            | runc `/proc/self/exe` overwrite, container escape                                                                                                                                                                                                                                                                                                                                                     | D20          | ✅                                                                                              |
+| CVE-2024-21626                                          | 2024            | runc leaked file descriptor, container escape                                                                                                                                                                                                                                                                                                                                                         | D20          | ✅                                                                                              |
+| CVE-2025-29927                                          | 2025            | Next.js middleware auth bypass via a header (in CISA KEV)                                                                                                                                                                                                                                                                                                                                             | D24          | ✅                                                                                              |
+| CVE-2015-9235                                           | 2018 (not 2015) | jsonwebtoken RS/HS algorithm confusion                                                                                                                                                                                                                                                                                                                                                                | D30          | ✅                                                                                              |
+| CVE-2022-21449                                          | 2022            | Java ECDSA "Psychic Signatures"                                                                                                                                                                                                                                                                                                                                                                       | D30          | ⚠ ID exists, NVD text is generic and does not mention ECDSA; drop it if not confirmed elsewhere |
+| CVE-2021-41773                                          | 2021            | Apache httpd path traversal                                                                                                                                                                                                                                                                                                                                                                           | D34, step 6  | ⏳                                                                                              |
+| CVE-2023-4863                                           | 2023            | libwebp heap overflow                                                                                                                                                                                                                                                                                                                                                                                 | D39, step 5  | ⏳                                                                                              |
+| CVE-2016-3714                                           | 2016            | ImageMagick "ImageTragick"                                                                                                                                                                                                                                                                                                                                                                            | D39, step 5  | ⏳                                                                                              |
+| CVE-2025-49844                                          | 2025            | Redis Lua use-after-free RCE, "RediShell"                                                                                                                                                                                                                                                                                                                                                             | D44          | ⏳                                                                                              |
+| CVE-2021-44228                                          | 2021            | Log4Shell                                                                                                                                                                                                                                                                                                                                                                                             | D47, step 23 | ⏳                                                                                              |
+| CVE-2016-1897, CVE-2016-1898                            | 2016            | FFmpeg HLS local file disclosure / SSRF                                                                                                                                                                                                                                                                                                                                                               | step 8       | ⏳                                                                                              |
+| CVE-2019-9193                                           | 2019            | PostgreSQL `COPY FROM PROGRAM` (disputed: documented superuser feature)                                                                                                                                                                                                                                                                                                                               | step 12      | ⏳                                                                                              |
+| CVE-2018-1058                                           | 2018            | PostgreSQL search_path privilege escalation                                                                                                                                                                                                                                                                                                                                                           | step 12      | ⏳                                                                                              |
+| CVE-2023-44487                                          | 2023            | HTTP/2 Rapid Reset                                                                                                                                                                                                                                                                                                                                                                                    | step 16      | ⏳                                                                                              |
+| CVE-2022-0847                                           | 2022            | Linux "Dirty Pipe"                                                                                                                                                                                                                                                                                                                                                                                    | step 19      | ⏳                                                                                              |
+| CVE-2025-30066                                          | 2025            | tj-actions/changed-files compromise                                                                                                                                                                                                                                                                                                                                                                   | step 22      | ⏳                                                                                              |
+| CVE-2008-1447                                           | 2008            | DNS cache poisoning, "Kaminsky"                                                                                                                                                                                                                                                                                                                                                                       | step 32      | ⏳                                                                                              |
+| Incidents (public reporting, no CVE; not NVD-checkable) |                 | Firesheep 2010 (D1) · British Airways Magecart 2018 (D3) · Polyfill.io takeover 2024 (D4) · event-stream 2018, ua-parser-js 2021 (D46) · Uber keys on GitHub 2016 (D49) · SolarWinds 2020 (26) · Codecov uploader 2021 (23) · Toyota key on GitHub 2022 (23) · LastPass 2022 (20) · 0ktapus 2022 (32) · Shai-Hulud and chalk/debug 2025, torchtriton 2022 (21) · Ultralytics 2024 (22) · Kinsing (14) |              | n/a                                                                                             |
+
+CWE references (CWE-79, 89, 20, 209, 250, 284, 307, 352, 400, 494, 532, 598, 601, 636, 693, 770, 923, 1004, 1021, 1022) are classes, not dated events.
+
+## 7. Cadence
+
+- **Per PR:** CI gates (`pnpm audit`, step 23 scanners, Vitest, lint).
+- **Weekly:** `trivy image` on built images, ZAP baseline, Dependabot.
+- **Monthly:** Lynis and docker-bench (step 25), CSP reports in Sentry, live header review (Observatory, securityheaders.com, SSL Labs).
+- **Quarterly:** `pentest-lab.md` probes and a ZAP active scan on the local stack, backup restore drill, outside port scan of the origin.
+- **Twice a year:** rollback and redeploy drill, account 2FA and GitHub settings audit.
+
+## 8. Tests left after the steps are done
+
+### 8a. Automated, Vitest, every PR
+
+Existing: `origin.guard`, `caddyfile-headers`, `csp.controller`, `throttle`, `throttle-storage`, `meta`, `og-card`, `catalog-text`, `shares/*` (magic bytes, EXIF), `all-exceptions.filter`, `email-challenge`, `google-id-token`, `telegram-login`, `session-cookie`.
+
+| Step  | New test                                                      |
+| ----- | ------------------------------------------------------------- |
+| 1-2   | telemetry scrubbers remove token, plate and VIN               |
+| 3     | `assertProductionEnv` rejects a missing Turnstile or ALPR key |
+| 4     | pytest: ALPR exits without a key, `/docs` is 404              |
+| 5     | recognize rejects wrong magic bytes, 502 body is generic      |
+| 6     | hostile-plate meta escaping, SPA path traversal               |
+| 7     | `fetchJson` timeout, byte cap, schema failure                 |
+| 8-9   | throttle decorators present, redirect allowlist               |
+| 10    | fallback headers only when absent                             |
+| 11    | pool options                                                  |
+| 12    | integration: app role cannot `DROP` or `TRUNCATE`             |
+| 16-17 | extended `caddyfile-headers` assertions                       |
+| 27    | the lint run itself                                           |
+
+### 8b. Automated, CI scanners
+
+Per PR: gitleaks, `trivy fs` and `trivy config`, OSV-Scanner, Opengrep, `pnpm audit`, CodeQL if the repo is public. Weekly: `trivy image`, ZAP baseline, Dependabot.
+
+### 8c. Recurring on the VPS (automated, owner reviews)
+
+Monthly `host-audit.sh` diff; nightly backup pings (healthchecks.io); CSP reports in Sentry; UptimeRobot.
+
+### 8d. Manual, still needed
+
+1. `pentest-lab.md` probes plus a ZAP **active** scan on the local stack (quarterly). Covers business logic: IDOR on share tokens and account endpoints, auth flows, sudo mode.
+2. Backup restore drill with age decryption (quarterly).
+3. Outside `nmap` of the origin, IPv4 and IPv6: only 443, only for Cloudflare (after step 32 H7, then quarterly).
+4. Origin-bypass check: `curl` straight at the origin IP must fail without Cloudflare's mTLS (after every Caddy change).
+5. Passive live header and TLS checks: Observatory, securityheaders.com, SSL Labs, hstspreload.org (monthly and after deploys).
+6. Embed walk after steps 28 and 31: YouTube, Maps, 3D models, Disqus, Telegram login, Turnstile.
+7. Account 2FA, recovery codes and GitHub settings review (every six months).
+8. Rollback and redeploy drill (twice a year).
+9. Lynis findings triage; record accepted waivers in this wiki.
+
+### 8e. Not tested on purpose (accepted risk)
+
+DDoS and load tests against prod (Cloudflare absorbs; never load-test prod); social engineering and phishing; provider-side compromise (Contabo, Cloudflare, GitHub); physical security; third-party script internals (PostHog, Disqus, Google; limited by CSP); a formal external pentest or bug bounty (optional, once there is a budget).
+
+### 8f. Test inventory
+
+| Test                           | Layer | Type            | Frequency                   | Owner         | Added by                    |
+| ------------------------------ | ----- | --------------- | --------------------------- | ------------- | --------------------------- |
+| Vitest security suites         | 2, 8  | unit            | per PR                      | CI            | existing, steps 1-12, 16-17 |
+| pytest ALPR fail-closed        | 10    | unit            | per PR                      | CI            | step 4                      |
+| gitleaks, Trivy, OSV, Opengrep | 11    | CI scan         | per PR                      | CI            | step 23                     |
+| `trivy image`                  | 6, 11 | CI scan         | weekly                      | CI            | step 23                     |
+| ZAP baseline                   | 2, 8  | CI DAST         | weekly                      | CI            | step 24                     |
+| Lynis, docker-bench            | 5, 6  | VPS cron        | monthly                     | owner reviews | step 25                     |
+| pentest-lab, ZAP active        | 2, 8  | manual          | quarterly                   | owner         | existing                    |
+| Restore drill                  | 9     | manual          | quarterly                   | owner         | step 20                     |
+| Origin nmap, mTLS bypass       | 3, 4  | manual          | quarterly, per Caddy change | owner         | step 32                     |
+| Live header and TLS checks     | 3, 7  | manual, passive | monthly                     | owner         | existing                    |
+| 2FA and GitHub audit           | 12    | manual          | six-monthly                 | owner         | step 32                     |
