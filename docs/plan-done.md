@@ -5028,3 +5028,7 @@ Features reference: "Mobile collapsed tables and page TOC (2026-11-24)".
 ## Security wiki step 3 - fail-closed production secrets (2026-11-24)
 
 `assertProductionEnv` (`apps/api/src/env.ts`) now also requires `TURNSTILE_SECRET_KEY` and `ALPR_API_KEY`, so production no longer boots with Turnstile passing every token or the ALPR container open. Both are already written to `api.env` by `deploy-api.yml`. Test: `env.test.ts`. No web change, so no release bump. The ALPR side (exit without a key, hidden docs) is step 4.
+
+## Security wiki step 4 - ALPR fails closed, docs hidden (2026-11-24)
+
+`services/alpr/app.py` exits at import (before the models load) when `ALPR_API_KEY` is unset, unless `ALPR_ALLOW_NO_KEY=1`, which only `infra/docker-compose.alpr.yml` (dev, bound to 127.0.0.1) sets. `FastAPI(docs_url=None, redoc_url=None, openapi_url=None)` removes `/docs`, `/redoc`, `/openapi.json`. Tests: `services/alpr/test_app_config.py`, run by `pnpm alpr:test` (now `python -m unittest test_anonymize test_app_config`). Prod needs nothing new: `alpr.env` already carries the key. No web change, so no release bump.

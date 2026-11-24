@@ -36,7 +36,7 @@
     "db:refresh-stats": "pnpm --filter @carplates/scripts refresh-stats",
     "alpr:build": "docker compose -f infra/docker-compose.alpr.yml build",
     "alpr:up": "docker compose -f infra/docker-compose.alpr.yml up -d",
-    "alpr:test": "docker compose -f infra/docker-compose.alpr.yml run --rm --no-deps -v ./services/alpr/test_anonymize.py:/app/test_anonymize.py:ro -v ./services/alpr/eval/faces:/app/eval/faces:ro alpr python test_anonymize.py",
+    "alpr:test": "docker compose -f infra/docker-compose.alpr.yml run --rm --no-deps -v ./services/alpr/test_anonymize.py:/app/test_anonymize.py:ro -v ./services/alpr/test_app_config.py:/app/test_app_config.py:ro -v ./services/alpr/eval/faces:/app/eval/faces:ro alpr python -m unittest test_anonymize test_app_config",
     "alpr:down": "docker compose -f infra/docker-compose.alpr.yml down",
     "ingest": "pnpm --filter @carplates/scripts ingest",
     "ingest:full": "pnpm --filter @carplates/scripts ingest:full",

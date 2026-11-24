@@ -21,7 +21,7 @@ Legend: ✅ done · ❌ open (step #) · 🔍 verify · 🤖 code/config (diff s
 | 7   | Caddy                | D24-D26 | 16, 17, 18     |
 | 8   | API (NestJS)         | D27-D40 | 2, 3, 5-10     |
 | 9   | Postgres and Redis   | D41-D44 | 11, 12, 15, 20 |
-| 10  | ALPR (Python)        | D45     | 4, 21          |
+| 10  | ALPR (Python)        | D45     | 21             |
 | 11  | Supply chain and CI  | D46-D49 | 21-24, 26, 30  |
 | 12  | Accounts and people  | D50     | 32             |
 
@@ -196,7 +196,7 @@ Open: timeouts → 11; roles → 12; Redis password on command line → 15; back
 | --- | ------------------------------------------------------------------------------------------------- | ----------------------------------------------- | --------------------------------------- |
 | D45 | Non-root uid 10001, read-only, internal network, 6 MB upload cap, `hmac.compare_digest` key check | `services/alpr/app.py:408-422`, `Dockerfile:28` | Image parsers are a classic RCE surface |
 
-Open: fail-open without key, docs exposed → 4; unpinned requirements, no Dependabot `pip` → 21.
+Open: unpinned requirements, no Dependabot `pip` → 21.
 
 ### Layer 11 - Supply chain and CI
 
@@ -249,7 +249,7 @@ Tick the box and add a `docs/plan-done.md` entry when a step is finished. "Verif
 - **Alternatives:** switch the feature off when the secret is unset (app still boots; silent feature loss).
 - **Verify:** env test: production without either key throws.
 
-### Step 4 - ALPR fails closed and hides its docs [ ] · S · 🤖 · layer 10 (bundle with step 3)
+### Step 4 - ALPR fails closed and hides its docs [x] · S · 🤖 · layer 10 (bundle with step 3)
 
 - **What:** exit at startup when `ALPR_API_KEY` is unset; `FastAPI(docs_url=None, redoc_url=None, openapi_url=None)`.
 - **Files:** `services/alpr/app.py:37,408`; add a pytest.
