@@ -27,7 +27,7 @@ calls behind our own API.
 
 Everything is on `latest` **except** the six below. Each is held back for a
 concrete reason with a revisit trigger — not caution for its own sake. Re-check
-by re-reading this section before bumping.
+by re-reading this section before bumping. `.github/dependabot.yml` `ignore` mirrors these pins (plus `ioredis`/`bullmq` below and major-only `react`, `react-dom`, `zod`, `eslint`, `vite`, `vitest`): lift the ignore together with the pin.
 
 | Package                   | `latest` (2026-09)                                                | We use                                         | Why held back                                                                                                                                                                                                                                                                                                                      | Revisit when                                                                                                                                                            |
 | ------------------------- | ----------------------------------------------------------------- | ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

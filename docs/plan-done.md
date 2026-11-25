@@ -4943,6 +4943,12 @@ Trigger: Lighthouse on `/BC6743PH` (mobile, slow 4G): performance 42, FCP 7.0 s,
 - `PlateCardButton` ("Save as image") moved from the links row into the end of `CollapsibleChips` in `ResultCard` (hidden until "Show more").
 - Tests: `WikiHeroImage.test.tsx` (dots, thumbnails, arrows, swipe, single photo). Version `v2.1455`.
 
+## Dependabot config tightened (2026-11-25) ✅
+
+- `.github/dependabot.yml`: all five ecosystems target `stage`, use the `chore(deps)` prefix, a `cooldown` and a minor-and-patch group. Security PRs still go to `main` (GitHub limitation).
+- New ignores mirroring PLAN.md pins: `ioredis` and `bullmq` (minor, major), `drizzle-orm` (minor, major), `@tanstack/react-table` (major); major-only for `react`, `react-dom`, `zod`, `eslint`, `vite`, `vitest`.
+- #264 (ioredis 6) is to be closed (bullmq needs exactly ioredis 5.11.1); #263 (8 minor/patch) is to be checked and merged. No release entry: no app change.
+
 ## Dependabot minor-and-patch group, 18 updates, #201 (2026-11-21) ✅
 
 Applied by hand on `stage` (same updates as PR #201, so the PR can be closed): eslint 10.15.0, prettier 3.10.1, `@fastify/multipart` 10.1.9, `@fastify/static` 10.1.11, `@nestjs/{common,core,platform-fastify,testing}` 11.2.10, `@nestjs/throttler` 6.8.0, `@react-email/render` 2.3.1, `@sentry/nestjs` + `@sentry/react` 11.12.0, nodemailer 10.6.0, docx 9.15.4, posthog-js 1.450.0, vite 8.3.8, vite-imagetools 12.0.2, `read-excel-file` 9.3.17 (kept exact in `scripts/package.json`). Pins and majors unchanged.
