@@ -401,7 +401,7 @@ Tick the box and add a `docs/plan-done.md` entry when a step is finished. "Verif
 - **Verify:** `pnpm install --frozen-lockfile`, ALPR image builds with `--require-hashes`, Dependabot config validates.
 - **Done (2026-11-24):** `minimumReleaseAge: 1440`; key globs in `.gitignore`; Dependabot `pip` (`services/alpr`), docker `/scripts`, docker-compose `/infra`; `services/alpr/requirements.in` + hash-pinned `requirements.txt` (regenerate: `docker run --rm -v "$PWD/services/alpr:/w" -w /w python:3.12-slim sh -c "pip install pip-tools && pip-compile --generate-hashes --strip-extras -o requirements.txt requirements.in"`), Dockerfile uses `--require-hashes`. **`onnxruntime-web-dev` stays:** transformers.js 4.3.2 pins that exact nightly and mixing it with stable breaks the wasm ABI (plan-done CARSUA-2P); revisit when transformers.js pins a stable release.
 
-### Step 22 - Pin Actions to commit SHAs [ ] · S · 🤖 · layer 11
+### Step 22 - Pin Actions to commit SHAs [x] · S · 🤖 · layer 11
 
 - **What:** `actions/checkout@v7`, `docker/build-push-action@v7` and the composite actions use tags. Pin to SHAs with the tag in a comment; Dependabot's `github-actions` ecosystem keeps them current. **Scope:** third-party actions first (`docker/*`, scanner and ZAP actions from steps 23-24, composite actions that call them); `actions/*` (GitHub-maintained) is optional. Add a Dependabot `cooldown` (e.g. `default-days: 3`) to the `github-actions` entry in `.github/dependabot.yml`, the Actions counterpart of `minimumReleaseAge` (step 21), so a bump PR does not arrive the day a release is published.
 - **Files:** `.github/workflows/*`, `.github/actions/*/action.yml`, `.github/dependabot.yml`.
@@ -409,6 +409,7 @@ Tick the box and add a `docs/plan-done.md` entry when a step is finished. "Verif
 - **Alternatives:** `pinact` or `ratchet` CLI (automates pinning) · forking the Actions (maintenance).
 - **Limit:** a SHA guarantees the code cannot change after pinning, not that it is safe. Resolve the SHA from the official repo's release tag (`git ls-remote https://github.com/<owner>/<repo> <tag>`), never from a fork or a link someone sent, and skim the diff in each Dependabot bump PR before merging. It also does not cover what an action pulls internally (unpinned dependencies, floating Docker images).
 - **Verify:** `grep -rn "uses:" .github | grep -v "@[0-9a-f]\{40\}"` is empty for third-party actions; CI green.
+- **Done (2026-11-25):** third-party actions pinned (`docker/setup-buildx-action`, `docker/login-action`, `docker/build-push-action` in `build-image/action.yml`; `pnpm/action-setup` in `ci.yml`, `deploy-web.yml`), SHAs resolved with `git ls-remote` from the official repos (`pnpm/action-setup` v6 is an annotated tag: the dereferenced commit is pinned). `actions/*` left on tags (optional). Dependabot `github-actions` has `cooldown: default-days: 3`. Steps 23-24 must pin their actions the same way.
 
 ### Step 23 - `security.yml` workflow [ ] · M · 🤖 · layer 11
 
