@@ -3,6 +3,7 @@ name: Security
 # Wiki step 23 (docs/security-wiki.md). Scanners are plain release binaries, version-pinned with a SHA-256 checked before use,
 # so no third-party Action runs with the repo token (CodeQL is the only one, pinned to a commit SHA).
 # Local equivalents: `pnpm security:check`.
+# Severity baseline for every dependency scanner: fixable High/Critical (CVSS >= 7.0) blocks the PR, Medium/Low only warns.
 
 on:
   pull_request:
@@ -84,8 +85,11 @@ jobs:
           curl -fsSL -o osv-scanner "https://github.com/google/osv-scanner/releases/download/v${OSV_VERSION}/osv-scanner_linux_amd64"
           echo "${OSV_SHA256}  osv-scanner" | sha256sum -c -
           sudo install osv-scanner /usr/local/bin/osv-scanner
-      # Second advisory feed next to `pnpm audit` (OSV also lists PyPI for the ALPR service).
-      - run: osv-scanner scan source -L pnpm-lock.yaml -L services/alpr/requirements.txt
+      # Second advisory feed next to `pnpm audit` (OSV also lists PyPI for the ALPR service). osv-scanner exits 1 on any finding
+      # (no severity flag), so exit 1 is tolerated here and infra/ci/osv-gate.mjs applies the shared baseline (CVSS >= 7.0 blocks).
+      - run: |
+          osv-scanner scan source -L pnpm-lock.yaml -L services/alpr/requirements.txt --format json --output osv.json || [ $? -eq 1 ]
+          node infra/ci/osv-gate.mjs osv.json
 
   # opengrep: static analysis of our own code (injection, unsafe eval, weak crypto patterns); results go to the Security tab.
   opengrep:
@@ -113,6 +117,12 @@ jobs:
             --config "$RUNNER_TEMP/rules/javascript" --config "$RUNNER_TEMP/rules/typescript" --config "$RUNNER_TEMP/rules/python" \
             --exclude node_modules --exclude 'scripts/seed-data' --exclude '*.test.ts' --exclude '*.test.tsx' \
             --severity ERROR --sarif-output=opengrep.sarif --error .
+      # Opengrep keeps nosemgrep-waived findings in the SARIF (marked as suppressed); drop them so no Security-tab alert opens for a waiver.
+      - name: Drop suppressed results
+        if: ${{ !cancelled() && hashFiles('opengrep.sarif') != '' }}
+        run: |
+          jq '.runs[].results |= map(select((.suppressions // []) | length == 0))' opengrep.sarif > opengrep.filtered.sarif
+          mv opengrep.filtered.sarif opengrep.sarif
       - name: Upload SARIF
         if: ${{ !cancelled() && hashFiles('opengrep.sarif') != '' }}
         uses: github/codeql-action/upload-sarif@915412ff23e8b7659517e607487dbeae018f2934 # v4.39.5
