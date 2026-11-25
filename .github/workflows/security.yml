@@ -1,0 +1,167 @@
+name: Security
+
+# Wiki step 23 (docs/security-wiki.md). Scanners are plain release binaries, version-pinned with a SHA-256 checked before use,
+# so no third-party Action runs with the repo token (CodeQL is the only one, pinned to a commit SHA).
+# Local equivalents: `pnpm security:check`.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '17 4 * * 1' # Mondays 04:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: security-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GITLEAKS_VERSION: 8.30.1
+  GITLEAKS_SHA256: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
+  TRIVY_VERSION: 0.76.2
+  TRIVY_SHA256: bc0fc726e017b8927a62b2d3531d7a84ee01769daf5c99ed866dced54089fdbf
+  OSV_VERSION: 2.7.1
+  OSV_SHA256: fb7dab19a8bd9bbe5c3189f09d4b7ee1820c9553a23bac202648a56efd2f6ee8
+  OPENGREP_VERSION: 2.0.0
+  OPENGREP_SHA256: 37e93f4da5fd04a18c5c1febbdd12f7e98dfccd4d0c9cf2593bcb25eeb462da0
+  OPENGREP_RULES_SHA: f1d2b562b414783763fd02a6ed2736eaed622efa # github.com/opengrep/opengrep-rules
+
+jobs:
+  # gitleaks: finds API keys, tokens and passwords committed to git (checks every commit, not just the latest files).
+  secrets:
+    name: gitleaks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # full history: a secret deleted in a later commit is still leaked
+          persist-credentials: false
+      - name: Install gitleaks
+        run: |
+          curl -fsSL -o gitleaks.tgz "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          echo "${GITLEAKS_SHA256}  gitleaks.tgz" | sha256sum -c -
+          tar -xzf gitleaks.tgz gitleaks
+          sudo install gitleaks /usr/local/bin/gitleaks
+      - run: gitleaks git --redact --no-banner --exit-code 1 .
+
+  # trivy fs + config: known CVEs in dependencies (pnpm-lock.yaml, requirements.txt), secrets in files,
+  # and insecure settings in Dockerfiles and compose files.
+  trivy-fs:
+    name: trivy fs and config
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Install trivy
+        run: |
+          curl -fsSL -o trivy.tgz "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz"
+          echo "${TRIVY_SHA256}  trivy.tgz" | sha256sum -c -
+          tar -xzf trivy.tgz trivy
+          sudo install trivy /usr/local/bin/trivy
+      # Dependencies (pnpm-lock.yaml, requirements.txt) and secrets in files. Unfixed CVEs cannot be acted on, so they do not fail the run.
+      - run: trivy fs --scanners vuln,secret --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 --skip-dirs "**/node_modules" --skip-dirs .claude .
+      # Dockerfile and compose misconfiguration.
+      - run: trivy config --severity HIGH,CRITICAL --exit-code 1 .
+
+  # osv-scanner: a second vulnerability database (OSV) for the same lockfiles, so an advisory one feed misses is still caught.
+  osv:
+    name: osv-scanner
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Install osv-scanner
+        run: |
+          curl -fsSL -o osv-scanner "https://github.com/google/osv-scanner/releases/download/v${OSV_VERSION}/osv-scanner_linux_amd64"
+          echo "${OSV_SHA256}  osv-scanner" | sha256sum -c -
+          sudo install osv-scanner /usr/local/bin/osv-scanner
+      # Second advisory feed next to `pnpm audit` (OSV also lists PyPI for the ALPR service).
+      - run: osv-scanner scan source -L pnpm-lock.yaml -L services/alpr/requirements.txt
+
+  # opengrep: static analysis of our own code (injection, unsafe eval, weak crypto patterns); results go to the Security tab.
+  opengrep:
+    name: opengrep SAST
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      security-events: write # upload SARIF to the Security tab (repo is public)
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Install opengrep and fetch rules
+        run: |
+          curl -fsSL -o opengrep "https://github.com/opengrep/opengrep/releases/download/v${OPENGREP_VERSION}/opengrep_linux_x86"
+          echo "${OPENGREP_SHA256}  opengrep" | sha256sum -c -
+          sudo install opengrep /usr/local/bin/opengrep
+          git init -q "$RUNNER_TEMP/rules"
+          git -C "$RUNNER_TEMP/rules" fetch -q --depth 1 https://github.com/opengrep/opengrep-rules.git "$OPENGREP_RULES_SHA"
+          git -C "$RUNNER_TEMP/rules" checkout -q FETCH_HEAD
+      - name: Scan
+        run: |
+          opengrep scan \
+            --config "$RUNNER_TEMP/rules/javascript" --config "$RUNNER_TEMP/rules/typescript" --config "$RUNNER_TEMP/rules/python" \
+            --exclude node_modules --exclude 'scripts/seed-data' --exclude '*.test.ts' --exclude '*.test.tsx' \
+            --severity ERROR --sarif-output=opengrep.sarif --error .
+      - name: Upload SARIF
+        if: ${{ !cancelled() && hashFiles('opengrep.sarif') != '' }}
+        uses: github/codeql-action/upload-sarif@915412ff23e8b7659517e607487dbeae018f2934 # v4.39.5
+        with:
+          sarif_file: opengrep.sarif
+          category: opengrep
+
+  # codeql: GitHub's deeper static analysis (data-flow, e.g. user input reaching a dangerous call); also in the Security tab.
+  codeql:
+    name: codeql
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [javascript-typescript, python]
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: github/codeql-action/init@915412ff23e8b7659517e607487dbeae018f2934 # v4.39.5
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: none
+      - uses: github/codeql-action/analyze@915412ff23e8b7659517e607487dbeae018f2934 # v4.39.5
+        with:
+          category: /language:${{ matrix.language }}
+
+  # Weekly only: the images in GHCR (packages are public, docs/deploy.md). Reports OS-package CVEs that a rebuild would fix.
+  trivy-image:
+    name: trivy image (${{ matrix.image }})
+    if: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        image: [carsua-api, carsua-alpr, carsua-ingest]
+    steps:
+      - name: Install trivy
+        run: |
+          curl -fsSL -o trivy.tgz "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz"
+          echo "${TRIVY_SHA256}  trivy.tgz" | sha256sum -c -
+          tar -xzf trivy.tgz trivy
+          sudo install trivy /usr/local/bin/trivy
+      - name: Scan the image of the latest build
+        run: |
+          OWNER="${GITHUB_REPOSITORY_OWNER,,}"
+          trivy image --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 "ghcr.io/${OWNER}/${{ matrix.image }}:latest"

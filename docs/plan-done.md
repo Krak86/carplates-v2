@@ -5046,3 +5046,7 @@ Features reference: "Mobile collapsed tables and page TOC (2026-11-24)".
 ## Security wiki step 22 - Actions pinned to commit SHAs (2026-11-25)
 
 Third-party actions (`docker/setup-buildx-action`, `docker/login-action`, `docker/build-push-action`, `pnpm/action-setup`) pinned to SHAs resolved with `git ls-remote` from the official repos; `actions/*` stays on tags. Dependabot `github-actions` has `cooldown: default-days: 3`. Steps 23-24 pin their actions the same way. Details: `docs/security-wiki.md` step 22.
+
+## Security wiki step 23 - security.yml workflow (2026-11-25)
+
+`.github/workflows/security.yml` (per PR, push to `main`, weekly, manual): gitleaks over the full history, `trivy fs` (vuln + secret) and `trivy config` (HIGH/CRITICAL, unfixed ignored), OSV-Scanner on `pnpm-lock.yaml` and the ALPR `requirements.txt`, Opengrep (rules from a pinned `opengrep-rules` commit, SARIF to the Security tab), CodeQL (javascript-typescript, python). Weekly `trivy image` on `carsua-api`, `carsua-alpr`, `carsua-ingest` `:latest`. Scanners are release binaries with a version and SHA-256 pinned in the workflow `env` (no third-party Action holds the token; only `github/codeql-action` is used, pinned to a SHA). `pnpm security:check` (`infra/ci/security-check.mjs`, Docker) runs gitleaks, trivy, OSV and `pnpm audit` locally; versions mirror the workflow. Not yet run on GitHub: first run may need waivers (`.trivyignore`, `.gitleaksignore`, opengrep severity). Step 26 stops pushing `:latest`, so then point `trivy-image` at the commit SHA.
