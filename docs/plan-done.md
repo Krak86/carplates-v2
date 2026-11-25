@@ -5032,3 +5032,11 @@ Features reference: "Mobile collapsed tables and page TOC (2026-11-24)".
 ## Security wiki step 4 - ALPR fails closed, docs hidden (2026-11-24)
 
 `services/alpr/app.py` exits at import (before the models load) when `ALPR_API_KEY` is unset, unless `ALPR_ALLOW_NO_KEY=1`, which only `infra/docker-compose.alpr.yml` (dev, bound to 127.0.0.1) sets. `FastAPI(docs_url=None, redoc_url=None, openapi_url=None)` removes `/docs`, `/redoc`, `/openapi.json`. Tests: `services/alpr/test_app_config.py`, run by `pnpm alpr:test` (now `python -m unittest test_anonymize test_app_config`). Prod needs nothing new: `alpr.env` already carries the key. No web change, so no release bump.
+
+## Security wiki step 21 - package-config hygiene (2026-11-24)
+
+`minimumReleaseAge: 1440` in `pnpm-workspace.yaml`; key globs (`*.pem`, `*.crt`, `id_*`, `ci_key`) in `.gitignore`; Dependabot `pip` (`services/alpr`), docker (`/scripts`) and docker-compose (`/infra`); `services/alpr/requirements.in` plus a hash-pinned `requirements.txt`, installed with `--require-hashes`. `onnxruntime-web-dev` stays: transformers.js 4.3.2 pins that exact nightly (see CARSUA-2P). Details and the regenerate command: `docs/security-wiki.md` step 21.
+
+## Security wiki step 22 - Actions pinned to commit SHAs (2026-11-25)
+
+Third-party actions (`docker/setup-buildx-action`, `docker/login-action`, `docker/build-push-action`, `pnpm/action-setup`) pinned to SHAs resolved with `git ls-remote` from the official repos; `actions/*` stays on tags. Dependabot `github-actions` has `cooldown: default-days: 3`. Steps 23-24 pin their actions the same way. Details: `docs/security-wiki.md` step 22.
