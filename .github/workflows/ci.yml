@@ -15,7 +15,7 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6 # version comes from package.json "packageManager"
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # was pnpm/action-setup@v6 # version comes from package.json "packageManager"
       - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
