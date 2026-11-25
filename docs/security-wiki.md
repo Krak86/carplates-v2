@@ -6,24 +6,24 @@ Companions: [security-checklist.md](security-checklist.md) (pre-deploy gate, fin
 
 ## 1. Status and legend
 
-As of **2026-11-24**. Source: three read-only surveys of the repo (infra, API, web and supply chain). Nothing was probed on production.
+As of **2026-11-25**. Repo: **public** (confirmed 2026-11-25), so CodeQL, the Security tab (SARIF), GitHub secret scanning and push protection are available at no cost. Source: three read-only surveys of the repo (infra, API, web and supply chain). Nothing was probed on production.
 
 Legend: ✅ done · ❌ open (step #) · 🔍 verify · 🤖 code/config (diff shown first) · 👤 owner action (dashboard, VPS, account) · effort **S** < 1 h, **M** half a day, **L** 1-2 days.
 
-| #   | Layer                | Done    | Open steps     |
-| --- | -------------------- | ------- | -------------- |
-| 1   | User OS and device   | D1-D2   | 29             |
-| 2   | Browser and frontend | D3-D12  | 27, 28, 31, 32 |
-| 3   | Cloudflare, CDN, DNS | D12-D14 | 32             |
-| 4   | Network and provider | D15     | 32             |
-| 5   | Ubuntu host          | D16-D19 | 19, 25         |
-| 6   | Docker               | D20-D23 | 13, 14, 15, 19 |
-| 7   | Caddy                | D24-D26 | 16, 17, 18     |
-| 8   | API (NestJS)         | D27-D40 | 2, 3, 5-10     |
-| 9   | Postgres and Redis   | D41-D44 | 11, 12, 15, 20 |
-| 10  | ALPR (Python)        | D45     | 21             |
-| 11  | Supply chain and CI  | D46-D49 | 21-24, 26, 30  |
-| 12  | Accounts and people  | D50     | 32             |
+| #   | Layer                | Done             | Open steps     |
+| --- | -------------------- | ---------------- | -------------- |
+| 1   | User OS and device   | D1-D2            | 29             |
+| 2   | Browser and frontend | D3-D12           | 27, 28, 31, 32 |
+| 3   | Cloudflare, CDN, DNS | D12-D14          | 32             |
+| 4   | Network and provider | D15              | 32             |
+| 5   | Ubuntu host          | D16-D19          | 19, 25         |
+| 6   | Docker               | D20-D23          | 13, 14, 15, 19 |
+| 7   | Caddy                | D24-D26          | 16, 17, 18     |
+| 8   | API (NestJS)         | D27-D40          | 2, 3, 5-10     |
+| 9   | Postgres and Redis   | D41-D44          | 11, 12, 15, 20 |
+| 10  | ALPR (Python)        | D45, D51         | -              |
+| 11  | Supply chain and CI  | D46-D49, D52-D54 | 23, 24, 26, 30 |
+| 12  | Accounts and people  | D50              | 32             |
 
 ## 2. Twelve-Factor and security
 
@@ -33,7 +33,7 @@ about authentication, input handling, least privilege, the network or the supply
 | #    | Factor              | Status           | How the app uses it                                                                                                     | Security relevance                 |
 | ---- | ------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
 | I    | Codebase            | Fully            | One monorepo, many deploys (blue/green, `stage` branch)                                                                 | Traceable code, one place to scan  |
-| II   | Dependencies        | Partly           | `pnpm-lock.yaml` frozen, `packageManager` pinned. ALPR `requirements.txt` hash-pinned (step 21)                            | Reproducible builds, supply chain  |
+| II   | Dependencies        | Partly           | `pnpm-lock.yaml` frozen, `packageManager` pinned. ALPR `requirements.txt` hash-pinned (step 21)                         | Reproducible builds, supply chain  |
 | III  | Config              | Fully, with gaps | Zod `env.ts` + `assertProductionEnv`. Some secrets fail open → steps 3-4. Secrets visible in `docker inspect` → step 15 | Secrets out of code                |
 | IV   | Backing services    | Fully            | Postgres, Redis, ALPR, mail, R2 all by URL                                                                              | Swappable and isolatable → step 13 |
 | V    | Build, release, run | Fully            | SHA-tagged images, rollback by `image_tag`, immutable web build. `:latest` also pushed → step 26                        | Integrity, provenance              |
@@ -192,22 +192,26 @@ Open: timeouts → 11; roles → 12; Redis password on command line → 15; back
 
 ### Layer 10 - ALPR service (Python, `services/alpr`)
 
-| ID  | Control                                                                                           | Where                                           | Why it matters                          |
-| --- | ------------------------------------------------------------------------------------------------- | ----------------------------------------------- | --------------------------------------- |
-| D45 | Non-root uid 10001, read-only, internal network, 6 MB upload cap, `hmac.compare_digest` key check | `services/alpr/app.py:408-422`, `Dockerfile:28` | Image parsers are a classic RCE surface |
+| ID  | Control                                                                                                           | Where                                           | Why it matters                          |
+| --- | ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- | --------------------------------------- |
+| D45 | Non-root uid 10001, read-only, internal network, 6 MB upload cap, `hmac.compare_digest` key check                 | `services/alpr/app.py:408-422`, `Dockerfile:28` | Image parsers are a classic RCE surface |
+| D51 | `requirements.txt` hash-pinned (`pip-compile --generate-hashes`), Dockerfile `--require-hashes`, Dependabot `pip` | `services/alpr/requirements.in`, `Dockerfile`   | torchtriton dependency confusion (2022) |
 
-Open: unpinned requirements, no Dependabot `pip` → 21.
+Open: none.
 
 ### Layer 11 - Supply chain and CI
 
-| ID  | Control                                                                                                                             | Where                                  | Why it matters                               |
-| --- | ----------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- | -------------------------------------------- |
-| D46 | Frozen lockfile in CI and both Dockerfiles (`ci.yml`, `deploy-web.yml`, `apps/api/Dockerfile`, `scripts/Dockerfile`; checked 2026-11-25); the lockfile holds a sha512 per package and also pins pnpm itself (`@pnpm/exe`); `allowBuilds` (install scripts blocked by default) | `pnpm-workspace.yaml:7-16`             | event-stream (2018), ua-parser-js (2021)     |
-| D47 | `pnpm audit --prod --audit-level=high` in CI, Dependabot npm/docker/actions                                                         | `ci.yml:28`, `.github/dependabot.yml`  | Log4Shell (CVE-2021-44228) is why SCA exists |
-| D48 | `permissions: contents: read`, `production` environment, pinned SSH host key, `umask 077` env files, 40-char SHA regex for rollback | `.github/workflows`, `infra/ci/lib.sh` | Least privilege in CI                        |
-| D49 | No secret ever committed (history checked), `.gitignore` and `.dockerignore` cover env, keys, secrets                               | `.gitignore`                           | Uber (2016) keys on GitHub                   |
+| ID  | Control                                                                                                                                                                                                                                                                       | Where                                                            | Why it matters                                 |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- | ---------------------------------------------- |
+| D46 | Frozen lockfile in CI and both Dockerfiles (`ci.yml`, `deploy-web.yml`, `apps/api/Dockerfile`, `scripts/Dockerfile`; checked 2026-11-25); the lockfile holds a sha512 per package and also pins pnpm itself (`@pnpm/exe`); `allowBuilds` (install scripts blocked by default) | `pnpm-workspace.yaml:7-16`                                       | event-stream (2018), ua-parser-js (2021)       |
+| D47 | `pnpm audit --prod --audit-level=high` in CI, Dependabot npm/docker/actions                                                                                                                                                                                                   | `ci.yml:28`, `.github/dependabot.yml`                            | Log4Shell (CVE-2021-44228) is why SCA exists   |
+| D48 | `permissions: contents: read`, `production` environment, pinned SSH host key, `umask 077` env files, 40-char SHA regex for rollback                                                                                                                                           | `.github/workflows`, `infra/ci/lib.sh`                           | Least privilege in CI                          |
+| D49 | No secret ever committed (history checked), `.gitignore` and `.dockerignore` cover env, keys, secrets                                                                                                                                                                         | `.gitignore`                                                     | Uber (2016) keys on GitHub                     |
+| D52 | pnpm `minimumReleaseAge: 1440` (new releases wait 24 h)                                                                                                                                                                                                                       | `pnpm-workspace.yaml`                                            | Shai-Hulud worm, chalk/debug compromise (2025) |
+| D53 | Third-party Actions pinned to commit SHAs; Dependabot `cooldown` on every ecosystem (npm: 3 days, minor 5, major 14)                                                                                                                                                          | `.github/workflows`, `.github/actions`, `.github/dependabot.yml` | tj-actions/changed-files (CVE-2025-30066)      |
+| D54 | Dependabot also covers `pip` (alpr), docker (`/scripts`, `/infra`); key globs in `.gitignore`                                                                                                                                                                                 | `.github/dependabot.yml`, `.gitignore`                           | Stale images and leaked keys                   |
 
-Open: 21, 22, 23, 24, 26, 30.
+Open: 23, 24, 26, 30.
 
 ### Layer 12 - Accounts and people
 
@@ -413,7 +417,7 @@ Tick the box and add a `docs/plan-done.md` entry when a step is finished. "Verif
 
 ### Step 23 - `security.yml` workflow [ ] · M · 🤖 · layer 11
 
-- **What:** per PR, to `main` and weekly: gitleaks (full history once), `trivy fs` and `trivy config` (fail on HIGH and CRITICAL), OSV-Scanner, Opengrep with OWASP and Node rules (SARIF to the Security tab on public repos, otherwise an artifact). Weekly: `trivy image` on api, alpr, ingest from GHCR. CodeQL only if the repo is public. Add a root `pnpm security:check` running the local equivalents. Repo visibility was not checked (`gh` is not logged in here).
+- **What:** per PR, to `main` and weekly: gitleaks (full history once), `trivy fs` and `trivy config` (fail on HIGH and CRITICAL), OSV-Scanner, Opengrep with OWASP and Node rules (SARIF to the Security tab; repo is public). Weekly: `trivy image` on api, alpr, ingest from GHCR. CodeQL (repo is public). Add a root `pnpm security:check` running the local equivalents.
 - **Files:** `.github/workflows/security.yml`, root `package.json`.
 - **Why:** Codecov bash uploader (2021), Toyota key on GitHub (2022), Log4Shell.
 - **Alternatives:** Grype instead of Trivy · SonarQube Community (needs a server) · GitHub secret scanning (free on public repos; cloud-side only).
@@ -488,7 +492,7 @@ Tick the box and add a `docs/plan-done.md` entry when a step is finished. "Verif
 - [ ] Least-scope Cloudflare purge token; optional cf-terraforming export of the zone.
 - [ ] Google Cloud: HTTP-referrer restriction on the Maps embed key (`lib/maps.ts:10,26`).
 - [ ] 2FA with hardware keys or TOTP and stored recovery codes on GitHub, Cloudflare, registrar, Contabo, R2, Google Cloud, Sentry, PostHog, Resend, Telegram BotFather (0ktapus phishing, 2022).
-- [ ] GitHub: branch protection on `main`, required reviewer on the `production` environment, secret scanning and push protection on.
+- [ ] GitHub: branch protection on `main`, required reviewer on the `production` environment, secret scanning and push protection on (free, repo is public).
 
 ### I. Docs
 
@@ -559,7 +563,7 @@ Existing: `origin.guard`, `caddyfile-headers`, `csp.controller`, `throttle`, `th
 
 ### 8b. Automated, CI scanners
 
-Per PR: gitleaks, `trivy fs` and `trivy config`, OSV-Scanner, Opengrep, `pnpm audit`, CodeQL if the repo is public. Weekly: `trivy image`, ZAP baseline, Dependabot.
+Per PR: gitleaks, `trivy fs` and `trivy config`, OSV-Scanner, Opengrep, `pnpm audit`, CodeQL. Weekly: `trivy image`, ZAP baseline, Dependabot.
 
 ### 8c. Recurring on the VPS (automated, owner reviews)
 
