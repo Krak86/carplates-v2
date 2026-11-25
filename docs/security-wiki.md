@@ -13,13 +13,13 @@ Legend: ✅ done · ❌ open (step #) · 🔍 verify · 🤖 code/config (diff s
 | #   | Layer                | Done             | Open steps     |
 | --- | -------------------- | ---------------- | -------------- |
 | 1   | User OS and device   | D1-D2            | 29             |
-| 2   | Browser and frontend | D3-D12           | 27, 28, 31, 32 |
+| 2   | Browser and frontend | D3-D11, D56      | 27, 28, 31, 32 |
 | 3   | Cloudflare, CDN, DNS | D12-D14          | 32             |
 | 4   | Network and provider | D15              | 32             |
 | 5   | Ubuntu host          | D16-D19          | 19, 25         |
 | 6   | Docker               | D20-D23          | 13, 14, 15, 19 |
 | 7   | Caddy                | D24-D26          | 16, 17, 18     |
-| 8   | API (NestJS)         | D27-D40          | 2, 3, 5-10     |
+| 8   | API (NestJS)         | D27-D40, D57     | 5-10           |
 | 9   | Postgres and Redis   | D41-D44          | 11, 12, 15, 20 |
 | 10  | ALPR (Python)        | D45, D51         | -              |
 | 11  | Supply chain and CI  | D46-D49, D52-D55 | 24, 26, 30     |
@@ -30,23 +30,23 @@ Legend: ✅ done · ❌ open (step #) · 🔍 verify · 🤖 code/config (diff s
 Twelve-Factor is about **operability**, not security. It helps only through III (config), V (build/release/run), X (parity), XI (logs). It says nothing
 about authentication, input handling, least privilege, the network or the supply chain. The app is compliant (audit: PLAN.md "Twelve-Factor audit").
 
-| #    | Factor              | Status           | How the app uses it                                                                                                     | Security relevance                 |
-| ---- | ------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
-| I    | Codebase            | Fully            | One monorepo, many deploys (blue/green, `stage` branch)                                                                 | Traceable code, one place to scan  |
-| II   | Dependencies        | Partly           | `pnpm-lock.yaml` frozen, `packageManager` pinned. ALPR `requirements.txt` hash-pinned (step 21)                         | Reproducible builds, supply chain  |
-| III  | Config              | Fully, with gaps | Zod `env.ts` + `assertProductionEnv`. Some secrets fail open → steps 3-4. Secrets visible in `docker inspect` → step 15 | Secrets out of code                |
-| IV   | Backing services    | Fully            | Postgres, Redis, ALPR, mail, R2 all by URL                                                                              | Swappable and isolatable → step 13 |
-| V    | Build, release, run | Fully            | SHA-tagged images, rollback by `image_tag`, immutable web build. `:latest` also pushed → step 26                        | Integrity, provenance              |
-| VI   | Processes           | Partly           | Stateless API, sessions in DB, throttle counters in Redis. `contact-limiter` in memory by design                        | Scale without sticky state         |
-| VII  | Port binding        | Fully            | `PORT`; only Caddy publishes 443                                                                                        | Small exposed surface              |
-| VIII | Concurrency         | Partly           | Ingest is its own process (advisory lock). Timers run inside the API (fine at one replica)                              | n/a                                |
-| IX   | Disposability       | Fully            | `enableShutdownHooks`, exec-form `CMD`, healthchecks, `stop_grace_period: 30s`                                          | Fast patch rollout                 |
-| X    | Dev/prod parity     | Fully            | Same Postgres 18.6 and Redis in dev and prod; dev binds 127.0.0.1                                                       | Bugs reproducible locally          |
-| XI   | Logs                | Partly           | stdout JSON, rotated json-file, Sentry. No Caddy access log → step 16. PII scrubbing → steps 1-2                        | Audit trail vs PII leak            |
-| XII  | Admin processes     | Fully            | Migrations, seed, ingest as one-off `compose run --rm` with the release image                                           | Same audited image for admin tasks |
+| #    | Factor              | Status           | How the app uses it                                                                                    | Security relevance                 |
+| ---- | ------------------- | ---------------- | ------------------------------------------------------------------------------------------------------ | ---------------------------------- |
+| I    | Codebase            | Fully            | One monorepo, many deploys (blue/green, `stage` branch)                                                | Traceable code, one place to scan  |
+| II   | Dependencies        | Partly           | `pnpm-lock.yaml` frozen, `packageManager` pinned. ALPR `requirements.txt` hash-pinned (step 21)        | Reproducible builds, supply chain  |
+| III  | Config              | Fully, with gaps | Zod `env.ts` + `assertProductionEnv`, ALPR fails closed. Secrets visible in `docker inspect` → step 15 | Secrets out of code                |
+| IV   | Backing services    | Fully            | Postgres, Redis, ALPR, mail, R2 all by URL                                                             | Swappable and isolatable → step 13 |
+| V    | Build, release, run | Fully            | SHA-tagged images, rollback by `image_tag`, immutable web build. `:latest` also pushed → step 26       | Integrity, provenance              |
+| VI   | Processes           | Partly           | Stateless API, sessions in DB, throttle counters in Redis. `contact-limiter` in memory by design       | Scale without sticky state         |
+| VII  | Port binding        | Fully            | `PORT`; only Caddy publishes 443                                                                       | Small exposed surface              |
+| VIII | Concurrency         | Partly           | Ingest is its own process (advisory lock). Timers run inside the API (fine at one replica)             | n/a                                |
+| IX   | Disposability       | Fully            | `enableShutdownHooks`, exec-form `CMD`, healthchecks, `stop_grace_period: 30s`                         | Fast patch rollout                 |
+| X    | Dev/prod parity     | Fully            | Same Postgres 18.6 and Redis in dev and prod; dev binds 127.0.0.1                                      | Bugs reproducible locally          |
+| XI   | Logs                | Partly           | stdout JSON, rotated json-file, Sentry. PII scrubbed (D56, D57). No Caddy access log → step 16         | Audit trail vs PII leak            |
+| XII  | Admin processes     | Fully            | Migrations, seed, ingest as one-off `compose run --rm` with the release image                          | Same audited image for admin tasks |
 
 "Beyond the Twelve-Factor App" (Hoffman, 2016) adds **API first**, **Telemetry**, **Authentication and authorization**. Mapped here: curated public OpenAPI
-subset (D36); Sentry + PostHog (D47 area, step 1); sessions, guards, sudo mode (D28-D30).
+subset (D36); Sentry + PostHog (D56, D57); sessions, guards, sudo mode (D28-D30).
 
 ## 3. Standards and tools
 
@@ -103,7 +103,7 @@ Open: history, favorites and offline cache survive sign-out → step 29.
 | D9  | Every `target=_blank` has `noopener`/`noreferrer`                                                                                                                                                                                                                      | `components/ExternalLink.tsx:19`                                    | Reverse tabnabbing (CWE-1022)       |
 | D10 | Telegram widget isolated in its own page with its own CSP, origin-checked `postMessage`                                                                                                                                                                                | `public/telegram-frame.*`, `lib/telegram-login.ts:24`               | Contains the one `eval`             |
 | D11 | SPA, no React Server Components, so not exposed to CVE-2025-55182                                                                                                                                                                                                      | architecture                                                        | RSC deserialization RCE             |
-| D12 | `?p=<token>` removed from the address bar after reading (Chrome still keeps the original URL in its history, which JS cannot erase); token, plate and VIN scrubbed from PostHog and Sentry URLs, breadcrumbs, transactions; Sentry `share_ref` tag is a SHA-256 prefix | `use-shared-photo.ts`, `lib/telemetry-scrub.ts`, `lib/telemetry.ts` | CWE-598, CWE-359                    |
+| D56 | `?p=<token>` removed from the address bar after reading (Chrome still keeps the original URL in its history, which JS cannot erase); token, plate and VIN scrubbed from PostHog and Sentry URLs, breadcrumbs, transactions; Sentry `share_ref` tag is a SHA-256 prefix | `use-shared-photo.ts`, `lib/telemetry-scrub.ts`, `lib/telemetry.ts` | CWE-598, CWE-359                    |
 
 Open: 27 (lint rules), 28 (iframe sandbox), 31 (Trusted Types), 32 (Maps key restriction).
 
@@ -175,9 +175,9 @@ Open: CORP, Server header, admin off, body limit, access log → 16; HSTS flags 
 | D38 | JSON body 1 MiB, multipart 4 MB / 1 file, request timeout 60 s                                                                                                                                         | `main.ts:23-43`                                                      | CWE-770                                                          |
 | D39 | Share uploads: magic bytes, EXIF stripped, sharp pixel limit                                                                                                                                           | `shares/helpers.ts:20-36`                                            | CVE-2023-4863, CVE-2016-3714                                     |
 | D40 | `fastify` 5.12.7 / `@nestjs/platform-fastify` 11.2.7 via `pnpm.overrides` (finding #1, fixed 2026-10-13)                                                                                               | `pnpm-workspace.yaml:29-35`                                          | Known high advisories                                            |
-| D41 | Sentry `beforeSend`/`beforeSendTransaction` drop body, query, cookies, Cookie/Authorization headers; plate, VIN, card and share paths, Referer, transaction and breadcrumb URLs become route templates | `apps/api/src/sentry-scrub.ts`, `instrument.ts`                      | CWE-532                                                          |
+| D57 | Sentry `beforeSend`/`beforeSendTransaction` drop body, query, cookies, Cookie/Authorization headers; plate, VIN, card and share paths, Referer, transaction and breadcrumb URLs become route templates | `apps/api/src/sentry-scrub.ts`, `instrument.ts`                      | CWE-532                                                          |
 
-Open: 3, 5-10.
+Open: 5-10.
 
 ### Layer 9 - Postgres and Redis
 
