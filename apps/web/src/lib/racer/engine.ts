@@ -94,6 +94,14 @@ const DEFAULT_CRUISE_KMH = 40
 const BRAKE_MARGIN = 300
 /** A hit within this many seconds of the previous contact is the same bump. */
 const BUMP_COOLDOWN = 0.7
+/** A new bump keeps this share of the speed; staying inside the obstacle drags the car on (share of speed lost per second). */
+const BUMP_SPEED_KEEP = 0.8
+const BUMP_DRAG = 0.6
+/** The bump animation: seconds it lasts, the car's tilt (rad) and hop (share of its height), the sideways shove (road half-widths / s). */
+const BUMP_ANIM_SECONDS = 0.8
+const BUMP_TILT = 0.09
+const BUMP_HOP = 0.07
+const BUMP_SHOVE = 0.9
 const SKY_SPEED = 0.001
 const HILL_SPEED = 0.002
 const TREE_SPEED = 0.003
@@ -247,6 +255,9 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
   let driven = 0 // km, never reset: the HUD's session odometer
   let bumps = 0 // collisions with traffic or roadside objects, never reset (session counter like `driven`)
   let bumpCooldown = 0 // seconds of contact-free driving left before the next hit counts as a new bump
+  let lastDt = 0 // the current update's step, for the drag in registerBump
+  let bumpAge = BUMP_ANIM_SECONDS // seconds since the last new bump; >= BUMP_ANIM_SECONDS = no animation
+  let bumpSide = 1 // which way the last bump shoves the car (-1 left, 1 right): away from what it hit
   let wrecked = false // BUMP_WRECK bumps: the car is stopped and input ignored until restart() clears it
   let finished = false // TEST_DRIVE_KM driven: same stop as a wreck, until restart() starts a new drive
   let puffs: Puff[] = []
@@ -343,12 +354,18 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
   }
 
   /** Counts a hit once per contact: staying pressed against the obstacle keeps the cooldown running. */
-  function registerBump(): void {
+  function registerBump(side: number): void {
     if (wrecked || finished) return
     if (bumpCooldown <= 0) {
       bumps++
       if (bumps >= BUMP_WRECK) wrecked = true
+      bumpAge = 0
+      bumpSide = side
+      speed *= BUMP_SPEED_KEEP
+      sound.crash()
       emitHud(true)
+    } else {
+      speed -= speed * BUMP_DRAG * lastDt // still inside the obstacle: plough on, slower
     }
     bumpCooldown = BUMP_COOLDOWN
   }
@@ -392,6 +409,7 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
   }
 
   function update(dt: number): void {
+    lastDt = dt
     bumpCooldown -= dt
     camLevel += (camTarget - camLevel) * Math.min(1, dt * 4)
     fpLevel += (fpTarget - fpLevel) * Math.min(1, dt * 6)
@@ -440,16 +458,7 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
       for (const sprite of playerSegment.sprites) {
         const spriteW = sprite.source.w * SPRITE_SCALE
         if (overlap(playerX, playerW, sprite.offset + (spriteW / 2) * (sprite.offset > 0 ? 1 : -1), spriteW)) {
-          sound.crash()
-          registerBump()
-          if (speed < 0) {
-            // backed into it: stop just behind the sprite's segment
-            speed = 0
-            position = increase(playerSegment.p2.world.z, -PLAYER_Z, trackLength)
-          } else {
-            speed = MAX_SPEED / 5
-            position = increase(playerSegment.p1.world.z, -PLAYER_Z, trackLength) // stop in front of the sprite
-          }
+          registerBump(sprite.offset > 0 ? -1 : 1) // no stopping: the car drives through, slower
           break
         }
       }
@@ -458,12 +467,15 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
     for (const car of playerSegment.cars) {
       const carW = car.sprite.w * SPRITE_SCALE
       if (speed > car.speed && overlap(playerX, playerW, car.offset, carW, 0.8)) {
-        speed = car.speed * (car.speed / speed)
-        sound.crash()
-        registerBump()
-        position = increase(car.z, -PLAYER_Z, trackLength)
+        registerBump(playerX < car.offset ? -1 : 1)
         break
       }
+    }
+
+    // the bump animation: a short shove sideways that dies out with the tilt and hop
+    if (bumpAge < BUMP_ANIM_SECONDS) {
+      bumpAge += dt
+      if (!wrecked && !finished) playerX += bumpSide * BUMP_SHOVE * Math.exp(-bumpAge * 6) * dt
     }
 
     playerX = limit(playerX, -3, 3)
@@ -607,15 +619,22 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
     if (fpLevel > 0.6) return // first person: no car in front of the camera, see drawHood
     const bounce = 1.5 * Math.random() * (speed / MAX_SPEED) * resolution * randomChoice([-1, 1])
     const sprite = steer < 0 ? atlas.player.left : steer > 0 ? atlas.player.right : atlas.player.straight
-    drawSprite(sprite, scale, destX, destY + bounce, -0.5, -1)
-    carAnchor = {
-      x: destX,
-      y: destY + bounce,
-      w: sprite.w * scale * (width / 2) * (SPRITE_SCALE * ROAD_WIDTH),
-      h: sprite.h * scale * (width / 2) * (SPRITE_SCALE * ROAD_WIDTH)
-    }
+    const w = sprite.w * scale * (width / 2) * (SPRITE_SCALE * ROAD_WIDTH)
+    const h = sprite.h * scale * (width / 2) * (SPRITE_SCALE * ROAD_WIDTH)
+    // bump: a damped wobble around the car's base, with a hop that fades out
+    const k = bumpAge < BUMP_ANIM_SECONDS ? Math.exp(-bumpAge * 5) * (1 - bumpAge / BUMP_ANIM_SECONDS) : 0
+    const tilt = bumpSide * BUMP_TILT * k * Math.cos(bumpAge * 22)
+    const hop = -BUMP_HOP * h * k * Math.abs(Math.sin(bumpAge * 12))
+    const y = destY + bounce + hop
+    carAnchor = { x: destX, y, w, h }
+    ctx.save()
+    ctx.translate(destX, y)
+    ctx.rotate(tilt)
+    ctx.translate(-destX, -y)
+    drawSprite(sprite, scale, destX, y, -0.5, -1)
     // brake lights glow while ↓ is held
-    if (braking && sprite.brake) drawSprite({ ...sprite, img: sprite.brake }, scale, destX, destY + bounce, -0.5, -1)
+    if (braking && sprite.brake) drawSprite({ ...sprite, img: sprite.brake }, scale, destX, y, -0.5, -1)
+    ctx.restore()
   }
 
   function render(): void {
@@ -1023,6 +1042,7 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
     // a restart always repairs the car: no bumps, no smoke
     bumps = 0
     bumpCooldown = 0
+    bumpAge = BUMP_ANIM_SECONDS
     puffs = []
     puffDebt = 0
     position = 0
