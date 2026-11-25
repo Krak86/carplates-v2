@@ -416,13 +416,14 @@ Tick the box and add a `docs/plan-done.md` entry when a step is finished. "Verif
 - **Verify:** `grep -rn "uses:" .github | grep -v "@[0-9a-f]\{40\}"` is empty for third-party actions; CI green.
 - **Done (2026-11-25):** third-party actions pinned (`docker/setup-buildx-action`, `docker/login-action`, `docker/build-push-action` in `build-image/action.yml`; `pnpm/action-setup` in `ci.yml`, `deploy-web.yml`), SHAs resolved with `git ls-remote` from the official repos (`pnpm/action-setup` v6 is an annotated tag: the dereferenced commit is pinned). `actions/*` left on tags (optional). Dependabot `github-actions` has `cooldown: default-days: 3`. Steps 23-24 must pin their actions the same way.
 
-### Step 23 - `security.yml` workflow [x] · M · 🤖 · layer 11
+### Step 23 - `security.yml` workflow [~] · M · 🤖 · layer 11
 
 - **What:** per PR, to `main` and weekly: gitleaks (full history once), `trivy fs` and `trivy config` (fail on HIGH and CRITICAL), OSV-Scanner, Opengrep with OWASP and Node rules (SARIF to the Security tab; repo is public). Weekly: `trivy image` on api, alpr, ingest from GHCR. CodeQL (repo is public). Add a root `pnpm security:check` running the local equivalents.
 - **Files:** `.github/workflows/security.yml`, root `package.json`.
 - **Why:** Codecov bash uploader (2021), Toyota key on GitHub (2022), Log4Shell.
 - **Alternatives:** Grype instead of Trivy · SonarQube Community (needs a server) · GitHub secret scanning (free on public repos; cloud-side only).
 - **Verify:** a planted test secret on a branch fails gitleaks; a known-vulnerable dev dependency fails OSV; run `pnpm security:check` locally.
+- **First CI run (PR #270, 2026-11-25):** ✅ gitleaks, trivy fs and config, CodeQL (js/ts, python). ❌ **OSV-Scanner**: 5 advisories in `pnpm-lock.yaml` (zod 4.6.0 → 4.6.6 is High 8.2; minimatch 10.2.6 → 11.0.1; glob 11.1.0 → 14.0.2; esbuild 0.18.20 → 0.25.0; serialize-javascript 7.1.2 → 7.1.3), so `pnpm audit` in CI may fail too. ❌ **Opengrep**: 6 ERROR findings, all reviewed as accepted dev tooling: `spawn-shell-true` in `infra/ci/security-check.mjs`, `scripts/src/{derived-refresh,ingest-full,run-job,tunnel}.ts` (static args, `shell` needed on Windows) and `subprocess.run` in `services/alpr/test_app_config.py` (test). Plan: inline `nosemgrep` with a reason per site, not a directory exclude. ❌ **CI lint** failed on `security-check.mjs` (`no-undef`): fixed by adding `infra/ci/*.mjs` to the node-globals block in `eslint.config.mjs`. ⏭ `trivy image` skipped on PRs by design. Step is `[x]` once the PR is green.
 
 ### Step 24 - ZAP baseline workflow [ ] · M · 🤖 · layer 8, 2
 
