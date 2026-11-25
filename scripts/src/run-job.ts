@@ -36,6 +36,7 @@ async function ping(job: string, suffix: '' | '/start' | '/fail'): Promise<void>
 function runCommand(command: string, timeoutMin: number): Promise<Outcome> {
   return new Promise(resolve => {
     // detached = own process group, so the timeout can take down the shell AND the tsx/node children under it.
+    // nosemgrep: javascript.lang.security.audit.spawn-shell-true - command is a hardcoded job string from this repo (shell needed for pipes and process-group kill)
     const child = spawn(command, { shell: true, stdio: 'inherit', detached: true })
     let timedOut = false
     let killTimer: NodeJS.Timeout | undefined

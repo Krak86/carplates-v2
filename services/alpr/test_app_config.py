@@ -14,6 +14,7 @@ HERE = Path(__file__).parent
 
 def _run(code: str, **env: str) -> subprocess.CompletedProcess[str]:
     base = {k: v for k, v in os.environ.items() if k not in ("ALPR_API_KEY", "ALPR_ALLOW_NO_KEY")}
+    # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-audit - argv is [sys.executable, "-c", <test-literal code>], no external input
     return subprocess.run(
         [sys.executable, "-c", code], cwd=HERE, env={**base, **env}, capture_output=True, text=True, timeout=300
     )

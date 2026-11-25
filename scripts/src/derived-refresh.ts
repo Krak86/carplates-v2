@@ -27,6 +27,7 @@ export const DERIVED_REFRESH_SCRIPTS = [
 export function refreshDerived(): void {
   for (const script of DERIVED_REFRESH_SCRIPTS) {
     console.log(`refreshing derived stats: ${script} …`)
+    // nosemgrep: javascript.lang.security.audit.spawn-shell-true - script names from a static constant list; shell needed for tsx.cmd on Windows
     const result = spawnSync('tsx', [script], { cwd: SCRIPTS_DIR, stdio: 'inherit', shell: true })
     if (result.status !== 0) throw new Error(`${script} failed (exit ${String(result.status)})`)
   }
