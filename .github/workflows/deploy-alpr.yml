@@ -28,7 +28,7 @@ jobs:
     outputs:
       owner: ${{ steps.meta.outputs.owner }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - id: meta
         uses: ./.github/actions/build-image
         with:
@@ -43,7 +43,7 @@ jobs:
     timeout-minutes: 15
     environment: production
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/ssh-setup
         with:
           host: ${{ secrets.VPS_HOST }}

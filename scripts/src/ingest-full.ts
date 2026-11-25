@@ -38,6 +38,7 @@ const ARCHIVE_2026_URL =
   'https://data.gov.ua/dataset/0ffd8b75-0628-48cc-952a-9302f9799ec0/resource/3f13166f-090b-499e-8e23-e9851c5a5f67/revision/508698/download'
 
 function runIngest(args: string[]): void {
+  // nosemgrep: javascript.lang.security.audit.spawn-shell-true - static command, args are CLI flags of this repo script; shell needed for tsx.cmd on Windows
   const result = spawnSync('tsx', ['src/ingest.ts', ...args], { cwd: SCRIPTS_DIR, stdio: 'inherit', shell: true })
   if (result.status !== 0) throw new Error(`pnpm ingest ${args.join(' ')} failed (exit ${String(result.status)})`)
 }

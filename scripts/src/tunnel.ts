@@ -53,6 +53,7 @@ function shutdown(code = 0): void {
 }
 
 function run(cmd: string, args: string[]): void {
+  // nosemgrep: javascript.lang.security.audit.spawn-shell-true - static cmd/args from this script; shell only on Windows for .cmd shims
   const r = spawnSync(cmd, args, { cwd: ROOT, stdio: 'inherit', shell: process.platform === 'win32' })
   if (r.status !== 0) fail(`\`${cmd} ${args.join(' ')}\` failed (exit ${r.status})`)
 }

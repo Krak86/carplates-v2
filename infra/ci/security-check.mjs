@@ -39,6 +39,7 @@ const checks = [
 const failed = []
 for (const [name, cmd, args] of checks) {
   console.log(`\n=== ${name} ===`)
+  // nosemgrep: javascript.lang.security.audit.spawn-shell-true - fixed args from the local checks table; shell only on Windows for .cmd shims
   const { status } = spawnSync(cmd, args, { stdio: 'inherit', shell: process.platform === 'win32' })
   if (status !== 0) failed.push(name)
 }
