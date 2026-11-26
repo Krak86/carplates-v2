@@ -381,4 +381,46 @@ describe('SpaController meta injection', () => {
     writeFileSync(join(dist, 'index.html'), INDEX.replace('<div id="root">', '<div id="root" data-build="new">'))
     expect(await get('/about')).toContain('data-build="new"')
   })
+
+  describe('hostile paths', () => {
+    const SECRET = 'TOP-SECRET-OUTSIDE-DIST'
+    const secretName = 'spa-secret-outside.txt'
+
+    beforeAll(() => {
+      writeFileSync(join(dist, '..', secretName), SECRET)
+    })
+
+    // Plain, encoded, double-encoded, backslash and NUL variants of a climb out of the dist dir.
+    it.each([
+      `/../${secretName}`,
+      `/%2e%2e/${secretName}`,
+      `/%2E%2E%2F${secretName}`,
+      `/..%2f${secretName}`,
+      `/%252e%252e/${secretName}`,
+      `/..%ets/../../${secretName}`,
+      `/%005c${secretName}`,
+      `/ass/${secretName}`,
+      `/${secretName}%00.png`
+    ])('never serves a file outside the dist dir: %s', async url => {
+      const res = await app.inject({ method: 'GET', url })
+      expect(res.body).not.toContain(SECRET)
+      expect(res.statusCode).toBeLessThan(500)
+    })
+
+    it('never answers a malformed %-escape in the path with a 5xx', async () => {
+      for (const url of ['/%E0%A4%A', '/%', '/%zz', '/AA%E0%A4%A']) {
+        const res = await app.inject({ method: 'GET', url })
+        expect(res.statusCode, url).toBeLessThan(500)
+      }
+    })
+
+    it('escapes markup in a requested plate or query, never reflecting it raw into the head', async () => {
+      for (const url of ['/%3Cscript%3Ealert(1)%3C%2Fscript%3E', '/%22%3E%3Cimg%20src%3Dx%20onerror%3Dalert(1)%3E']) {
+        const html = await get(url)
+        expect(html).not.toContain('<script>alert')
+        expect(html).not.toContain('<img src=x')
+        expect(html).not.toContain('"><img')
+      }
+    })
+  })
 })

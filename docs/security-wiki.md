@@ -19,7 +19,7 @@ Legend: ✅ done · ❌ open (step #) · 🔍 verify · 🤖 code/config (diff s
 | 5   | Ubuntu host          | D16-D19          | 19, 25         |
 | 6   | Docker               | D20-D23          | 13, 14, 15, 19 |
 | 7   | Caddy                | D24-D26          | 16, 17, 18     |
-| 8   | API (NestJS)         | D27-D40, D57     | 5-10           |
+| 8   | API (NestJS)         | D27-D40, D57-D58 | 7-10           |
 | 9   | Postgres and Redis   | D41-D44          | 11, 12, 15, 20 |
 | 10  | ALPR (Python)        | D45, D51         | -              |
 | 11  | Supply chain and CI  | D46-D49, D52-D55 | 24, 26, 30     |
@@ -175,6 +175,7 @@ Open: CORP, Server header, admin off, body limit, access log → 16; HSTS flags 
 | D38 | JSON body 1 MiB, multipart 4 MB / 1 file, request timeout 60 s                                                                                                                                         | `main.ts:23-43`                                                      | CWE-770                                                          |
 | D39 | Share uploads: magic bytes, EXIF stripped, sharp pixel limit                                                                                                                                           | `shares/helpers.ts:20-36`                                            | CVE-2023-4863, CVE-2016-3714                                     |
 | D40 | `fastify` 5.12.7 / `@nestjs/platform-fastify` 11.2.7 via `pnpm.overrides` (finding #1, fixed 2026-10-13)                                                                                               | `pnpm-workspace.yaml:29-35`                                          | Known high advisories                                            |
+| D58 | Recognize uploads: `image` field required, magic-byte type check (JPEG/PNG/WebP), client filename and MIME dropped, generic 502 bodies on ALPR, VIN OCR, Plate Recognizer, Pixabay and NHTSA           | `apps/api/src/recognize/read-upload.ts`                              |
 | D57 | Sentry `beforeSend`/`beforeSendTransaction` drop body, query, cookies, Cookie/Authorization headers; plate, VIN, card and share paths, Referer, transaction and breadcrumb URLs become route templates | `apps/api/src/sentry-scrub.ts`, `instrument.ts`                      | CWE-532                                                          |
 
 Open: 5-10.
@@ -263,20 +264,22 @@ Tick the box and add a `docs/plan-done.md` entry when a step is finished. "Verif
 
 ### B. API input and output
 
-### Step 5 - Recognize upload checks (local and VIN) [ ] · S-M · 🤖 · layer 8
+### Step 5 - Recognize upload checks (local and VIN) [x] · S-M · 🤖 · layer 8
 
 - **What:** recognize trusts the client MIME type, accepts any multipart field name, forwards the client filename and echoes upstream `err.message` in 502s (`local-recognize.service.ts:60`, same pattern in Pixabay and NHTSA). Reuse the magic-byte check from shares, require the field name, drop the filename, return generic 502 text.
 - **Files:** `apps/api/src/recognize/read-upload.ts`, `local-recognize.service.ts`, `vin-recognize.service.ts`, `shares/helpers.ts` (reuse), `photos`, `nhtsa` services.
 - **Why:** CVE-2023-4863 libwebp, CVE-2016-3714 ImageTragick, CWE-209.
 - **Alternatives:** re-encode with sharp before forwarding (strongest, strips polyglots; CPU and latency) · `file-type` package (more formats; new dependency).
 - **Verify:** tests: a text file renamed `.jpg` is rejected; 502 body is generic.
+- **Done 2026-11-26:** `readUpload` requires the `image` field, sniffs the magic bytes (JPEG, PNG, WebP; the client MIME type and filename are dropped, `UploadedImage` has no `filename`) and answers 400 naming the rejected format (HEIC/HEIF, AVIF, GIF, BMP, TIFF) or the generic "Unsupported image format". The web `recognize.badImage` text now says only JPEG, PNG and WebP work (not HEIC, GIF or AVIF), ua/ru/en. The browser re-encodes to JPEG first, so only a file it cannot decode (HEIC in Chrome) reaches this 400. 502s from ALPR, VIN OCR, Plate Recognizer, Pixabay and NHTSA (ratings, recalls, complaints, video) are fixed strings; the upstream message goes to the server log. The shares route shares `readUpload`, so it gets the same field and type checks.
 
-### Step 6 - Hostile-input tests [ ] · S · 🤖 · layer 8 (bundle with step 5)
+### Step 6 - Hostile-input tests [x] · S · 🤖 · layer 8 (bundle with step 5)
 
 - **What:** missing tests: `<script>` and `"` in a plate through `renderMetaTags` title and description; `../` and encoded traversal against SPA static serving.
 - **Files:** `apps/api/src/spa/meta.test.ts`, a new spa controller test.
 - **Why:** CWE-79, CVE-2021-41773.
 - **Verify:** tests pass, and fail when the escaping is removed.
+- **Done 2026-11-26:** `meta.test.ts` (markup, quotes and `&` in title, description, image, og:url) and `spa.controller.test.ts` "hostile paths" (nine traversal variants: plain, encoded, double-encoded, backslash, NUL; malformed %-escapes are never 5xx; a `<script>` plate is not reflected). Checked by replacing `esc` with the identity: 4 tests fail.
 
 ### Step 7 - `fetchJson` helper (timeout, byte cap, Zod) [ ] · M · 🤖 · layer 8
 

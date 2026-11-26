@@ -4,6 +4,7 @@ import {
   HttpException,
   Inject,
   Injectable,
+  Logger,
   NotFoundException,
   ServiceUnavailableException
 } from '@nestjs/common'
@@ -12,9 +13,9 @@ import type { PlateRecognizeResponse } from '@carplates/shared'
 import { alprLocalEnabled, loadEnv } from '../env.js'
 import { mapPlateReaderResults } from './recognize.mapper.js'
 import { RegistryRankService } from './registry-rank.service.js'
+import { ACCEPTED_MIME, UNSUPPORTED_IMAGE_MESSAGE } from './read-upload.js'
 import type { PlateReaderResponse, PlateReaderResult, UploadedImage, VinReaderResponse } from './recognize.types.js'
 
-const ACCEPTED_MIME = new Set(['image/jpeg', 'image/png', 'image/webp'])
 // Tiled multi-crop inference on the VPS can take well over 10 s; stays under the 60 s requestTimeout in main.ts.
 const UPSTREAM_TIMEOUT_MS = 40_000
 
@@ -25,6 +26,7 @@ const UPSTREAM_TIMEOUT_MS = 40_000
  */
 @Injectable()
 export class LocalRecognizeService {
+  private readonly logger = new Logger(LocalRecognizeService.name)
   private readonly env = loadEnv()
 
   constructor(@Inject(RegistryRankService) private readonly registryRank: RegistryRankService) {}
@@ -39,11 +41,11 @@ export class LocalRecognizeService {
     }
     if (image.buffer.byteLength === 0) throw new BadRequestException('Uploaded image is empty')
     if (!ACCEPTED_MIME.has(image.mimetype)) {
-      throw new BadRequestException(`Unsupported image format "${image.mimetype}" - upload a JPEG, PNG or WebP photo`)
+      throw new BadRequestException(UNSUPPORTED_IMAGE_MESSAGE)
     }
 
     const form = new FormData()
-    form.append('image', new Blob([image.buffer], { type: image.mimetype }), image.filename || 'plate.jpg')
+    form.append('image', new Blob([image.buffer], { type: image.mimetype }), 'plate')
 
     let payload: PlateReaderResponse
     try {
@@ -57,7 +59,8 @@ export class LocalRecognizeService {
       payload = (await res.json()) as PlateReaderResponse
     } catch (err) {
       if (err instanceof HttpException) throw err // don't let this swallow the mapping above
-      throw new BadGatewayException(`Local ALPR request failed: ${(err as Error).message}`)
+      this.logger.warn(`Local ALPR request failed: ${(err as Error).message}`)
+      throw new BadGatewayException('Plate recognition request failed')
     }
 
     let candidates = mapPlateReaderResults(payload.results ?? [])

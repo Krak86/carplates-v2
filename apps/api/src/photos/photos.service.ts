@@ -3,6 +3,7 @@ import {
   BadRequestException,
   HttpException,
   Injectable,
+  Logger,
   ServiceUnavailableException
 } from '@nestjs/common'
 import type { VehiclePhotosResponse } from '@carplates/shared'
@@ -23,6 +24,7 @@ const UPSTREAM_TIMEOUT_MS = 10_000
 
 @Injectable()
 export class PhotosService {
+  private readonly logger = new Logger(PhotosService.name)
   private readonly env = loadEnv()
   /** Stock photos for a given brand/model/year don't change day to day — a bounded cache saves quota (Pixabay free tier: 100 req/60s). */
   private readonly cache = new Map<string, VehiclePhotosResponse>()
@@ -57,7 +59,8 @@ export class PhotosService {
       payload = (await res.json()) as { hits?: PixabayHit[] }
     } catch (err) {
       if (err instanceof HttpException) throw err // don't let this swallow the mapping above
-      throw new BadGatewayException(`Pixabay request failed: ${(err as Error).message}`)
+      this.logger.warn(`Pixabay request failed: ${(err as Error).message}`)
+      throw new BadGatewayException('Photo search request failed')
     }
 
     const images = (payload.hits ?? []).map(hit => ({

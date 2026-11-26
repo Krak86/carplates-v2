@@ -11,7 +11,7 @@ import { CloudRecognizeService } from './cloud-recognize.service.js'
 vi.stubEnv('PLATE_RECOGNIZER_CLOUD_TOKEN', 'test-token')
 vi.stubEnv('PLATE_RECOGNIZER_CLOUD_ENABLED', 'true')
 
-const image = { buffer: Buffer.from('fake-image-bytes'), mimetype: 'image/jpeg', filename: 'plate.jpg' }
+const image = { buffer: Buffer.from('fake-image-bytes'), mimetype: 'image/jpeg' }
 
 function jsonResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), { status })

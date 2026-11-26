@@ -45,7 +45,7 @@ beforeAll(async () => {
     .toBuffer()
 })
 
-const upload = () => ({ buffer: jpeg, mimetype: 'image/jpeg', filename: 'x.jpg' })
+const upload = () => ({ buffer: jpeg, mimetype: 'image/jpeg' })
 
 function setup() {
   const repo = {
@@ -210,9 +210,9 @@ describe('SharesService.create', () => {
     const png = await sharp(Buffer.alloc(8 * 8 * 3), { raw: { width: 8, height: 8, channels: 3 } })
       .png()
       .toBuffer()
-    await expect(
-      s.service.create('u1', { buffer: png, mimetype: 'image/jpeg', filename: 'x.jpg' })
-    ).rejects.toBeInstanceOf(UnsupportedMediaTypeException)
+    await expect(s.service.create('u1', { buffer: png, mimetype: 'image/jpeg' })).rejects.toBeInstanceOf(
+      UnsupportedMediaTypeException
+    )
     expect(s.recognizer.recognize).not.toHaveBeenCalled()
   })
 
@@ -221,9 +221,9 @@ describe('SharesService.create', () => {
       .jpeg()
       .withExif({ IFD0: { Copyright: 'someone' } })
       .toBuffer()
-    await expect(
-      s.service.create('u1', { buffer: withExif, mimetype: 'image/jpeg', filename: 'x.jpg' })
-    ).rejects.toBeInstanceOf(BadRequestException)
+    await expect(s.service.create('u1', { buffer: withExif, mimetype: 'image/jpeg' })).rejects.toBeInstanceOf(
+      BadRequestException
+    )
     expect(s.repo.countActive).not.toHaveBeenCalled()
     expect(s.recognizer.recognize).not.toHaveBeenCalled()
   })

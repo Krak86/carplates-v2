@@ -9,7 +9,7 @@ const passThroughRank = { rank: async (c: PlateCandidate[]) => c } as unknown as
 
 vi.stubEnv('ALPR_LOCAL_URL', 'http://localhost:8088')
 
-const image = { buffer: Buffer.from('fake-image-bytes'), mimetype: 'image/jpeg', filename: 'plate.jpg' }
+const image = { buffer: Buffer.from('fake-image-bytes'), mimetype: 'image/jpeg' }
 
 function jsonResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), { status })
@@ -76,9 +76,12 @@ describe('LocalRecognizeService', () => {
   })
 
   it('throws BadGatewayException when the fetch itself rejects (container not running)', async () => {
-    vi.mocked(fetch).mockRejectedValue(new Error('connect ECONNREFUSED'))
+    vi.mocked(fetch).mockRejectedValue(new Error('connect ECONNREFUSED 10.0.0.5:8088'))
     const service = new LocalRecognizeService(passThroughRank)
-    await expect(service.recognize(image)).rejects.toBeInstanceOf(BadGatewayException)
+    const err = await service.recognize(image).catch((e: unknown) => e)
+    expect(err).toBeInstanceOf(BadGatewayException)
+    // the upstream error (host, port) stays in the server log, never in the response
+    expect((err as BadGatewayException).message).not.toContain('10.0.0.5')
   })
 
   it('rejects an unsupported mimetype before calling upstream', async () => {

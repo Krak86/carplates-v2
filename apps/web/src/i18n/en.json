@@ -1896,7 +1896,7 @@
   "favorites.remove": "Remove from favorites",
   "recognize.noPlate": "No plate was found in that photo. Try a clearer, closer shot.",
   "recognize.noVin": "No VIN was found in that photo. Get close to the VIN sticker, plate or barcode and keep it sharp and glare-free.",
-  "recognize.badImage": "That image couldn't be read - try a JPEG, PNG or WebP photo.",
+  "recognize.badImage": "That image couldn't be read - only JPEG, PNG and WebP photos work (not HEIC, GIF or AVIF).",
   "recognize.rateLimited": "Too many attempts - wait a moment and try again.",
   "recognize.unavailable": "Photo search isn't available right now.",
   "recognize.error": "Photo search failed. Please try again.",

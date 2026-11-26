@@ -5,8 +5,14 @@ import type { ReleaseDay } from './core.js'
 export const DAYS: readonly ReleaseDay[] = [
   {
     date: '2026-11-26',
-    version: 'v2.1503',
+    version: 'v2.1526',
     items: [
+      item(
+        'improved',
+        'Завантаження фото для розпізнавання номера й VIN тепер перевіряє справжній тип файлу, а не лише розширення; якщо формат не підтримується (HEIC, GIF, AVIF), повідомлення прямо каже, що підходять лише JPEG, PNG і WebP',
+        'Загрузка фото для распознавания номера и VIN теперь проверяет настоящий тип файла, а не только расширение; если формат не поддерживается (HEIC, GIF, AVIF), сообщение прямо говорит, что подходят только JPEG, PNG и WebP',
+        'Photo upload for plate and VIN recognition now checks the real file type, not just the extension; for an unsupported format (HEIC, GIF, AVIF) the message says plainly that only JPEG, PNG and WebP work'
+      ),
       item(
         'improved',
         'Історія оновлень даних більше не має смуги прокрутки: показано лише початок списку, решта плавно розгортається кнопкою «Показати більше»',

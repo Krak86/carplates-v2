@@ -1,4 +1,4 @@
-import { BadGatewayException, Injectable } from '@nestjs/common'
+import { BadGatewayException, Injectable, Logger } from '@nestjs/common'
 import type { SafetyRating, SafetyRatingsResponse } from '@carplates/shared'
 
 import { loadEnv } from '../env.js'
@@ -54,6 +54,7 @@ const UPSTREAM_TIMEOUT_MS = 10_000
 
 @Injectable()
 export class SafetyService {
+  private readonly logger = new Logger(SafetyService.name)
   private readonly base = loadEnv().NHTSA_SAFETY_RATINGS_BASE_URL
   /** A model year's crash ratings never change once published — a bounded map is enough until Redis (Phase 4). */
   private readonly cache = new Map<string, SafetyRatingsResponse>()
@@ -138,7 +139,8 @@ export class SafetyService {
       if (!res.ok) throw new Error(`status ${res.status}`)
       return (await res.json()) as T
     } catch (err) {
-      throw new BadGatewayException(`NHTSA safety ratings request failed: ${(err as Error).message}`)
+      this.logger.warn(`NHTSA safety ratings request failed: ${(err as Error).message}`)
+      throw new BadGatewayException('NHTSA safety ratings request failed')
     }
   }
 
