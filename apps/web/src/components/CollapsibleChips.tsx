@@ -9,21 +9,32 @@ type Props = {
   className?: string
   /** Async chips are still arriving: reserve ~3 rows so they land without pushing the card down. */
   pending?: boolean
+  /** Visible height while collapsed; defaults to ~3 chip rows. */
+  collapsedPx?: number
+  /** Layout of the measured content wrapper; defaults to a wrapping chip row. */
+  contentClassName?: string
 }
 
 /** ~3 chip rows (1.5rem chips, 0.375rem gaps) plus a faded sliver of the 4th. */
 const COLLAPSED_PX = 104
+const CHIPS_CONTENT = 'flex min-h-6 flex-wrap items-center gap-1.5'
 
 /**
  * Clips a long chip list to three rows plus a faded fourth, with a "show more" toggle underneath (all viewport sizes, so
  * the card height is the same everywhere and late chips never push the page down). The toggle appears only when the content really overflows.
  */
-export default function CollapsibleChips({ children, className, pending = false }: Props): ReactNode {
+export default function CollapsibleChips({
+  children,
+  className,
+  pending = false,
+  collapsedPx = COLLAPSED_PX,
+  contentClassName = CHIPS_CONTENT
+}: Props): ReactNode {
   const { t } = useTranslation()
   const [expanded, setExpanded] = useState(false)
   const [content, setContent] = useState<HTMLDivElement | null>(null)
   const [height, setHeight] = useState(0)
-  const overflowing = height > COLLAPSED_PX + 4
+  const overflowing = height > collapsedPx + 4
 
   useEffect(() => {
     if (!content || typeof ResizeObserver === 'undefined') return
@@ -41,7 +52,7 @@ export default function CollapsibleChips({ children, className, pending = false 
       <div
         style={
           overflowing || collapsedMax
-            ? ({ '--chips-max': `${expanded ? height : COLLAPSED_PX}px` } as CSSProperties)
+            ? ({ '--chips-max': `${expanded ? height : collapsedPx}px` } as CSSProperties)
             : undefined
         }
         className={cn(
@@ -50,7 +61,7 @@ export default function CollapsibleChips({ children, className, pending = false 
           clipped && 'mask-[linear-gradient(to_bottom,black_65%,transparent)]'
         )}
       >
-        <div ref={setContent} className="flex min-h-6 flex-wrap items-center gap-1.5">
+        <div ref={setContent} className={contentClassName}>
           {children}
         </div>
       </div>
