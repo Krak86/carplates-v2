@@ -1747,11 +1747,12 @@ Research result: worth it only as one small feed. The release log (`packages/sha
 - [ ] 5. Optional: batched auction-lots item (own caching) and a data-freshness feed
 - [ ] After deploy (owner): validate the feed (W3C feed validator), subscribe in one reader, check `robots.txt` does not block it
 
-## Admin logs (Vector + Loki + B2 archive) (plan 2026-11-26, nothing built)
+## Admin logs (Vector + Loki + B2 archive) (plan 2026-11-26, step 1 of 5 built)
 
 Redacted VPS container logs (plates / VINs / emails / IPs partly masked) searchable in a new `/admin` Logs tab: Vector reads the Docker json-file logs (no Docker socket), Loki keeps 14 days, a daily gz archive goes to a separate Backblaze B2 bucket (90 days; R2 is full). No Prometheus, no Grafana for now. Design, security model and steps: `docs/logs-plan.md`.
 
-- [ ] 1. `packages/shared/src/log-redact.ts` + fixture-driven tests; `RedactingLogger` in the api
+- [x] 1. `packages/shared/src/log-redact.ts` + fixture-driven tests; `RedactingLogger` in the api
+- Step 1 notes: fixture `packages/shared/src/__fixtures__/log-lines.txt` is `raw<TAB>expected` per line (# comments); generate the Vector `tests:` YAML from it in step 2. Redaction is idempotent (tested). Soviet/short-series plates are masked only in URL paths and `plate=`/`vin=`/`q=` params, not free text.
 - [ ] 2. `infra/`: `tag` in `x-logging`, `vector` + `loki` services, `vector.yaml` (with `vector test` from the fixture), `loki.yaml`, pins in "Version pins"
 - [ ] 3. `apps/api/src/logs/` (`GET /api/admin/logs`, `/containers`; LogQL built server-side; `docs/checklists.md` "new /api/* endpoint")
 - [ ] 4. Web `AdminLogsTab` (filters, live polling, URL state), i18n pack keys, release note

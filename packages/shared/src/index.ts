@@ -80,6 +80,7 @@ export {
   isShortSeriesPlate,
   isSovietPlate
 } from './plate.js'
+export { maskEmail, maskIpv4, maskIpv6, maskPlate, maskVin, redactLogText, redactLogValue } from './log-redact.js'
 export { formatCompareRef, parseCompareRef, type CompareRef } from './compareRef.js'
 export { modelFamily, type ModelFamily } from './modelFamily.js'
 export { REGION_IDS } from './regionIds.js'

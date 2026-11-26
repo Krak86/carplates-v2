@@ -1,7 +1,7 @@
 import './instrument.js' // Sentry — must load before anything it instruments
 
 import multipart from '@fastify/multipart'
-import { ConsoleLogger, Logger } from '@nestjs/common'
+import { Logger } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 import { FastifyAdapter } from '@nestjs/platform-fastify'
 import type { NestFastifyApplication } from '@nestjs/platform-fastify'
@@ -9,6 +9,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import { cleanupOpenApiDoc } from 'nestjs-zod'
 
 import { AppModule } from './app.module.js'
+import { RedactingLogger } from './common/redacting-logger.js'
 import { registerCspParsers } from './csp/csp-parsers.js'
 import { loadEnv, swaggerEnabled } from './env.js'
 import { publicOpenApiDoc } from './openapi/public-doc.js'
@@ -26,7 +27,7 @@ async function bootstrap(): Promise<void> {
       requestTimeout: 60_000
     }),
     // One JSON object per line in production (docker logs, grep/jq friendly); dev keeps the coloured text.
-    { logger: new ConsoleLogger({ json: env.NODE_ENV === 'production' }) }
+    { logger: new RedactingLogger({ json: env.NODE_ENV === 'production' }) }
   )
   app.enableShutdownHooks()
   // Baseline hardening. No CSP/HSTS here: the CSP needs the embed allowlist (YouTube, Sketchfab, Maps, PostHog)

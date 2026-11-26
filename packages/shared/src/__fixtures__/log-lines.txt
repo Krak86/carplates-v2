@@ -1,0 +1,37 @@
+# raw<TAB>expected. Drives log-redact.test.ts and (generated into) the Vector `tests:` block, so TS and VRL cannot drift.
+# Lines starting with # and blank lines are ignored.
+GET /api/plate/AA1234BB 200 12ms	GET /api/plate/AA****BB 200 12ms
+GET /api/plate/AA1234BB/history 200	GET /api/plate/AA****BB/history 200
+GET /api/plate/%D0%90%D0%902345%D0%92%D0%92 200	GET /api/plate/АА****ВВ 200
+GET /api/vin/WVWZZZ1JZXW000001 200	GET /api/vin/WVW**********0001 200
+GET /api/card/AX22925 200	GET /api/card/AX***25 200
+GET /AA1234BB 200	GET /AA****BB 200
+GET /AX22925 200	GET /AX***25 200
+GET /read/plates 200	GET /read/plates 200
+lookup plate=AA1234BB failed	lookup plate=AA****BB failed
+lookup plate=ABC123 failed	lookup plate=AB**23 failed
+{"level":"log","message":"plate AA1234BB found"}	{"level":"log","message":"plate AA****BB found"}
+plate AA 1234 BB and 11AB3456	plate AA****BB and 11****56
+ключ АА1234ВВ знайдено	ключ АА****ВВ знайдено
+Latin lookalike BE7116AA in text	Latin lookalike BE****AA in text
+DETAIL: Key (plate)=(AA1234BB) already exists.	DETAIL: Key (plate)=(AA****BB) already exists.
+vin WVWZZZ1JZXW000001 decoded	vin WVW**********0001 decoded
+vin wvwzzz1jzxw000001 lower	vin wvw**********0001 lower
+not a vin ABCDEFGHJKLMNPRST here	not a vin ABCDEFGHJKLMNPRST here
+mail roman@gmail.com sent	mail r***@g***.com sent
+mail first.last+tag@mail.example.co.uk sent	mail f***@m***.uk sent
+client 203.0.113.42 connected	client 203.0.113.0 connected
+client 203.0.113.42:51234 connected	client 203.0.113.0:51234 connected
+version 1.2.3 and 999.1.1.1 stay	version 1.2.3 and 999.1.1.1 stay
+client 2001:db8:85a3:0:0:8a2e:370:7334 connected	client 2001:db8:85a3:: connected
+client 2001:db8::1 connected	client 2001:db8:0:: connected
+client ::1 connected	client 0:0:0:: connected
+time 12:34:56 and Cache::bad stay	time 12:34:56 and Cache::bad stay
+Authorization: Bearer abc.def.ghi	Authorization: [redacted]
+{"headers":{"cookie":"sid=abc; theme=dark","accept":"*/*"}}	{"headers":{"cookie":"[redacted]","accept":"*/*"}}
+Set-Cookie: sid=abc123; HttpOnly	Set-Cookie: [redacted]
+GET /auth/callback?code=4%2F0AX4&state=xyz 302	GET /auth/callback?code=[redacted]&state=xyz 302
+GET /api/x?access_token=abc123&a=1 200	GET /api/x?access_token=[redacted]&a=1 200
+GET /api/shares/Zm9vYmFyYmF6cXV4MTIzNA/image 200	GET /api/shares/[redacted]/image 200
+GET /api/shares/12 200	GET /api/shares/12 200
+nothing personal here, 200 OK in 12ms	nothing personal here, 200 OK in 12ms
