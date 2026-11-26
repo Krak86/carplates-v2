@@ -225,3 +225,11 @@ Minimal variant (registry + the five crash-test sources only):
 Afterwards, once by hand and optional, the live feeds that have no seed (the VPS cron runs them daily/monthly, see SCHEDULE.md):
 `pnpm ingest:wanted`, `ingest:wanted-plates`, `ingest:auctions --all`, `ingest:prozorro`, `ingest:auction-proceedings [--dry-run --file x.zip]`, `ingest:news`, `ingest:social`, `ingest:dtp:patrol`,
 `ingest:rdw-recalls`, `ingest:ca-recalls`. Env variables and API keys: README "Environment reference".
+
+## Quality / coverage
+
+```bash
+pnpm test:coverage   # all Vitest projects with v8 coverage; writes coverage/lcov.info (git-ignored) and prints a summary
+```
+
+CI runs it in `.github/workflows/quality.yml` and sends the result to SonarQube Cloud (`sonar-project.properties`). Needs the repo secret `SONAR_TOKEN` (GitHub Actions only, never in an `.env`); Sonar's Automatic Analysis must be off.

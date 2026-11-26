@@ -65,17 +65,17 @@ docker-bench-security covers the gap between them (CIS Docker daemon and runtime
 - **Lynis in CI: no.** Monthly cron on the VPS (step 25).
 - **ZAP baseline in CI: yes**, weekly and `workflow_dispatch`, against the local stack inside CI, never carsua.app (step 24). `.zap/rules.tsv` ignores the header rules Caddy owns (guarded by `caddyfile-headers.test.ts`). Active scans stay manual, local only.
 
-| Need                 | Tool                                    | Licence             | Alternatives (pros / cons)                                                                                                                                                             |
-| -------------------- | --------------------------------------- | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Secrets in git       | gitleaks (CLI or image)                 | MIT                 | trufflehog: verifies secrets live, more noise · GitHub secret scanning: free on public repos, cloud-side only. The official gitleaks-action needs a licence key for organisation repos |
-| Deps, images, IaC    | Trivy                                   | Apache-2.0          | Grype (+Syft): simpler, no IaC · Docker Scout: not fully OSS                                                                                                                           |
-| Second advisory feed | OSV-Scanner                             | Apache-2.0          | `pnpm audit` only: GitHub advisories only                                                                                                                                              |
-| SAST                 | Opengrep (or Semgrep CE)                | LGPL-2.1            | CodeQL: deeper, free only on public repos · SonarQube Community: needs a server                                                                                                        |
-| DAST                 | OWASP ZAP baseline                      | Apache-2.0          | Nuclei (MIT): fast CVE templates, less app-logic · Nikto: dated                                                                                                                        |
-| Host audit           | Lynis, docker-bench-security            | GPL-3.0, Apache-2.0 | OpenSCAP + CIS profile: formal, heavy · Wazuh: full SIEM, too heavy for one VPS                                                                                                        |
-| SBOM, provenance     | Syft, `actions/attest-build-provenance` | Apache-2.0, free    | cosign keyless: also verifies at deploy, more scripting                                                                                                                                |
-| Backup encryption    | age                                     | BSD                 | rclone crypt: transparent, key on the VPS · gpg: clunky                                                                                                                                |
-| Supply-chain score   | OpenSSF Scorecard                       | Apache-2.0          | none needed                                                                                                                                                                            |
+| Need                 | Tool                                    | Licence             | Alternatives (pros / cons)                                                                                                                                                                                               |
+| -------------------- | --------------------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Secrets in git       | gitleaks (CLI or image)                 | MIT                 | trufflehog: verifies secrets live, more noise · GitHub secret scanning: free on public repos, cloud-side only. The official gitleaks-action needs a licence key for organisation repos                                   |
+| Deps, images, IaC    | Trivy                                   | Apache-2.0          | Grype (+Syft): simpler, no IaC · Docker Scout: not fully OSS                                                                                                                                                             |
+| Second advisory feed | OSV-Scanner                             | Apache-2.0          | `pnpm audit` only: GitHub advisories only                                                                                                                                                                                |
+| SAST                 | Opengrep (or Semgrep CE)                | LGPL-2.1            | CodeQL: deeper, free only on public repos · SonarQube Cloud: free on public repos, runs in `quality.yml` for quality (bugs, smells, duplication, coverage), not as a security gate · SonarQube Community: needs a server |
+| DAST                 | OWASP ZAP baseline                      | Apache-2.0          | Nuclei (MIT): fast CVE templates, less app-logic · Nikto: dated                                                                                                                                                          |
+| Host audit           | Lynis, docker-bench-security            | GPL-3.0, Apache-2.0 | OpenSCAP + CIS profile: formal, heavy · Wazuh: full SIEM, too heavy for one VPS                                                                                                                                          |
+| SBOM, provenance     | Syft, `actions/attest-build-provenance` | Apache-2.0, free    | cosign keyless: also verifies at deploy, more scripting                                                                                                                                                                  |
+| Backup encryption    | age                                     | BSD                 | rclone crypt: transparent, key on the VPS · gpg: clunky                                                                                                                                                                  |
+| Supply-chain score   | OpenSSF Scorecard                       | Apache-2.0          | none needed                                                                                                                                                                                                              |
 
 ## 4. Layer wiki (done items, D-n)
 
@@ -565,7 +565,7 @@ Existing: `origin.guard`, `caddyfile-headers`, `csp.controller`, `throttle`, `th
 
 ### 8b. Automated, CI scanners
 
-Per PR: gitleaks, `trivy fs` and `trivy config`, OSV-Scanner, Opengrep, `pnpm audit`, CodeQL. Weekly: `trivy image`, ZAP baseline, Dependabot.
+Per PR: gitleaks, `trivy fs` and `trivy config`, OSV-Scanner, Opengrep, `pnpm audit`, CodeQL; SonarQube Cloud quality scan (`quality.yml`, not a security gate). Weekly: `trivy image`, ZAP baseline, Dependabot.
 
 ### 8c. Recurring on the VPS (automated, owner reviews)
 

@@ -1110,6 +1110,15 @@ headers (`nosniff`, `referrer-policy`, `x-frame-options`) · 60 s `requestTimeou
 ⚠️ Per-IP only. Not done: tracker keyed on `userId` when authed (needs a session lookup per request), Redis throttler store (the
 in-memory store resets on restart and isn't shared across instances), body-email limit on login (P5).
 
+### Quality scan (SonarQube Cloud, 2026-11-26)
+
+`quality.yml` + `sonar-project.properties` are written (docs/plan-done.md "Quality workflow"). Open (owner):
+
+- [ ] Sonar: import `carplates-v2` with "With GitHub Actions" (Automatic Analysis off); the project key must equal `sonar.projectKey` in `sonar-project.properties` (guessed `carsua-v2_carplates-v2`).
+- [ ] GitHub repo secret `SONAR_TOKEN` set (done 2026-11-26); remove it from `apps/api/.env` if it was put there.
+- [ ] First scan green on a PR; note the real coverage and the quality-gate result here. The 2 failing `releases/latest.test.ts` tests (date order) fail the job until fixed.
+- [ ] Optional: tune `sonar.exclusions` / coverage exclusions after the first report; consider a coverage threshold only once the baseline is known (about 37% lines).
+
 ### Deploy-time security checklist (do when setting up the VPS)
 
 Security wiki (per-layer status, 33 numbered steps (8 done, rest open) with alternatives and CVE index, test inventory): [docs/security-wiki.md](docs/security-wiki.md). Owner-only open items (details in its step 32):
