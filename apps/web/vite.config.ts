@@ -12,6 +12,7 @@ import { imagetools } from 'vite-imagetools'
 import { VitePWA } from 'vite-plugin-pwa'
 
 import { i18nFallback } from './i18n-fallback-plugin.ts'
+import { latestReleaseDate } from './latest-release-date.ts'
 
 const DAY_S = 24 * 60 * 60
 const BRAND_COLOR = '#1d4ed8'
@@ -139,7 +140,8 @@ function preloadHints(): Plugin {
 export default defineConfig({
   define: {
     __OFFLINE_CACHE_BUSTER__: JSON.stringify(OFFLINE_CACHE_BUSTER),
-    __APP_VERSION__: JSON.stringify(appVersion())
+    __APP_VERSION__: JSON.stringify(appVersion()),
+    __LATEST_RELEASE_DATE__: JSON.stringify(latestReleaseDate())
   },
   plugins: [
     react(),

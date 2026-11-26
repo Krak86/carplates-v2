@@ -3,6 +3,7 @@
 
 declare const __OFFLINE_CACHE_BUSTER__: string
 declare const __APP_VERSION__: string
+declare const __LATEST_RELEASE_DATE__: string
 
 interface ImportMetaEnv {
   readonly VITE_API_BASE?: string
