@@ -7,7 +7,7 @@ import type { RegistryRankService } from './registry-rank.service.js'
 
 const passThroughRank = { rank: async (c: PlateCandidate[]) => c } as unknown as RegistryRankService
 
-const image = { buffer: Buffer.from('fake-image-bytes'), mimetype: 'image/jpeg', filename: 'plate.jpg' }
+const image = { buffer: Buffer.from('fake-image-bytes'), mimetype: 'image/jpeg' }
 
 describe('LocalRecognizeService without ALPR_LOCAL_URL', () => {
   it('throws ServiceUnavailableException when ALPR_LOCAL_URL is unset', async () => {

@@ -28,6 +28,22 @@ describe('renderMetaTags', () => {
     expect(renderMetaTags(base)).not.toContain('ld+json')
   })
 
+  it('escapes markup and quotes in the title, description, image and og:url of every tag', () => {
+    const evil = '<script>alert(1)</script>"'
+    const tags = renderMetaTags({ ...base, title: evil, description: evil, image: evil, ogUrl: evil })
+    expect(tags).not.toContain('<script>')
+    expect(tags).toContain('<title>&lt;script&gt;alert(1)&lt;/script&gt;&quot;</title>')
+    expect(tags).toContain('name="description" content="&lt;script&gt;alert(1)&lt;/script&gt;&quot;"')
+    expect(tags).toContain('og:url" content="&lt;script&gt;')
+    // an attribute-breaking quote never survives unescaped inside any content="..." value
+    for (const [, value] of tags.matchAll(/content="([^"]*)"/g)) expect(value).not.toMatch(/[<>]/)
+  })
+
+  it('escapes an ampersand so a query string cannot inject a second attribute', () => {
+    const tags = renderMetaTags({ ...base, image: 'https://x.test/a.png?b=1&c="onload="x' })
+    expect(tags).toContain('a.png?b=1&amp;c=&quot;onload=&quot;x')
+  })
+
   it('adds noindex only when asked', () => {
     expect(renderMetaTags(base)).not.toContain('robots')
     expect(renderMetaTags({ ...base, noindex: true })).toContain('noindex')

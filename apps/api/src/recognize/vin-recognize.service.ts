@@ -3,15 +3,16 @@ import {
   BadRequestException,
   HttpException,
   Injectable,
+  Logger,
   NotFoundException,
   ServiceUnavailableException
 } from '@nestjs/common'
 import { extractVins, type VinRecognizeResponse } from '@carplates/shared'
 
 import { alprLocalEnabled, loadEnv } from '../env.js'
+import { ACCEPTED_MIME, UNSUPPORTED_IMAGE_MESSAGE } from './read-upload.js'
 import type { UploadedImage, VinReaderResponse } from './recognize.types.js'
 
-const ACCEPTED_MIME = new Set(['image/jpeg', 'image/png', 'image/webp'])
 const UPSTREAM_TIMEOUT_MS = 40_000
 const MAX_CANDIDATES = 5
 
@@ -22,6 +23,7 @@ const MAX_CANDIDATES = 5
  */
 @Injectable()
 export class VinRecognizeService {
+  private readonly logger = new Logger(VinRecognizeService.name)
   private readonly env = loadEnv()
 
   async recognize(image: UploadedImage): Promise<VinRecognizeResponse> {
@@ -30,11 +32,11 @@ export class VinRecognizeService {
     }
     if (image.buffer.byteLength === 0) throw new BadRequestException('Uploaded image is empty')
     if (!ACCEPTED_MIME.has(image.mimetype)) {
-      throw new BadRequestException(`Unsupported image format "${image.mimetype}" - upload a JPEG, PNG or WebP photo`)
+      throw new BadRequestException(UNSUPPORTED_IMAGE_MESSAGE)
     }
 
     const form = new FormData()
-    form.append('image', new Blob([image.buffer], { type: image.mimetype }), image.filename || 'vin.jpg')
+    form.append('image', new Blob([image.buffer], { type: image.mimetype }), 'vin')
 
     let payload: VinReaderResponse
     try {
@@ -48,7 +50,8 @@ export class VinRecognizeService {
       payload = (await res.json()) as VinReaderResponse
     } catch (err) {
       if (err instanceof HttpException) throw err
-      throw new BadGatewayException(`Local VIN OCR request failed: ${(err as Error).message}`)
+      this.logger.warn(`Local VIN OCR request failed: ${(err as Error).message}`)
+      throw new BadGatewayException('VIN recognition request failed')
     }
 
     const candidates = extractVins(payload.lines ?? []).slice(0, MAX_CANDIDATES)

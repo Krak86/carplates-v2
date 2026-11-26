@@ -1121,7 +1121,7 @@ in-memory store resets on restart and isn't shared across instances), body-email
 
 ### Deploy-time security checklist (do when setting up the VPS)
 
-Security wiki (per-layer status, 33 numbered steps (8 done, rest open) with alternatives and CVE index, test inventory): [docs/security-wiki.md](docs/security-wiki.md). Owner-only open items (details in its step 32):
+Security wiki (per-layer status, 33 numbered steps (11 done, rest open) with alternatives and CVE index, test inventory): [docs/security-wiki.md](docs/security-wiki.md). Owner-only open items (details in its step 32):
 
 - [ ] Change the origin IP (H7) and test the IPv6 lockdown from outside; decide H11 (SSH over Tunnel or Tailscale).
 - [x] Least-scope Cloudflare purge token and the referrer-restricted Maps embed key (`VITE_GOOGLE_MAPS_EMBED_KEY`), done 2026-11-26. Optional: cf-terraforming export.
@@ -1130,9 +1130,9 @@ Security wiki (per-layer status, 33 numbered steps (8 done, rest open) with alte
 - [x] GitHub: branch protection on `main` (ruleset `production-rule`, 8 required checks), done 2026-11-26.
 - [x] GitHub: required reviewer on the `production` environment (saved 2026-11-26; confirm on the next deploy that it waits for review).
 - [x] GitHub: secret scanning, push protection, dependency graph, Dependabot alerts and security updates, done 2026-11-26.
-- [ ] GitHub: Dependabot malware alerts; enable private vulnerability reporting (`SECURITY.md` is written).
+- [x] GitHub: Dependabot malware alerts and private vulnerability reporting on (2026-11-26).
 - [x] Cloudflare Email Routing: `security@carsua.app` → Gmail, test mail delivered 2026-11-26.
-- [ ] After deploy: `/.well-known/security.txt` is served as text, not rewritten to `index.html`.
+- [x] After deploy: `/.well-known/security.txt` is served as text, not rewritten to `index.html` (verified 2026-11-26).
 - [ ] First `lynis` + `docker-bench-security` baseline on the VPS (wiki step 25) and a decrypt-and-restore drill once backups are encrypted (step 20).
 
 Code-level audit findings and the full pre-deploy gate: [docs/security-checklist.md](docs/security-checklist.md) (re-verified 2026-11-05; §1b has the infra settings status, finding #2 the CSP report-sink design). Local pentest runbook (never against production): [docs/pentest-lab.md](docs/pentest-lab.md).

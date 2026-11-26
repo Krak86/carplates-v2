@@ -1,4 +1,4 @@
-import { BadGatewayException, Injectable } from '@nestjs/common'
+import { BadGatewayException, Injectable, Logger } from '@nestjs/common'
 import type { z } from 'zod'
 import type { NhtsaComplaintsResponse, NhtsaRecallsResponse } from '@carplates/shared'
 
@@ -22,6 +22,7 @@ type CacheEntry<T> = { value: T; expiresAt: number }
  */
 @Injectable()
 export class NhtsaService {
+  private readonly logger = new Logger(NhtsaService.name)
   private readonly base = loadEnv().NHTSA_SAFETY_RATINGS_BASE_URL
   private readonly recallsCache = new Map<string, CacheEntry<NhtsaRecallsResponse>>()
   private readonly complaintsCache = new Map<string, CacheEntry<NhtsaComplaintsResponse>>()
@@ -93,7 +94,8 @@ export class NhtsaService {
       if (!res.ok && !emptyMatch) throw new Error(`status ${res.status}`)
       return schema.parse(body)
     } catch (err) {
-      throw new BadGatewayException(`NHTSA request failed: ${(err as Error).message}`)
+      this.logger.warn(`NHTSA request failed: ${(err as Error).message}`)
+      throw new BadGatewayException('NHTSA request failed')
     }
   }
 }

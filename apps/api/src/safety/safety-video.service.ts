@@ -5,7 +5,7 @@ import { createRequire } from 'node:module'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
-import { BadGatewayException, BadRequestException, Injectable } from '@nestjs/common'
+import { BadGatewayException, BadRequestException, Injectable, Logger } from '@nestjs/common'
 
 // ffmpeg-static's own .d.ts is authored for ESM default-import but the package
 // ships as CJS with no "type" field — under NodeNext that mismatch resolves the
@@ -26,6 +26,7 @@ const FFMPEG_TIMEOUT_MS = 60_000
 
 @Injectable()
 export class SafetyVideoService {
+  private readonly logger = new Logger(SafetyVideoService.name)
   /** Old .wmv clips never change — a bounded on-disk cache means we transcode each one once. */
   private readonly inFlight = new Map<string, Promise<string>>()
 
@@ -84,7 +85,8 @@ export class SafetyVideoService {
     try {
       res = await fetch(url, { signal: AbortSignal.timeout(DOWNLOAD_TIMEOUT_MS) })
     } catch (err) {
-      throw new BadGatewayException(`NHTSA video request failed: ${(err as Error).message}`)
+      this.logger.warn(`NHTSA video request failed: ${(err as Error).message}`)
+      throw new BadGatewayException('NHTSA video request failed')
     }
     if (!res.ok) throw new BadGatewayException(`NHTSA video request failed: status ${res.status}`)
     await writeFile(destination, Buffer.from(await res.arrayBuffer()))

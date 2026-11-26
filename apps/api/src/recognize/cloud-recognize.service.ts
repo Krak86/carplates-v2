@@ -11,9 +11,9 @@ import type { PlateRecognizeResponse } from '@carplates/shared'
 
 import { loadEnv, plateRecognizerCloudEnabled } from '../env.js'
 import { mapPlateReaderResults } from './recognize.mapper.js'
+import { ACCEPTED_MIME, UNSUPPORTED_IMAGE_MESSAGE } from './read-upload.js'
 import type { PlateReaderResponse, UploadedImage } from './recognize.types.js'
 
-const ACCEPTED_MIME = new Set(['image/jpeg', 'image/png', 'image/webp'])
 const UPSTREAM_TIMEOUT_MS = 15_000
 
 const currentMonthKey = (): string => new Date().toISOString().slice(0, 7)
@@ -31,11 +31,11 @@ export class CloudRecognizeService {
     this.checkBudget()
     if (image.buffer.byteLength === 0) throw new BadRequestException('Uploaded image is empty')
     if (!ACCEPTED_MIME.has(image.mimetype)) {
-      throw new BadRequestException(`Unsupported image format "${image.mimetype}" - upload a JPEG, PNG or WebP photo`)
+      throw new BadRequestException(UNSUPPORTED_IMAGE_MESSAGE)
     }
 
     const form = new FormData()
-    form.append('upload', new Blob([image.buffer], { type: image.mimetype }), image.filename || 'plate.jpg')
+    form.append('upload', new Blob([image.buffer], { type: image.mimetype }), 'plate')
 
     let payload: PlateReaderResponse
     try {
@@ -56,7 +56,8 @@ export class CloudRecognizeService {
       payload = (await res.json()) as PlateReaderResponse
     } catch (err) {
       if (err instanceof HttpException) throw err // don't let this swallow the mappings above
-      throw new BadGatewayException(`Plate Recognizer request failed: ${(err as Error).message}`)
+      this.logger.warn(`Plate Recognizer request failed: ${(err as Error).message}`)
+      throw new BadGatewayException('Plate recognition request failed')
     }
 
     const candidates = mapPlateReaderResults(payload.results ?? [])

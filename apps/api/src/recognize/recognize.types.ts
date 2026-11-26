@@ -1,4 +1,4 @@
-export type UploadedImage = { buffer: Buffer; mimetype: string; filename: string }
+export type UploadedImage = { buffer: Buffer; mimetype: string }
 
 export interface PlateReaderResult {
   plate?: string

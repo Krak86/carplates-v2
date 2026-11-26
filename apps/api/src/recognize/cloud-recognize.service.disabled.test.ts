@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 
 import { CloudRecognizeService } from './cloud-recognize.service.js'
 
-const image = { buffer: Buffer.from('fake-image-bytes'), mimetype: 'image/jpeg', filename: 'plate.jpg' }
+const image = { buffer: Buffer.from('fake-image-bytes'), mimetype: 'image/jpeg' }
 
 describe('CloudRecognizeService without a token', () => {
   it('throws ServiceUnavailableException when PLATE_RECOGNIZER_CLOUD_TOKEN is unset', async () => {

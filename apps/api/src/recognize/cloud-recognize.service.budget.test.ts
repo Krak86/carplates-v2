@@ -13,7 +13,7 @@ vi.stubGlobal(
     .mockResolvedValue(new Response(JSON.stringify({ results: [{ plate: 'AA1234BC', score: 0.9 }] }), { status: 200 }))
 )
 
-const image = { buffer: Buffer.from('fake-image-bytes'), mimetype: 'image/jpeg', filename: 'plate.jpg' }
+const image = { buffer: Buffer.from('fake-image-bytes'), mimetype: 'image/jpeg' }
 
 describe('CloudRecognizeService budget', () => {
   it('exhausts the monthly budget after PLATE_RECOGNIZER_MONTHLY_BUDGET calls', async () => {
