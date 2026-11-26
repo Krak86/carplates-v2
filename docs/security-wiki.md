@@ -220,7 +220,7 @@ Open: 24, 26, 30.
 | --- | ---------------------------- | -------------------- | ----------------- |
 | D50 | VPS and CI use SSH keys only | `bootstrap.sh:36-45` | Password spraying |
 
-Branch protection on `main` is a ruleset since 2026-11-26. The `production` environment reviewer is saved (2026-11-26). Open: 2FA on every account, secret scanning and push protection → step 32.
+Branch protection on `main` is a ruleset since 2026-11-26. The `production` environment reviewer is saved (2026-11-26). Secret scanning, push protection, dependency graph, Dependabot alerts and security updates are on (2026-11-26). Open: 2FA on every account, Dependabot malware alerts, `SECURITY.md` plus private vulnerability reporting → step 32.
 
 ## 5. Steps (open items)
 
@@ -499,7 +499,8 @@ Tick the box and add a `docs/plan-done.md` entry when a step is finished. "Verif
 - [x] 2FA leftovers, done 2026-11-26: GitHub preferred method is the authenticator app and SMS is removed; Telegram BotFather is covered by the personal Telegram account (the bots live there), which has Two-Step Verification on and a passkey. Open hygiene: 15 active Telegram sessions and 5 connected websites are worth pruning.
 - [x] GitHub: branch protection on `main`, done 2026-11-26 as the ruleset `production-rule` (active, empty bypass list): restrict deletions, block force pushes, PR required (0 approvals, solo), required status checks from GitHub Actions: `check`, `gitleaks`, `trivy fs and config`, `osv-scanner`, `opengrep SAST`, `codeql (javascript-typescript)`, `codeql (python)`, `sonarqube cloud`. Required names are the **job** names, not "Workflow / job". `trivy image` runs on schedule only, so it is not required. Direct pushes to `main` are now blocked. Verified on a real PR (all checks passed, merge unlocked).
 - [x] GitHub: required reviewer on the `production` environment, saved 2026-11-26: reviewer `Krak86`, self-review allowed (solo), deployment branches limited to `main`. Deploys now pause on "Waiting for review" (Review deployments, tick `production`, Approve and deploy). Not yet confirmed by a real deploy; check that "Allow administrators to bypass" is off if the approval must be mandatory. A `workflow_dispatch` deploy from `stage` is rejected by the branch limit.
-- [ ] GitHub: secret scanning and push protection on (Settings, Advanced Security; free, repo is public).
+- [x] GitHub: secret scanning (Secret Protection) and push protection on, verified 2026-11-26 in Settings, Advanced Security. Also on: dependency graph, Dependabot alerts, Dependabot security updates (grouped security updates off: `dependabot.yml` controls grouping), Copilot Autofix. Left off on purpose: the AI Scan options and Agentic autofix (they use AI credits; CodeQL, opengrep and Sonar already cover that). These overlap gitleaks but do not replace it: push protection blocks before the push, gitleaks is the CI gate and catches custom patterns.
+- [ ] GitHub: Dependabot malware alerts on (free, currently off); private vulnerability reporting, only together with a `SECURITY.md` (the repo has none yet).
 
 ### I. Docs
 
