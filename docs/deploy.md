@@ -162,7 +162,7 @@ Env vars the api reads that `deploy-api.yml` does **not** pass (so production us
 `SENTRY_TRACES_SAMPLE_RATE`, `PLATE_RECOGNIZER_CLOUD_URL` / `PLATE_RECOGNIZER_MONTHLY_BUDGET`, `NHTSA_*_BASE_URL`, `PIXABAY_BASE_URL`,
 `RIA_CHECK_BASE_URL`. The full list with defaults is the "Environment reference" in
 the [README](../README.md). The `production` Environment as set up 2026-11-02 holds exactly the names above (secrets: `ALPR_API_KEY` … `VPS_SSH_KEY`;
-variables: `BACKUP_BUCKET` … `VPS_USER`); `VITE_API_BASE` and `VITE_GOOGLE_MAPS_EMBED_KEY` are optional and not set.
+variables: `BACKUP_BUCKET` … `VPS_USER`); `VITE_API_BASE` is optional and not set. `VITE_GOOGLE_MAPS_EMBED_KEY` is set (repo variable, since 2026-11-26) to a key restricted to the Maps Embed API and the `carsua.app` referrers; without it the keyless embed is used.
 
 ## First-time setup (in this order)
 
@@ -393,8 +393,8 @@ Not worth tuning at current traffic (Cloudflare cache + per-IP limits sit in fro
    Protocol; not on the Network page), Browser Cache TTL "Respect Existing Headers", Rocket Loader off, Bot Fight Mode, and one WAF rate-limit rule `api-lookup-limit`
    (Security → Security rules → zone level, not the Enterprise account WAF): `starts_with(uri.path, "/api/plate") or starts_with(…, "/api/vin")`, per IP, 30 requests
    / 10 s, Block 10 s (verified: ~30 × 200 then 429). HSTS is sent by Caddy (`max-age=31536000`), so Cloudflare's HSTS toggle stays off (a second source would
-   duplicate or override it). Not done: "Under Attack" is a manual toggle for incidents. DNSSEC was turned off at Squarespace for the nameserver move; optionally
-   re-enable it in Cloudflare and add the DS record at Squarespace.
+   duplicate or override it). Not done: "Under Attack" is a manual toggle for incidents. DNSSEC was turned off at Squarespace for the nameserver move and re-enabled
+   on 2026-11-26 (Cloudflare signs the zone, DS record added at Squarespace → DNS → DNSSEC).
 5. **Pre-deploy security gate** ([security-checklist.md §7](security-checklist.md)), partly done 2026-10-28. Passed against the live site: `pnpm audit --prod` has
    no high/critical (nodemailer ^10.2.1 and `fast-uri >=4.2.3` bumped; the one left is a low `deepmerge` with no patch, accepted), HSTS/nosniff/Referrer/Permissions
    headers, `/api/docs` is not Swagger, `/api/admin/*` anonymous → 401, cross-site POST → 403, rate limits → 429 on `/api/plate/*` and `/api/auth/google`.

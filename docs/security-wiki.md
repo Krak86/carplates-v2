@@ -115,7 +115,7 @@ Open: 27 (lint rules), 28 (iframe sandbox), 31 (Trusted Types), 32 (Maps key res
 | D13 | Authenticated Origin Pulls (mTLS), per-zone CA, cert valid to 2036                                      | `Caddyfile:14-17`, `secrets/README.md` | Origin reachable only through Cloudflare (CWE-693 WAF bypass) |
 | D14 | WAF rate rule `api-lookup-limit` 30 req / 10 s on `/api/plate`, `/api/vin`; Bot Fight Mode; cache rules | dashboard                              | Scraping and enumeration                                      |
 
-Open: DNSSEC, CAA, origin IP change (H7), account hardening → step 32.
+DNSSEC and CAA are on (2026-11-26; DS record at Squarespace, Verisign analyzer green). Open: origin IP change (H7), account hardening → step 32.
 
 ### Layer 4 - Network and provider (Contabo)
 
@@ -220,7 +220,7 @@ Open: 24, 26, 30.
 | --- | ---------------------------- | -------------------- | ----------------- |
 | D50 | VPS and CI use SSH keys only | `bootstrap.sh:36-45` | Password spraying |
 
-Open: 2FA on every account, branch protection, secret scanning → step 32.
+Branch protection on `main` is a ruleset since 2026-11-26. The `production` environment reviewer is saved (2026-11-26). Secret scanning, push protection, dependency graph, Dependabot alerts and security updates are on (2026-11-26). Open: 2FA on every account, Dependabot malware alerts, `SECURITY.md` plus private vulnerability reporting → step 32.
 
 ## 5. Steps (open items)
 
@@ -470,7 +470,9 @@ Tick the box and add a `docs/plan-done.md` entry when a step is finished. "Verif
 - **Alternatives:** always clear (users lose offline data) · a "don't save history" toggle.
 - **Verify:** component test; manual: after sign-out with the box ticked, IndexedDB `carplates.*` stores are empty.
 
-### Step 30 - `SECURITY.md` and `security.txt` [ ] · S · 🤖 · layer 11
+### Step 30 - `SECURITY.md` and `security.txt` [~] · S · 🤖 · layer 11
+
+Files written 2026-11-26 (`SECURITY.md`, `apps/web/public/.well-known/security.txt`, Expires 2027-11-26: renew yearly). The `security@carsua.app` mailbox works (step 32). Open: deploy and the Verify check below.
 
 - **What:** `SECURITY.md` at the root and `apps/web/public/.well-known/security.txt` (Contact, Expires, Preferred-Languages, Canonical). Today only `ai-catalog.json` and `ard.json` live in `.well-known`.
 - **Why:** RFC 9116.
@@ -488,13 +490,21 @@ Tick the box and add a `docs/plan-done.md` entry when a step is finished. "Verif
 
 ### Step 32 - Dashboards and accounts [ ] · S each · 👤 · layers 2, 3, 4, 12
 
-- [ ] Cloudflare DNSSEC on (CVE-2008-1447 Kaminsky) and a CAA record (letsencrypt.org, pki.goog, digicert.com plus what Cloudflare needs).
+- [x] Cloudflare DNSSEC on (CVE-2008-1447 Kaminsky), done 2026-11-26: Cloudflare signs the zone (algorithm 13, key tag 2371); the registrar is **Squarespace** (DNS → DNSSEC → add the DS record there; the Squarespace DNS Settings page is inactive because the nameservers are Cloudflare's). Verified at dnssec-analyzer.verisignlabs.com. Before ever leaving Cloudflare DNS, remove the DS record at Squarespace first, or the domain fails validation.
+- [x] CAA records in Cloudflare DNS, done 2026-11-26 (`@`, flags 0, tag `issue`, CA in the "CA domain name" field): `letsencrypt.org` (Universal edge cert), `sectigo.com` (Cloudflare backup edge cert), `pki.goog`, `ssl.com`. Cloudflare also serves its own extra CAA records (comodoca.com, digicert.com, `issuewild`), which the dashboard flags with a harmless warning. Verify (no `dig` on Windows): `curl -s -H "accept: application/dns-json" "https://cloudflare-dns.com/dns-query?name=carsua.app&type=CAA"`. Still to watch: the next edge-cert renewal (Universal expires 2027-01-25).
 - [ ] Change the origin IP (H7), then test the IPv6 lockdown from outside.
 - [ ] Decide H11 (SSH over Cloudflare Tunnel or Tailscale).
-- [ ] Least-scope Cloudflare purge token; optional cf-terraforming export of the zone.
-- [ ] Google Cloud: HTTP-referrer restriction on the Maps embed key (`lib/maps.ts:10,26`).
-- [ ] 2FA with hardware keys or TOTP and stored recovery codes on GitHub, Cloudflare, registrar, Contabo, R2, Google Cloud, Sentry, PostHog, Resend, Telegram BotFather (0ktapus phishing, 2022).
-- [ ] GitHub: branch protection on `main`, required reviewer on the `production` environment, secret scanning and push protection on (free, repo is public).
+- [x] Least-scope Cloudflare purge token, done 2026-11-26: custom token, only `Zone > Cache Purge > Purge`, zone `carsua.app` only, stored as the `CF_API_TOKEN` secret (used by `.github/actions/cf-purge`); the old token was replaced. If the token has an expiry, the purge fails after it, so keep a rotation reminder.
+- [ ] Optional: cf-terraforming export of the zone (use a separate read-only token, never the purge token; keep the output out of git).
+- [x] Google Cloud: HTTP-referrer restriction on the Maps embed key (`lib/maps.ts:10,26`), done 2026-11-26: new key `maps-embed-web`, restricted to the Maps Embed API only and to the referrers `https://carsua.app/*` and `https://*.carsua.app/*`; set as the repo variable `VITE_GOOGLE_MAPS_EMBED_KEY` and the web deploy re-run. The existing YouTube key is separate (YouTube Data API v3 only).
+- [x] 2FA with hardware keys or TOTP and stored recovery codes, verified 2026-11-26 on GitHub, Cloudflare (security key + TOTP + email), Squarespace, Contabo (TOTP), Google Cloud, Sentry, PostHog, Resend (0ktapus phishing, 2022). R2 and Google Cloud have no separate login: they sit behind the Cloudflare and Google account 2FA (R2 S3 keys and GCP API/service-account keys are separate credentials, scope them and keep them in `secrets/`). Backup codes are stored in Google Drive and OneDrive. Squarespace has no own 2FA (login is Google) and its "Account recovery" is off because it requires a phone number and Ukrainian numbers are not supported; recovery goes through the Google account.
+- [x] 2FA leftovers, done 2026-11-26: GitHub preferred method is the authenticator app and SMS is removed; Telegram BotFather is covered by the personal Telegram account (the bots live there), which has Two-Step Verification on and a passkey. Open hygiene: 15 active Telegram sessions and 5 connected websites are worth pruning.
+- [x] GitHub: branch protection on `main`, done 2026-11-26 as the ruleset `production-rule` (active, empty bypass list): restrict deletions, block force pushes, PR required (0 approvals, solo), required status checks from GitHub Actions: `check`, `gitleaks`, `trivy fs and config`, `osv-scanner`, `opengrep SAST`, `codeql (javascript-typescript)`, `codeql (python)`, `sonarqube cloud`. Required names are the **job** names, not "Workflow / job". `trivy image` runs on schedule only, so it is not required. Direct pushes to `main` are now blocked. Verified on a real PR (all checks passed, merge unlocked).
+- [x] GitHub: required reviewer on the `production` environment, saved 2026-11-26: reviewer `Krak86`, self-review allowed (solo), deployment branches limited to `main`. Deploys now pause on "Waiting for review" (Review deployments, tick `production`, Approve and deploy). Not yet confirmed by a real deploy; check that "Allow administrators to bypass" is off if the approval must be mandatory. A `workflow_dispatch` deploy from `stage` is rejected by the branch limit.
+- [x] GitHub: secret scanning (Secret Protection) and push protection on, verified 2026-11-26 in Settings, Advanced Security. Also on: dependency graph, Dependabot alerts, Dependabot security updates (grouped security updates off: `dependabot.yml` controls grouping), Copilot Autofix. Left off on purpose: the AI Scan options and Agentic autofix (they use AI credits; CodeQL, opengrep and Sonar already cover that). These overlap gitleaks but do not replace it: push protection blocks before the push, gitleaks is the CI gate and catches custom patterns.
+- [x] `SECURITY.md` written (step 30), 2026-11-26.
+- [ ] GitHub: Dependabot malware alerts on (free, currently off); then private vulnerability reporting (Settings, Advanced Security) now that `SECURITY.md` exists.
+- [x] Cloudflare Email Routing (free), done 2026-11-26: rule `security@carsua.app` → personal Gmail (destination verified), test mail delivered. `SECURITY.md` and `security.txt` list this address. Gotchas: the wizard keeps an old root `v=spf1 -all` and marks routing "Syncing / DNS misconfigured" until it is deleted and Cloudflare's own `v=spf1 include:_spf.mx.cloudflare.net ~all` is added ("Add missing records"); keep the root SPF exactly that value while Email Routing is on (spoofing stays covered by `_dmarc` `p=reject`). The catch-all is disabled (Drop). The Activity log lagged and stayed empty although mail arrived. The destination page takes the real inbox, not the `security@` address. To reply as `security@carsua.app` from Gmail, send through Resend SMTP (DKIM must align with DMARC `p=reject`).
 
 ### I. Docs
 
