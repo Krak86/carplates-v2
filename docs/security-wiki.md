@@ -470,7 +470,9 @@ Tick the box and add a `docs/plan-done.md` entry when a step is finished. "Verif
 - **Alternatives:** always clear (users lose offline data) · a "don't save history" toggle.
 - **Verify:** component test; manual: after sign-out with the box ticked, IndexedDB `carplates.*` stores are empty.
 
-### Step 30 - `SECURITY.md` and `security.txt` [ ] · S · 🤖 · layer 11
+### Step 30 - `SECURITY.md` and `security.txt` [~] · S · 🤖 · layer 11
+
+Files written 2026-11-26 (`SECURITY.md`, `apps/web/public/.well-known/security.txt`, Expires 2027-11-26: renew yearly). The `security@carsua.app` mailbox works (step 32). Open: deploy and the Verify check below.
 
 - **What:** `SECURITY.md` at the root and `apps/web/public/.well-known/security.txt` (Contact, Expires, Preferred-Languages, Canonical). Today only `ai-catalog.json` and `ard.json` live in `.well-known`.
 - **Why:** RFC 9116.
@@ -500,7 +502,9 @@ Tick the box and add a `docs/plan-done.md` entry when a step is finished. "Verif
 - [x] GitHub: branch protection on `main`, done 2026-11-26 as the ruleset `production-rule` (active, empty bypass list): restrict deletions, block force pushes, PR required (0 approvals, solo), required status checks from GitHub Actions: `check`, `gitleaks`, `trivy fs and config`, `osv-scanner`, `opengrep SAST`, `codeql (javascript-typescript)`, `codeql (python)`, `sonarqube cloud`. Required names are the **job** names, not "Workflow / job". `trivy image` runs on schedule only, so it is not required. Direct pushes to `main` are now blocked. Verified on a real PR (all checks passed, merge unlocked).
 - [x] GitHub: required reviewer on the `production` environment, saved 2026-11-26: reviewer `Krak86`, self-review allowed (solo), deployment branches limited to `main`. Deploys now pause on "Waiting for review" (Review deployments, tick `production`, Approve and deploy). Not yet confirmed by a real deploy; check that "Allow administrators to bypass" is off if the approval must be mandatory. A `workflow_dispatch` deploy from `stage` is rejected by the branch limit.
 - [x] GitHub: secret scanning (Secret Protection) and push protection on, verified 2026-11-26 in Settings, Advanced Security. Also on: dependency graph, Dependabot alerts, Dependabot security updates (grouped security updates off: `dependabot.yml` controls grouping), Copilot Autofix. Left off on purpose: the AI Scan options and Agentic autofix (they use AI credits; CodeQL, opengrep and Sonar already cover that). These overlap gitleaks but do not replace it: push protection blocks before the push, gitleaks is the CI gate and catches custom patterns.
-- [ ] GitHub: Dependabot malware alerts on (free, currently off); private vulnerability reporting, only together with a `SECURITY.md` (the repo has none yet).
+- [x] `SECURITY.md` written (step 30), 2026-11-26.
+- [ ] GitHub: Dependabot malware alerts on (free, currently off); then private vulnerability reporting (Settings, Advanced Security) now that `SECURITY.md` exists.
+- [x] Cloudflare Email Routing (free), done 2026-11-26: rule `security@carsua.app` → personal Gmail (destination verified), test mail delivered. `SECURITY.md` and `security.txt` list this address. Gotchas: the wizard keeps an old root `v=spf1 -all` and marks routing "Syncing / DNS misconfigured" until it is deleted and Cloudflare's own `v=spf1 include:_spf.mx.cloudflare.net ~all` is added ("Add missing records"); keep the root SPF exactly that value while Email Routing is on (spoofing stays covered by `_dmarc` `p=reject`). The catch-all is disabled (Drop). The Activity log lagged and stayed empty although mail arrived. The destination page takes the real inbox, not the `security@` address. To reply as `security@carsua.app` from Gmail, send through Resend SMTP (DKIM must align with DMARC `p=reject`).
 
 ### I. Docs
 
