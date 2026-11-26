@@ -2,6 +2,7 @@ import type { MouseEvent, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { JobStatus } from '@carplates/shared'
 
+import CollapsibleChips from '@/components/CollapsibleChips'
 import Card from '@/components/ui/Card'
 import { cn } from '@/lib/cn'
 import { toIntlLocale } from '@/lib/intl'
@@ -51,33 +52,35 @@ export default function RunHistory({ jobs }: Props): ReactNode {
           </a>
         ))}
       </nav>
-      <ul className="max-h-72 overflow-y-auto pl-1 text-sm">
-        {rows.map(({ dataset, synced, status }) => (
-          <li key={dataset.id} className="relative ml-0 border-l border-border pl-4">
-            <span
-              aria-hidden
-              className={cn(
-                'absolute top-2.5 left-[-0.28rem] size-2 rounded-full',
-                status === 'failing' ? 'bg-red-500' : synced ? 'bg-primary' : 'bg-muted'
-              )}
-            />
-            <a
-              href={`#dataset-${dataset.id}`}
-              onClick={e => jumpTo(e, `dataset-${dataset.id}`)}
-              className="flex flex-wrap items-center gap-x-3 py-1 hover:text-primary"
-            >
-              <span className="min-w-0">{dataset.name}</span>
-              <span className="text-muted">
-                {synced
-                  ? format.format(synced)
-                  : dataset.cadence === 'minutely' || dataset.cadence === 'live'
-                    ? t(`dataStatus.cadence.${dataset.cadence}`)
-                    : t('dataStatus.neverSynced')}
-              </span>
-            </a>
-          </li>
-        ))}
-      </ul>
+      <CollapsibleChips collapsedPx={150} contentClassName="pl-1 text-sm">
+        <ul>
+          {rows.map(({ dataset, synced, status }) => (
+            <li key={dataset.id} className="relative ml-0 border-l border-border pl-4">
+              <span
+                aria-hidden
+                className={cn(
+                  'absolute top-2.5 left-[-0.28rem] size-2 rounded-full',
+                  status === 'failing' ? 'bg-red-500' : synced ? 'bg-primary' : 'bg-muted'
+                )}
+              />
+              <a
+                href={`#dataset-${dataset.id}`}
+                onClick={e => jumpTo(e, `dataset-${dataset.id}`)}
+                className="flex flex-wrap items-center gap-x-3 py-1 hover:text-primary"
+              >
+                <span className="min-w-0">{dataset.name}</span>
+                <span className="text-muted">
+                  {synced
+                    ? format.format(synced)
+                    : dataset.cadence === 'minutely' || dataset.cadence === 'live'
+                      ? t(`dataStatus.cadence.${dataset.cadence}`)
+                      : t('dataStatus.neverSynced')}
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </CollapsibleChips>
     </Card>
   )
 }

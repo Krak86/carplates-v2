@@ -4,6 +4,18 @@ import type { ReleaseDay } from './core.js'
 /** 2026-11: newest day first. */
 export const DAYS: readonly ReleaseDay[] = [
   {
+    date: '2026-11-26',
+    version: 'v2.1503',
+    items: [
+      item(
+        'improved',
+        'Історія оновлень даних більше не має смуги прокрутки: показано лише початок списку, решта плавно розгортається кнопкою «Показати більше»',
+        'История обновлений данных больше не имеет полосы прокрутки: показано лишь начало списка, остальное плавно раскрывается кнопкой «Показать больше»',
+        'The data update history no longer has a scrollbar: only the top of the list shows, and a "Show more" button smoothly expands the rest'
+      )
+    ]
+  },
+  {
     date: '2026-11-25',
     version: 'v2.1502',
     items: [
