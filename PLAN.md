@@ -1125,7 +1125,8 @@ Security wiki (per-layer status, 33 numbered steps (8 done, rest open) with alte
 
 - [ ] Change the origin IP (H7) and test the IPv6 lockdown from outside; decide H11 (SSH over Tunnel or Tailscale).
 - [x] Least-scope Cloudflare purge token and the referrer-restricted Maps embed key (`VITE_GOOGLE_MAPS_EMBED_KEY`), done 2026-11-26. Optional: cf-terraforming export.
-- [ ] 2FA (hardware key or TOTP, recovery codes stored) on GitHub, Cloudflare, registrar (Squarespace), Contabo, R2, Google Cloud, Sentry, PostHog, Resend, BotFather.
+- [x] 2FA verified 2026-11-26 on GitHub, Cloudflare (security key + TOTP + email; R2 is covered by the same account), Squarespace (via Google login, which has 2-Step Verification), Contabo (TOTP), Google Cloud (same Google account), Sentry, PostHog, Resend. Backup codes are kept in Google Drive and OneDrive. Squarespace "Account recovery" stays off (it needs a phone number and Ukrainian numbers are not supported); recovery is Google account recovery.
+- [x] 2FA leftovers, done 2026-11-26: GitHub preferred method is the authenticator app and SMS is removed; Telegram (the personal account owns the bots, so BotFather is covered) has Two-Step Verification on and a passkey.
 - [x] GitHub: branch protection on `main` (ruleset `production-rule`, 8 required checks), done 2026-11-26.
 - [ ] GitHub: required reviewer on the `production` environment, secret scanning and push protection.
 - [ ] First `lynis` + `docker-bench-security` baseline on the VPS (wiki step 25) and a decrypt-and-restore drill once backups are encrypted (step 20).
