@@ -220,7 +220,7 @@ Open: 24, 26, 30.
 | --- | ---------------------------- | -------------------- | ----------------- |
 | D50 | VPS and CI use SSH keys only | `bootstrap.sh:36-45` | Password spraying |
 
-Open: 2FA on every account, branch protection, secret scanning → step 32.
+Branch protection on `main` is a ruleset since 2026-11-26. Open: 2FA on every account, `production` environment reviewer, secret scanning → step 32.
 
 ## 5. Steps (open items)
 
@@ -492,10 +492,12 @@ Tick the box and add a `docs/plan-done.md` entry when a step is finished. "Verif
 - [x] CAA records in Cloudflare DNS, done 2026-11-26 (`@`, flags 0, tag `issue`, CA in the "CA domain name" field): `letsencrypt.org` (Universal edge cert), `sectigo.com` (Cloudflare backup edge cert), `pki.goog`, `ssl.com`. Cloudflare also serves its own extra CAA records (comodoca.com, digicert.com, `issuewild`), which the dashboard flags with a harmless warning. Verify (no `dig` on Windows): `curl -s -H "accept: application/dns-json" "https://cloudflare-dns.com/dns-query?name=carsua.app&type=CAA"`. Still to watch: the next edge-cert renewal (Universal expires 2027-01-25).
 - [ ] Change the origin IP (H7), then test the IPv6 lockdown from outside.
 - [ ] Decide H11 (SSH over Cloudflare Tunnel or Tailscale).
-- [ ] Least-scope Cloudflare purge token; optional cf-terraforming export of the zone.
-- [ ] Google Cloud: HTTP-referrer restriction on the Maps embed key (`lib/maps.ts:10,26`).
+- [x] Least-scope Cloudflare purge token, done 2026-11-26: custom token, only `Zone > Cache Purge > Purge`, zone `carsua.app` only, stored as the `CF_API_TOKEN` secret (used by `.github/actions/cf-purge`); the old token was replaced. If the token has an expiry, the purge fails after it, so keep a rotation reminder.
+- [ ] Optional: cf-terraforming export of the zone (use a separate read-only token, never the purge token; keep the output out of git).
+- [x] Google Cloud: HTTP-referrer restriction on the Maps embed key (`lib/maps.ts:10,26`), done 2026-11-26: new key `maps-embed-web`, restricted to the Maps Embed API only and to the referrers `https://carsua.app/*` and `https://*.carsua.app/*`; set as the repo variable `VITE_GOOGLE_MAPS_EMBED_KEY` and the web deploy re-run. The existing YouTube key is separate (YouTube Data API v3 only).
 - [ ] 2FA with hardware keys or TOTP and stored recovery codes on GitHub, Cloudflare, registrar (Squarespace), Contabo, R2, Google Cloud, Sentry, PostHog, Resend, Telegram BotFather (0ktapus phishing, 2022).
-- [ ] GitHub: branch protection on `main`, required reviewer on the `production` environment, secret scanning and push protection on (free, repo is public).
+- [x] GitHub: branch protection on `main`, done 2026-11-26 as the ruleset `production-rule` (active, empty bypass list): restrict deletions, block force pushes, PR required (0 approvals, solo), required status checks from GitHub Actions: `check`, `gitleaks`, `trivy fs and config`, `osv-scanner`, `opengrep SAST`, `codeql (javascript-typescript)`, `codeql (python)`, `sonarqube cloud`. Required names are the **job** names, not "Workflow / job". `trivy image` runs on schedule only, so it is not required. Direct pushes to `main` are now blocked. Verified on a real PR (all checks passed, merge unlocked).
+- [ ] GitHub: required reviewer on the `production` environment, secret scanning and push protection on (free, repo is public).
 
 ### I. Docs
 

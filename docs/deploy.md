@@ -162,7 +162,7 @@ Env vars the api reads that `deploy-api.yml` does **not** pass (so production us
 `SENTRY_TRACES_SAMPLE_RATE`, `PLATE_RECOGNIZER_CLOUD_URL` / `PLATE_RECOGNIZER_MONTHLY_BUDGET`, `NHTSA_*_BASE_URL`, `PIXABAY_BASE_URL`,
 `RIA_CHECK_BASE_URL`. The full list with defaults is the "Environment reference" in
 the [README](../README.md). The `production` Environment as set up 2026-11-02 holds exactly the names above (secrets: `ALPR_API_KEY` … `VPS_SSH_KEY`;
-variables: `BACKUP_BUCKET` … `VPS_USER`); `VITE_API_BASE` and `VITE_GOOGLE_MAPS_EMBED_KEY` are optional and not set.
+variables: `BACKUP_BUCKET` … `VPS_USER`); `VITE_API_BASE` is optional and not set. `VITE_GOOGLE_MAPS_EMBED_KEY` is set (repo variable, since 2026-11-26) to a key restricted to the Maps Embed API and the `carsua.app` referrers; without it the keyless embed is used.
 
 ## First-time setup (in this order)
 
