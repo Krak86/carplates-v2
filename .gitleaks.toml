@@ -1,0 +1,12 @@
+# gitleaks config (picked up automatically from the repo root by `gitleaks git .` in security.yml).
+title = "carplates-v2"
+
+[extend]
+useDefault = true
+
+# The SonarQube Cloud project key is a public identifier, not a secret, but its name ("...Key=<20+ chars>")
+# trips the generic-api-key rule. Scoped to this one file and this one pattern.
+[[allowlists]]
+description = "Sonar project key (public identifier)"
+paths = ['''^sonar-project\.properties$''']
+regexes = ['''sonar\.projectKey=[\w.\-]+''']

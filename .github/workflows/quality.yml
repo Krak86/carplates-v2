@@ -1,0 +1,47 @@
+name: Quality
+
+# Code quality (bugs, code smells, duplication, coverage) in SonarQube Cloud. Free for public repos.
+# Security scanners stay in security.yml; lint, type-check and tests that gate the deploy chain stay in ci.yml (deploy-*.yml reuse it).
+# One-time setup: import the repo at sonarcloud.io, turn OFF "Automatic Analysis"
+# (it conflicts with this CI scan), then add the repo secret SONAR_TOKEN. Project key and organization: sonar-project.properties.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sonar:
+    name: sonarqube cloud
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    permissions:
+      contents: read
+      pull-requests: read # PR decoration
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} # empty on fork and Dependabot PRs: the scan is skipped, not failed
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # Sonar needs full history for blame and new-code detection
+          persist-credentials: false
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # was pnpm/action-setup@v6 # version comes from package.json "packageManager"
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @carplates/shared --filter @carplates/db build # other packages consume dist/
+      - name: Tests with coverage (lcov)
+        run: pnpm test:coverage
+      - name: Scan
+        if: ${{ !cancelled() && env.SONAR_TOKEN != '' && hashFiles('coverage/lcov.info') != '' }}
+        uses: SonarSource/sonarqube-scan-action@70bad232163b09d998ea0707ee80c0ec80798c16 # v8.5.1

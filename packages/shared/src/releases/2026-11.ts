@@ -4,6 +4,18 @@ import type { ReleaseDay } from './core.js'
 /** 2026-11: newest day first. */
 export const DAYS: readonly ReleaseDay[] = [
   {
+    date: '2026-11-25',
+    version: 'v2.1502',
+    items: [
+      item(
+        'improved',
+        'У грі-гонці зіткнення більше не зупиняють авто: воно проїжджає крізь перешкоду з меншою швидкістю, а удар супроводжується плавною анімацією',
+        'В игре-гонке столкновения больше не останавливают авто: оно проезжает сквозь препятствие с меньшей скоростью, а удар сопровождается плавной анимацией',
+        'In the racer game a collision no longer stops the car: it drives through the obstacle at a lower speed, with a smooth bump animation'
+      )
+    ]
+  },
+  {
     date: '2026-11-24',
     version: 'v2.1501',
     items: [
