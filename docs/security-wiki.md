@@ -115,7 +115,7 @@ Open: 27 (lint rules), 28 (iframe sandbox), 31 (Trusted Types), 32 (Maps key res
 | D13 | Authenticated Origin Pulls (mTLS), per-zone CA, cert valid to 2036                                      | `Caddyfile:14-17`, `secrets/README.md` | Origin reachable only through Cloudflare (CWE-693 WAF bypass) |
 | D14 | WAF rate rule `api-lookup-limit` 30 req / 10 s on `/api/plate`, `/api/vin`; Bot Fight Mode; cache rules | dashboard                              | Scraping and enumeration                                      |
 
-Open: DNSSEC, CAA, origin IP change (H7), account hardening → step 32.
+DNSSEC and CAA are on (2026-11-26; DS record at Squarespace, Verisign analyzer green). Open: origin IP change (H7), account hardening → step 32.
 
 ### Layer 4 - Network and provider (Contabo)
 
@@ -488,12 +488,13 @@ Tick the box and add a `docs/plan-done.md` entry when a step is finished. "Verif
 
 ### Step 32 - Dashboards and accounts [ ] · S each · 👤 · layers 2, 3, 4, 12
 
-- [ ] Cloudflare DNSSEC on (CVE-2008-1447 Kaminsky) and a CAA record (letsencrypt.org, pki.goog, digicert.com plus what Cloudflare needs).
+- [x] Cloudflare DNSSEC on (CVE-2008-1447 Kaminsky), done 2026-11-26: Cloudflare signs the zone (algorithm 13, key tag 2371); the registrar is **Squarespace** (DNS → DNSSEC → add the DS record there; the Squarespace DNS Settings page is inactive because the nameservers are Cloudflare's). Verified at dnssec-analyzer.verisignlabs.com. Before ever leaving Cloudflare DNS, remove the DS record at Squarespace first, or the domain fails validation.
+- [x] CAA records in Cloudflare DNS, done 2026-11-26 (`@`, flags 0, tag `issue`, CA in the "CA domain name" field): `letsencrypt.org` (Universal edge cert), `sectigo.com` (Cloudflare backup edge cert), `pki.goog`, `ssl.com`. Cloudflare also serves its own extra CAA records (comodoca.com, digicert.com, `issuewild`), which the dashboard flags with a harmless warning. Verify (no `dig` on Windows): `curl -s -H "accept: application/dns-json" "https://cloudflare-dns.com/dns-query?name=carsua.app&type=CAA"`. Still to watch: the next edge-cert renewal (Universal expires 2027-01-25).
 - [ ] Change the origin IP (H7), then test the IPv6 lockdown from outside.
 - [ ] Decide H11 (SSH over Cloudflare Tunnel or Tailscale).
 - [ ] Least-scope Cloudflare purge token; optional cf-terraforming export of the zone.
 - [ ] Google Cloud: HTTP-referrer restriction on the Maps embed key (`lib/maps.ts:10,26`).
-- [ ] 2FA with hardware keys or TOTP and stored recovery codes on GitHub, Cloudflare, registrar, Contabo, R2, Google Cloud, Sentry, PostHog, Resend, Telegram BotFather (0ktapus phishing, 2022).
+- [ ] 2FA with hardware keys or TOTP and stored recovery codes on GitHub, Cloudflare, registrar (Squarespace), Contabo, R2, Google Cloud, Sentry, PostHog, Resend, Telegram BotFather (0ktapus phishing, 2022).
 - [ ] GitHub: branch protection on `main`, required reviewer on the `production` environment, secret scanning and push protection on (free, repo is public).
 
 ### I. Docs
