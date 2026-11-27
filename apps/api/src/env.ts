@@ -22,7 +22,8 @@ const envSchema = z.object({
   DB_POOL_MAX: z.coerce.number().int().positive().default(10),
   DB_CONNECT_TIMEOUT_MS: z.coerce.number().int().nonnegative().default(5000),
   DB_IDLE_TIMEOUT_MS: z.coerce.number().int().nonnegative().default(30000),
-  DB_STATEMENT_TIMEOUT_MS: z.coerce.number().int().nonnegative().default(15000),
+  /** 30 s, not 15: a cold-cache advanced search (16M-row view, ~28k scattered pages) takes up to ~12 s right after an ingest refresh. */
+  DB_STATEMENT_TIMEOUT_MS: z.coerce.number().int().nonnegative().default(30000),
   DB_IDLE_IN_TX_TIMEOUT_MS: z.coerce.number().int().nonnegative().default(30000),
   DB_LOCK_TIMEOUT_MS: z.coerce.number().int().nonnegative().default(5000),
 
