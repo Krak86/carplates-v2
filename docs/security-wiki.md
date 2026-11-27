@@ -383,6 +383,7 @@ done: 1-9, 11, 21-23, 30, 33. Remaining, in order:
 ### Step 17 - HSTS `includeSubDomains; preload` [ ] · S · 👤🤖 · layer 7
 
 - **What:** currently `max-age=31536000` only. Confirm every subdomain serves HTTPS, then add the flags; submit to hstspreload.org after a month of stable running.
+- **Status (2026-11-27):** DNS checked (apex + www proxied; `send`/`rsend` are Resend email CNAMEs, no web). Flags added to `infra/Caddyfile`; needs a Caddy reload on the VPS. Still open: `curl -sI` check after reload, hstspreload.org submit after ~2026-12-27.
 - **Files:** `infra/Caddyfile:38`, header test.
 - **Why:** sslstrip (2009), CWE-319.
 - **Alternatives / con:** preloading is hard to undo; skip the preload flag if any subdomain may ever be plain HTTP.
