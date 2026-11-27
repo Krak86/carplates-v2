@@ -1764,11 +1764,12 @@ Redacted VPS container logs (plates / VINs / emails / IPs partly masked) searcha
 - [x] 5. `backup.sh logs` mode + cron, deploy wiring, docs (`features-reference.md`, `security-checklist.md`, `deploy.md`, `plan-done.md`)
 - Step 5 notes: built 2026-11-27, nothing run on Docker / the VPS. `backup.sh logs` reads `logs-archive.env` (exit 0 with a warning if missing), ping var `HC_PING_LOGS`; cron `50 3 * * *` added to the `bootstrap.sh` cron file (an existing VPS needs it re-run or the line added by hand). `deploy-api.sh` does `up -d ... loki vector`; `deploy-api.yml` rsyncs `vector.yaml` / `loki.yaml` and writes `LOKI_URL` (`infra/**` was already in `paths`). Write-up: `docs/plan-done.md`.
 - [x] ✅ Admin logs built end to end (steps 1-5); write-up in `docs/plan-done.md` "Admin logs - Vector + Loki + B2 archive"
-- After deploy (owner, nothing here is run by the agent):
-  - [ ] Backblaze B2: create private bucket `carsua-logs` (EU region), enable SSE-B2, add a lifecycle rule (delete after 90 days), create an application key scoped to that bucket with only `writeFiles` + `listBuckets`
-  - [ ] On the VPS: create `/opt/carsua/env/logs-archive.env` (mode 600: `RCLONE_CONFIG_B2_TYPE=b2`, `RCLONE_CONFIG_B2_ACCOUNT`, `RCLONE_CONFIG_B2_KEY`, `LOGS_BUCKET=carsua-logs`, optional `HC_PING_LOGS` from a new healthchecks.io check); add the 03:50 cron line (re-run `bootstrap.sh` or edit `/etc/cron.d/carsua-backup`)
-  - [ ] Run "Deploy API"; check `docker compose ps` shows `loki` and `vector` healthy and `/opt/carsua/lokidata` + `/opt/carsua/logs` are deploy-owned
-  - [ ] Hit `/api/plate/<a known plate>`, then in Loki (`/admin?tab=logs`, search the plate) and in today's `/opt/carsua/logs/*.ndjson.gz` check only the masked form (`AA****BB`) appears
+- After deploy (owner, nothing here is run by the agent; done 2026-11-27 unless unticked):
+  - [x] Backblaze B2: private bucket `carsua-logs` (EU Central), SSE-B2 on, custom lifecycle rule (hide after 90 days, delete 1 day later), Write Only application key scoped to the bucket (2FA is on for the account)
+  - [x] On the VPS: `/opt/carsua/env/logs-archive.env` created and the 03:50 cron line added to `/etc/cron.d/carsua-backup`
+  - [ ] Optional: healthchecks.io check for `HC_PING_LOGS` (skipped for now; add the URL to `logs-archive.env` later)
+  - [x] Deploy API run (PR #278, then the `cap_add: [DAC_OVERRIDE]` fix in #279); `loki` and `vector` up, `vector` healthy, `/opt/carsua/logs` holds `2026-11-27.ndjson.gz`
+  - [ ] Masking check on **prod** (`https://carsua.app/admin?tab=logs`, not localhost): the api does not log plate lookups, so search `AA1234BB` once, then search `admin logs query`: the audit line must show `AA****BB` in its LogQL, never the raw plate. In the archive: `zcat /opt/carsua/logs/<day>.ndjson.gz 2>/dev/null | grep -c AA1234BB` must print 0 (a file still being written ends with "unexpected end of file", that is normal)
   - [ ] Run `bash /opt/carsua/compose/backup.sh logs` once (day after the first logs), check the file is in B2 and a second run changes nothing; local files older than 3 days are gone
   - [ ] Verify the B2 key cannot delete or download (`rclone deletefile` and `rclone copy B2:carsua-logs/<file> .` both fail)
   - [ ] Check Loki is unreachable from outside (`curl -m 5 http://<vps-ip>:3100/ready` times out)
