@@ -11,6 +11,11 @@ export const ADMIN_LINKS = [
     icon: '🗄️'
   },
   {
+    label: 'Backblaze B2 - logs archive bucket (carsua-logs)',
+    href: 'https://secure.backblaze.com/b2_buckets.htm',
+    icon: '🪣'
+  },
+  {
     label: 'Squarespace - domain and DNS settings',
     href: 'https://account.squarespace.com/domains/managed/carsua.app/dns/dns-settings',
     icon: '🔗'

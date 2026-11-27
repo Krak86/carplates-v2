@@ -20,7 +20,7 @@ Legend: ✅ done · ❌ open (step #) · 🔍 verify · 🤖 code/config (diff s
 | 6   | Docker               | D20-D23          | 13, 14, 15, 19 |
 | 7   | Caddy                | D24-D26          | 16, 17, 18     |
 | 8   | API (NestJS)         | D27-D40, D57-D58 | 7-10           |
-| 9   | Postgres and Redis   | D41-D44          | 11, 12, 15, 20 |
+| 9   | Postgres and Redis   | D41-D44          | 12, 15, 20     |
 | 10  | ALPR (Python)        | D45, D51         | -              |
 | 11  | Supply chain and CI  | D46-D49, D52-D55 | 24, 26, 30     |
 | 12  | Accounts and people  | D50              | 32             |
@@ -189,7 +189,7 @@ Open: 5-10.
 | D43 | Nightly dump to R2 (14 days), full dump after ingest, restore tested 2026-10-28, healthchecks.io | `infra/vps/backup.sh`            | Ransomware and loss                                                               |
 | D44 | Redis: password, AOF, `noeviction`, no published port                                            | `docker-compose.prod.yml:87-107` | CVE-2025-49844 needs auth and network reach; both blocked. Keep the image patched |
 
-Open: timeouts → 11; roles → 12; Redis password on command line → 15; backup encryption → 20.
+Open: roles → 12 (timeouts done, step 11); Redis password on command line → 15; backup encryption → 20.
 
 ### Layer 10 - ALPR service (Python, `services/alpr`)
 
@@ -315,13 +315,14 @@ Tick the box and add a `docs/plan-done.md` entry when a step is finished. "Verif
 
 ### C. Database
 
-### Step 11 - Postgres timeouts and pool limits [ ] · S · 🤖 · layer 9
+### Step 11 - Postgres timeouts and pool limits [x] · S · 🤖 · layer 9
 
 - **What:** `new Pool({ connectionString })` has no `max`, `connectionTimeoutMillis`, `idleTimeoutMillis` or timeouts. Set them and `options: '-c statement_timeout=15000 -c idle_in_transaction_session_timeout=30000 -c lock_timeout=5000'`; ingest overrides through env.
 - **Files:** `packages/db/src/client.ts:54-57`, ingest env.
 - **Why:** CWE-400.
 - **Alternatives:** `ALTER ROLE ... SET statement_timeout` after step 12 (enforced server-side; needs roles first) · PgBouncer (rejected in origin-hardening §5).
 - **Verify:** test: `SELECT pg_sleep(60)` is cancelled; ingest still completes.
+- **Done 2026-11-27:** `createDb(url, limits?)` takes `DbLimits` (`max`, connect and idle timeouts, `statement_timeout`, `idle_in_transaction_session_timeout`, `lock_timeout` via the libpq `options` string; `buildPgOptions` is unit-tested). Limits are **opt-in per caller**: only the API (`DbService`) passes them, from env `DB_POOL_MAX` 10, `DB_CONNECT_TIMEOUT_MS` 5000, `DB_IDLE_TIMEOUT_MS` 30000, `DB_STATEMENT_TIMEOUT_MS` 15000, `DB_IDLE_IN_TX_TIMEOUT_MS` 30000, `DB_LOCK_TIMEOUT_MS` 5000 (0 disables a timeout). Ingest and scripts call `createDb()` with no limits, so long `COPY`/`REFRESH` statements are unaffected and need no env override. Still to check after deploy: `SELECT pg_sleep(60)` through the API pool is cancelled, and no real endpoint (stats, search, sync) hits 15 s.
 
 ### Step 12 - Least-privilege roles [ ] · L · 🤖👤 · layer 9
 

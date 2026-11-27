@@ -258,7 +258,9 @@ export {
   refreshCurrentRegistration,
   refreshStats,
   LOCAL_DATABASE_URL,
-  type Db
+  buildPgOptions,
+  type Db,
+  type DbLimits
 } from './client.js'
 export { runMigrations } from './migrate.js'
 export { findWikiImage, upsertWikiImages } from './wikiImage.js'
