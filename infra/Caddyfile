@@ -35,7 +35,8 @@ carsua.app {
 	encode @direct zstd gzip
 
 	header {
-		Strict-Transport-Security "max-age=31536000"
+		# includeSubDomains + preload: every DNS record is proxied web or email-only (checked 2026-11-27); .app is already preloaded as a TLD.
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
 		Permissions-Policy "camera=(self), geolocation=(self), microphone=()"
 		# allow-popups, never same-origin: the Google / Telegram sign-in popups must keep window.opener (PLAN.md Helmet review).
 		Cross-Origin-Opener-Policy "same-origin-allow-popups"
