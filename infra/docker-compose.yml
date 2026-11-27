@@ -1,5 +1,10 @@
-# Local development services only (Postgres, mailpit, optional Redis). Production is infra/docker-compose.prod.yml.
+# Local development services only (Postgres, mailpit, optional Redis, optional Loki + Vector). Production is infra/docker-compose.prod.yml.
 name: carplates-v2
+
+# `tag` puts the container name into each json-file line, which the optional `logs` profile (Vector) reads as the `container` label.
+x-logging: &logging
+  driver: json-file
+  options: { max-size: '10m', max-file: '3', tag: '{{.Name}}' }
 
 services:
   postgres:
@@ -20,6 +25,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+    logging: *logging
 
   # Catches outgoing mail locally: SMTP on 1025, inbox UI on http://localhost:8025.
   # Use with MAIL_TRANSPORT=smtp (SMTP_URL defaults to smtp://localhost:1025).
@@ -29,6 +35,7 @@ services:
     ports:
       - '127.0.0.1:1025:1025'
       - '127.0.0.1:8025:8025'
+    logging: *logging
 
   # Optional: shared throttler counters, like production. Without REDIS_URL the api throttles in memory (tests never need this).
   # Try it: `docker compose up -d redis` + REDIS_URL=redis://localhost:6379 in apps/api/.env. No password, bound to localhost only.
@@ -46,7 +53,43 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+    logging: *logging
+
+  # Optional, profile `logs`: the admin Logs tab stack, like production (docs/logs-plan.md). `docker compose --profile logs up -d loki vector`,
+  # then LOKI_URL=http://localhost:3100 in apps/api/.env. Only lines of containers started AFTER the `tag` logging option show a name
+  # (recreate postgres / redis to get it). Vector reads the Docker VM's /var/lib/docker/containers; the daily gzip goes to the `logs` volume.
+  loki:
+    image: grafana/loki:3.7.10
+    profiles: [logs]
+    restart: unless-stopped
+    command: ['-config.file=/etc/loki/loki.yaml']
+    ports:
+      - '127.0.0.1:3100:3100'
+    volumes:
+      - ./loki.yaml:/etc/loki/loki.yaml:ro
+      - lokidata:/loki
+    user: '0:0' # a fresh named volume is root-owned
+    logging: *logging
+
+  vector:
+    image: timberio/vector:0.62.0-alpine
+    profiles: [logs]
+    restart: unless-stopped
+    command: ['--config', '/etc/vector/vector.yaml']
+    environment:
+      VECTOR_LOG: warn
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - ./vector.yaml:/etc/vector/vector.yaml:ro
+      - logs:/logs
+      - vectordata:/var/lib/vector
+    depends_on: [loki]
+    user: '0:0'
+    logging: *logging
 
 volumes:
   pgdata:
   redisdata:
+  lokidata:
+  logs:
+  vectordata:

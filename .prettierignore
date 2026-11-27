@@ -10,3 +10,4 @@ infra/db/migrations
 *.log
 CHANGELOG.md
 scripts/src/fixtures
+infra/vector.yaml

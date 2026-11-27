@@ -15,6 +15,10 @@ unset _k
 # Redis runs as the deploy user so it can write the bind-mounted ../redisdata (created here, owned by deploy, never root).
 mkdir -p ../redisdata
 grep -q '^REDIS_UID=' .env || echo "REDIS_UID=$(id -u)" >> .env
+# Same for Loki (../lokidata); Vector (root, to read Docker's log files) writes the daily archive into ../logs, which stays deploy-owned
+# so backup.sh logs can delete old files. docker-compose.prod.yml needs LOKI_UID to parse, so every deploy script seeds it here.
+mkdir -p ../lokidata ../logs
+grep -q '^LOKI_UID=' .env || echo "LOKI_UID=$(id -u)" >> .env
 
 # set_env KEY VALUE: replace (or add) one line in compose/.env, which holds the image tags and the colour tags.
 set_env() { { grep -v "^$1=" .env || true; echo "$1=$2"; } > .env.tmp && mv .env.tmp .env; }

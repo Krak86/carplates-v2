@@ -1,0 +1,619 @@
+# Vector: reads the Docker json-file logs of every container (read-only bind mount, NO Docker socket), masks personal data and ships
+# the result to Loki (14 days, searched by the api for the /admin Logs tab) and to a daily gzip archive (/logs, later copied to B2 by
+# backup.sh). Design and security model: docs/logs-plan.md. Pinned image: PLAN.md "Version pins".
+#
+# The `redact` transform mirrors packages/shared/src/log-redact.ts (the TypeScript source of truth). Both run the same fixture,
+# packages/shared/src/__fixtures__/log-lines.txt: the `tests:` block at the bottom is GENERATED from it by infra/gen-vector-tests.mjs
+# (`node infra/gen-vector-tests.mjs`; `--check` fails when it is stale) and runs with
+#   docker run --rm -v ./infra:/etc/vector timberio/vector:0.62.0-alpine test /etc/vector/vector.yaml
+# Rust regexes have no lookbehind / lookahead, so the JS lookarounds are emulated with a captured lead char and a captured trail
+# char (a non-empty trail = the lookahead failed = leave the text alone). \x22 is `"`, \x27 is `'`; [0-9] instead of \d.
+data_dir: /var/lib/vector
+
+api:
+  enabled: true
+  address: 127.0.0.1:8686 # container healthcheck only; not published
+
+sources:
+  docker_json:
+    type: file
+    include: ['/var/lib/docker/containers/*/*-json.log']
+    fingerprint: { strategy: device_and_inode } # follows Docker's rename-based rotation (10m x 5)
+    read_from: beginning # first start only; afterwards checkpoints in data_dir
+
+transforms:
+  # json-file envelope: {"log":"<line>\n","stream":"stdout","time":"<rfc3339>","attrs":{"tag":"<container name>"}}
+  envelope:
+    type: remap
+    inputs: [docker_json]
+    source: |
+      env, err = parse_json(string!(.message))
+      if err != null || !is_object(env) { abort }
+      .message = replace(string(env.log) ?? "", r'[\r\n]+$', "")
+      .container = replace(string(env.attrs.tag) ?? "unknown", r'^/', "")
+      .stream = string(env.stream) ?? "stdout"
+      .timestamp = parse_timestamp(string(env.time) ?? "", "%+") ?? now()
+      del(.file)
+      del(.host)
+      del(.source_type)
+      del(.offset)
+      if contains(.container, "vector") { abort } # never ship our own logs (a Loki outage would feed back into itself)
+      if .message == "" { abort }
+
+  redact:
+    type: remap
+    inputs: [envelope]
+    source: |
+      msg = string!(.message)
+
+      # 1. secret headers
+      msg = replace_with(msg, r'(?i)(?-u:\b)(authorization|set-cookie|cookie)(["\x27]?\s*[:=]\s*["\x27]?)[^\r\n"\x27}]*') -> |m| {
+        (string(m.captures[0]) ?? "") + (string(m.captures[1]) ?? "") + "[redacted]"
+      }
+      # 2. token / code / password ... query params
+      msg = replace_with(msg, r'(?i)(^|[?&;\s\x22\x27])((?:access_|refresh_|id_)?token|code|password|secret|api_?key|sig|signature)=[^&\s\x22\x27#]*') -> |m| {
+        (string(m.captures[0]) ?? "") + (string(m.captures[1]) ?? "") + "=[redacted]"
+      }
+      # 3. share tokens in paths
+      msg = replace(msg, r'(/api/shares/)[A-Za-z0-9_-]{20,}', "${1}[redacted]")
+
+      # 4. plate / VIN URL segments (/api/plate/<id>, /api/vin/<id>, /api/card/<id>, /api/ria-check/<id>, /og/<id>)
+      msg = replace_with(msg, r'(/(?:api/(?:plate|vin|card|ria-check)|og)/)([^/?#\s\x22\x27\\]*[0-9][^/?#\s\x22\x27\\]*)') -> |m| {
+        lead = string(m.captures[0]) ?? ""
+        raw = string(m.captures[1]) ?? ""
+        if contains(raw, "*") {
+          m.string
+        } else {
+          dec = decode_percent(raw)
+          c = replace(dec, r'\s+', "")
+          sp = upcase(replace(dec, r'[\s/]+', ""))
+          sov = replace(sp, "-", "")
+          kind = if match(upcase(c), r'^[A-HJ-NPR-Z0-9]{17}$') { "vin" } else if match(sp, r'^[АВСЕНІКМОРТХA-Z]{2}[0-9]{4}[АВСЕНІКМОРТХA-Z]{2}$') || match(sp, r'^[0-9]{2}[АВСЕНІКМОРТХA-Z]{2}[0-9]{4}$') || match(sp, r'^[АВСЕНІКМОРТХA-Z]{4}[0-9]{4}$') || match(sov, r'^[0-9]{4,5}[А-ЯІЇЄҐABCEHIKMOPTX]{2,3}$') || match(sov, r'^[А-ЯІЇЄҐABCEHIKMOPTX][0-9]{4}[А-ЯІЇЄҐABCEHIKMOPTX]{2}$') || match(sp, r'^[АВСЕНІКМОРТХA-Z]{1,3}[0-9]{3,6}[АВСЕНІКМОРТХA-Z]{0,3}$') { "plate" } else { "any" }
+          masked = if kind == "vin" {
+            if match(c, r'(?s)^.{0,7}$') { replace(c, r'(?s).', "*") } else {
+              replace(c, r'(?s)^(.{3}).*$', "${1}") + replace(replace(replace(c, r'(?s)^.{3}', ""), r'(?s).{4}$', ""), r'(?s).', "*") + replace(c, r'(?s)^.*(.{4})$', "${1}")
+            }
+          } else {
+            # a plate, or any other segment of these routes: first 2 and last 2 stay (the raw text for the "any" fallback)
+            x = if kind == "plate" { c } else { raw }
+            if match(x, r'(?s)^.{0,4}$') { replace(x, r'(?s).', "*") } else {
+              replace(x, r'(?s)^(.{2}).*$', "${1}") + replace(replace(replace(x, r'(?s)^.{2}', ""), r'(?s).{2}$', ""), r'(?s).', "*") + replace(x, r'(?s)^.*(.{2})$', "${1}")
+            }
+          }
+          lead + masked
+        }
+      }
+
+      # 5. plate= / vin= / q= / query= params, whatever the value looks like
+      msg = replace_with(msg, r'(?i)(^|[?&;\s\x22\x27])((?:plate|vin|q|query)=)([^&\s\x22\x27#]+)') -> |m| {
+        lead = string(m.captures[0]) ?? ""
+        name = string(m.captures[1]) ?? ""
+        raw = string(m.captures[2]) ?? ""
+        if contains(raw, "*") {
+          m.string
+        } else {
+          dec = decode_percent(raw)
+          c = replace(dec, r'\s+', "")
+          sp = upcase(replace(dec, r'[\s/]+', ""))
+          sov = replace(sp, "-", "")
+          kind = if match(upcase(c), r'^[A-HJ-NPR-Z0-9]{17}$') { "vin" } else if match(sp, r'^[АВСЕНІКМОРТХA-Z]{2}[0-9]{4}[АВСЕНІКМОРТХA-Z]{2}$') || match(sp, r'^[0-9]{2}[АВСЕНІКМОРТХA-Z]{2}[0-9]{4}$') || match(sp, r'^[АВСЕНІКМОРТХA-Z]{4}[0-9]{4}$') || match(sov, r'^[0-9]{4,5}[А-ЯІЇЄҐABCEHIKMOPTX]{2,3}$') || match(sov, r'^[А-ЯІЇЄҐABCEHIKMOPTX][0-9]{4}[А-ЯІЇЄҐABCEHIKMOPTX]{2}$') || match(sp, r'^[АВСЕНІКМОРТХA-Z]{1,3}[0-9]{3,6}[АВСЕНІКМОРТХA-Z]{0,3}$') { "plate" } else { "any" }
+          masked = if kind == "vin" {
+            if match(c, r'(?s)^.{0,7}$') { replace(c, r'(?s).', "*") } else {
+              replace(c, r'(?s)^(.{3}).*$', "${1}") + replace(replace(replace(c, r'(?s)^.{3}', ""), r'(?s).{4}$', ""), r'(?s).', "*") + replace(c, r'(?s)^.*(.{4})$', "${1}")
+            }
+          } else {
+            x = if kind == "plate" { c } else { raw }
+            if match(x, r'(?s)^.{0,4}$') { replace(x, r'(?s).', "*") } else {
+              replace(x, r'(?s)^(.{2}).*$', "${1}") + replace(replace(replace(x, r'(?s)^.{2}', ""), r'(?s).{2}$', ""), r'(?s).', "*") + replace(x, r'(?s)^.*(.{2})$', "${1}")
+            }
+          }
+          lead + name + masked
+        }
+      }
+
+      # 6. a one-segment SPA path (`GET /AX22925 200`): masked only when the segment really is a plate or a VIN
+      msg = replace_with(msg, r'(^|[\s\x22\x27])/([^/?#\s\x22\x27\\]*[0-9][^/?#\s\x22\x27\\]*)(/?)') -> |m| {
+        lead = string(m.captures[0]) ?? ""
+        raw = string(m.captures[1]) ?? ""
+        more = string(m.captures[2]) ?? ""
+        if more != "" {
+          m.string
+        } else {
+          dec = decode_percent(raw)
+          c = replace(dec, r'\s+', "")
+          sp = upcase(replace(dec, r'[\s/]+', ""))
+          sov = replace(sp, "-", "")
+          kind = if match(upcase(c), r'^[A-HJ-NPR-Z0-9]{17}$') { "vin" } else if match(sp, r'^[АВСЕНІКМОРТХA-Z]{2}[0-9]{4}[АВСЕНІКМОРТХA-Z]{2}$') || match(sp, r'^[0-9]{2}[АВСЕНІКМОРТХA-Z]{2}[0-9]{4}$') || match(sp, r'^[АВСЕНІКМОРТХA-Z]{4}[0-9]{4}$') || match(sov, r'^[0-9]{4,5}[А-ЯІЇЄҐABCEHIKMOPTX]{2,3}$') || match(sov, r'^[А-ЯІЇЄҐABCEHIKMOPTX][0-9]{4}[А-ЯІЇЄҐABCEHIKMOPTX]{2}$') || match(sp, r'^[АВСЕНІКМОРТХA-Z]{1,3}[0-9]{3,6}[АВСЕНІКМОРТХA-Z]{0,3}$') { "plate" } else { "none" }
+          if kind == "none" {
+            m.string
+          } else if kind == "vin" {
+            if match(c, r'(?s)^.{0,7}$') { lead + "/" + replace(c, r'(?s).', "*") } else {
+              lead + "/" + replace(c, r'(?s)^(.{3}).*$', "${1}") + replace(replace(replace(c, r'(?s)^.{3}', ""), r'(?s).{4}$', ""), r'(?s).', "*") + replace(c, r'(?s)^.*(.{4})$', "${1}")
+            }
+          } else {
+            if match(c, r'(?s)^.{0,4}$') { lead + "/" + replace(c, r'(?s).', "*") } else {
+              lead + "/" + replace(c, r'(?s)^(.{2}).*$', "${1}") + replace(replace(replace(c, r'(?s)^.{2}', ""), r'(?s).{2}$', ""), r'(?s).', "*") + replace(c, r'(?s)^.*(.{2})$', "${1}")
+            }
+          }
+        }
+      }
+
+      # 7. e-mail: r***@g***.com
+      msg = replace_with(msg, r'(^|[^A-Za-z0-9_.%+-])([A-Za-z0-9_.%+-]+)@([A-Za-z0-9-][A-Za-z0-9.-]*\.[A-Za-z]{2,})([A-Za-z0-9_-]?)') -> |m| {
+        lead = string(m.captures[0]) ?? ""
+        lcl = string(m.captures[1]) ?? ""
+        domain = string(m.captures[2]) ?? ""
+        trail = string(m.captures[3]) ?? ""
+        if trail != "" {
+          m.string
+        } else {
+          tld = if contains(domain, ".") { "." + replace(domain, r'^.*\.', "") } else { "" }
+          lead + replace(lcl,r'(?s)^(.).*$', "${1}") + "***@" + replace(domain, r'(?s)^(.).*$', "${1}") + "***" + tld
+        }
+      }
+
+      # 8. IPv6: only the /48 stays
+      msg = replace_with(msg, r'(?i)(^|[^A-Za-z0-9_:.])((?:[0-9a-f]{1,4}:){7}[0-9a-f]{1,4}|(?:[0-9a-f]{1,4}:){0,6}[0-9a-f]{0,4}::(?:[0-9a-f]{1,4}:){0,6}[0-9a-f]{0,4})([A-Za-z0-9_:.]?)') -> |m| {
+        lead = string(m.captures[0]) ?? ""
+        addr = downcase(string(m.captures[1]) ?? "")
+        trail = string(m.captures[2]) ?? ""
+        halves = split(addr, "::")
+        head = if (string(halves[0]) ?? "") == "" { [] } else { split(string(halves[0]) ?? "", ":") }
+        tail = if (string(halves[1]) ?? "") == "" { [] } else { split(string(halves[1]) ?? "", ":") }
+        count = length(head) + length(tail)
+        shape_ok = if length(halves) == 1 { count == 8 } else { count <= 7 }
+        valid = length(halves) <= 2 && shape_ok && match(join(append(head, tail), "|"),r'^(?:[0-9a-f]{1,4}(?:\|[0-9a-f]{1,4})*)?$')
+        if trail != "" || !valid {
+          m.string
+        } else {
+          fill = slice(["0", "0", "0", "0", "0", "0", "0", "0"], 0, 8 - count) ?? []
+          full = if length(halves) == 1 { head } else { append(append(head, fill), tail) }
+          kept = map_values(slice(full, 0, 3) ?? []) -> |g| {
+            t = replace(string(g), r'^0+', "")
+            if t == "" { "0" } else { t }
+          }
+          lead + join(kept, ":") + "::"
+        }
+      }
+
+      # 9. IPv4: the last octet becomes 0
+      msg = replace_with(msg, r'(^|[^0-9.])((?:[0-9]{1,3}\.){3}[0-9]{1,3})(\.[0-9]|[0-9])?') -> |m| {
+        lead = string(m.captures[0]) ?? ""
+        ip = string(m.captures[1]) ?? ""
+        trail = string(m.captures[2]) ?? ""
+        if trail == "" && match(ip, r'^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9]{1,2})\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9]{1,2})$') {
+          lead + replace(ip, r'\.[0-9]{1,3}$', ".0")
+        } else {
+          m.string
+        }
+      }
+
+      # 10. VIN in free text (17 chars, no I/O/Q, letters AND digits): WMI + last 4 stay
+      msg = replace_with(msg, r'(?i)(^|[^A-Za-z0-9])([A-HJ-NPR-Z0-9]{17})([A-Za-z0-9]?)') -> |m| {
+        lead = string(m.captures[0]) ?? ""
+        vin = string(m.captures[1]) ?? ""
+        trail = string(m.captures[2]) ?? ""
+        if trail == "" && match(vin, r'[0-9]') && match(vin, r'[A-Za-z]') {
+          lead + replace(vin, r'(?s)^(.{3}).*$', "${1}") + "**********" + replace(vin, r'(?s)^.*(.{4})$', "${1}")
+        } else {
+          m.string
+        }
+      }
+
+      # 11. plate in free text (8 chars, or `AA 1234 BB`): first 2 and last 2 stay
+      msg = replace_with(msg, r'(^|[^\p{L}0-9])([\p{L}0-9]{2}(?: ?[\p{L}0-9]{4} ?[\p{L}0-9]{2}))([\p{L}0-9]?)') -> |m| {
+        lead = string(m.captures[0]) ?? ""
+        raw = string(m.captures[1]) ?? ""
+        trail = string(m.captures[2]) ?? ""
+        sp = upcase(replace(raw, r'[\s/]+', ""))
+        if trail == "" && (match(sp, r'^[АВСЕНІКМОРТХA-Z]{2}[0-9]{4}[АВСЕНІКМОРТХA-Z]{2}$') || match(sp, r'^[0-9]{2}[АВСЕНІКМОРТХA-Z]{2}[0-9]{4}$') || match(sp, r'^[АВСЕНІКМОРТХA-Z]{4}[0-9]{4}$')) {
+          c = replace(raw, r'\s+', "")
+          lead + replace(c, r'(?s)^(.{2}).*$', "${1}") + "****" + replace(c, r'(?s)^.*(.{2})$', "${1}")
+        } else {
+          m.string
+        }
+      }
+
+      .message = msg
+
+  # level (JSON `level`, else the first level word of a text line) normalised to error / warn / info / debug
+  shape:
+    type: remap
+    inputs: [redact]
+    source: |
+      raw = ""
+      if starts_with(string!(.message), "{") {
+        obj = parse_json(string!(.message)) ?? null
+        if is_object(obj) { raw = string(obj.level) ?? string(obj.severity) ?? "" }
+      }
+      if raw == "" {
+        hit = parse_regex(slice(string!(.message), 0, 200) ?? string!(.message), r'(?i)\b(?P<word>fatal|panic|error|warn(?:ing)?|debug|verbose|trace)\b') ?? null
+        if is_object(hit) { raw = string(hit.word) ?? "" }
+      }
+      lv = downcase(raw)
+      .level = if match(lv, r'^(fatal|panic|critical|crit|error|err|emerg|alert)') {
+        "error"
+      } else if match(lv, r'^warn') {
+        "warn"
+      } else if match(lv, r'^(debug|verbose|trace)') {
+        "debug"
+      } else {
+        "info"
+      }
+
+sinks:
+  loki:
+    type: loki
+    inputs: [shape]
+    endpoint: http://loki:3100
+    encoding: { codec: text } # the masked line; the entry time is the Docker `time`
+    labels:
+      container: '{{ container }}' # only two low-cardinality labels
+      level: '{{ level }}'
+    out_of_order_action: accept
+    buffer:
+      type: disk # a Loki restart must not stall the archive sink below
+      max_size: 268435488
+      when_full: block
+
+  archive:
+    type: file
+    inputs: [shape]
+    path: /logs/%Y-%m-%d.ndjson.gz # one file per UTC day; backup.sh logs copies yesterday's and older to B2
+    compression: gzip
+    encoding: { codec: json }
+
+# BEGIN GENERATED TESTS (infra/gen-vector-tests.mjs, from packages/shared/src/__fixtures__/log-lines.txt - do not edit by hand)
+# raw -> expected pairs, one per fixture line
+tests:
+  - name: fixture-001
+    inputs:
+      - insert_at: redact
+        type: log
+        log_fields: { message: "GET /api/plate/AA1234BB 200 12ms" }
+    outputs:
+      - extract_from: redact
+        conditions:
+          - type: vrl
+            source: "assert_eq!(.message, \"GET /api/plate/AA****BB 200 12ms\")"
+  - name: fixture-002
+    inputs:
+      - insert_at: redact
+        type: log
+        log_fields: { message: "GET /api/plate/AA1234BB/history 200" }
+    outputs:
+      - extract_from: redact
+        conditions:
+          - type: vrl
+            source: "assert_eq!(.message, \"GET /api/plate/AA****BB/history 200\")"
+  - name: fixture-003
+    inputs:
+      - insert_at: redact
+        type: log
+        log_fields: { message: "GET /api/plate/%D0%90%D0%902345%D0%92%D0%92 200" }
+    outputs:
+      - extract_from: redact
+        conditions:
+          - type: vrl
+            source: "assert_eq!(.message, \"GET /api/plate/АА****ВВ 200\")"
+  - name: fixture-004
+    inputs:
+      - insert_at: redact
+        type: log
+        log_fields: { message: "GET /api/vin/WVWZZZ1JZXW000001 200" }
+    outputs:
+      - extract_from: redact
+        conditions:
+          - type: vrl
+            source: "assert_eq!(.message, \"GET /api/vin/WVW**********0001 200\")"
+  - name: fixture-005
+    inputs:
+      - insert_at: redact
+        type: log
+        log_fields: { message: "GET /api/card/AX22925 200" }
+    outputs:
+      - extract_from: redact
+        conditions:
+          - type: vrl
+            source: "assert_eq!(.message, \"GET /api/card/AX***25 200\")"
+  - name: fixture-006
+    inputs:
+      - insert_at: redact
+        type: log
+        log_fields: { message: "GET /AA1234BB 200" }
+    outputs:
+      - extract_from: redact
+        conditions:
+          - type: vrl
+            source: "assert_eq!(.message, \"GET /AA****BB 200\")"
+  - name: fixture-007
+    inputs:
+      - insert_at: redact
+        type: log
+        log_fields: { message: "GET /AX22925 200" }
+    outputs:
+      - extract_from: redact
+        conditions:
+          - type: vrl
+            source: "assert_eq!(.message, \"GET /AX***25 200\")"
+  - name: fixture-008
+    inputs:
+      - insert_at: redact
+        type: log
+        log_fields: { message: "GET /read/plates 200" }
+    outputs:
+      - extract_from: redact
+        conditions:
+          - type: vrl
+            source: "assert_eq!(.message, \"GET /read/plates 200\")"
+  - name: fixture-009
+    inputs:
+      - insert_at: redact
+        type: log
+        log_fields: { message: "lookup plate=AA1234BB failed" }
+    outputs:
+      - extract_from: redact
+        conditions:
+          - type: vrl
+            source: "assert_eq!(.message, \"lookup plate=AA****BB failed\")"
+  - name: fixture-010
+    inputs:
+      - insert_at: redact
+        type: log
+        log_fields: { message: "lookup plate=ABC123 failed" }
+    outputs:
+      - extract_from: redact
+        conditions:
+          - type: vrl
+            source: "assert_eq!(.message, \"lookup plate=AB**23 failed\")"
+  - name: fixture-011
+    inputs:
+      - insert_at: redact
+        type: log
+        log_fields: { message: "{\"level\":\"log\",\"message\":\"plate AA1234BB found\"}" }
+    outputs:
+      - extract_from: redact
+        conditions:
+          - type: vrl
+            source: "assert_eq!(.message, \"{\\\"level\\\":\\\"log\\\",\\\"message\\\":\\\"plate AA****BB found\\\"}\")"
+  - name: fixture-012
+    inputs:
+      - insert_at: redact
+        type: log
+        log_fields: { message: "plate AA 1234 BB and 11AB3456" }
+    outputs:
+      - extract_from: redact
+        conditions:
+          - type: vrl
+            source: "assert_eq!(.message, \"plate AA****BB and 11****56\")"
+  - name: fixture-013
+    inputs:
+      - insert_at: redact
+        type: log
+        log_fields: { message: "ключ АА1234ВВ знайдено" }
+    outputs:
+      - extract_from: redact
+        conditions:
+          - type: vrl
+            source: "assert_eq!(.message, \"ключ АА****ВВ знайдено\")"
+  - name: fixture-014
+    inputs:
+      - insert_at: redact
+        type: log
+        log_fields: { message: "Latin lookalike BE7116AA in text" }
+    outputs:
+      - extract_from: redact
+        conditions:
+          - type: vrl
+            source: "assert_eq!(.message, \"Latin lookalike BE****AA in text\")"
+  - name: fixture-015
+    inputs:
+      - insert_at: redact
+        type: log
+        log_fields: { message: "DETAIL: Key (plate)=(AA1234BB) already exists." }
+    outputs:
+      - extract_from: redact
+        conditions:
+          - type: vrl
+            source: "assert_eq!(.message, \"DETAIL: Key (plate)=(AA****BB) already exists.\")"
+  - name: fixture-016
+    inputs:
+      - insert_at: redact
+        type: log
+        log_fields: { message: "vin WVWZZZ1JZXW000001 decoded" }
+    outputs:
+      - extract_from: redact
+        conditions:
+          - type: vrl
+            source: "assert_eq!(.message, \"vin WVW**********0001 decoded\")"
+  - name: fixture-017
+    inputs:
+      - insert_at: redact
+        type: log
+        log_fields: { message: "vin wvwzzz1jzxw000001 lower" }
+    outputs:
+      - extract_from: redact
+        conditions:
+          - type: vrl
+            source: "assert_eq!(.message, \"vin wvw**********0001 lower\")"
+  - name: fixture-018
+    inputs:
+      - insert_at: redact
+        type: log
+        log_fields: { message: "not a vin ABCDEFGHJKLMNPRST here" }
+    outputs:
+      - extract_from: redact
+        conditions:
+          - type: vrl
+            source: "assert_eq!(.message, \"not a vin ABCDEFGHJKLMNPRST here\")"
+  - name: fixture-019
+    inputs:
+      - insert_at: redact
+        type: log
+        log_fields: { message: "mail roman@gmail.com sent" }
+    outputs:
+      - extract_from: redact
+        conditions:
+          - type: vrl
+            source: "assert_eq!(.message, \"mail r***@g***.com sent\")"
+  - name: fixture-020
+    inputs:
+      - insert_at: redact
+        type: log
+        log_fields: { message: "mail first.last+tag@mail.example.co.uk sent" }
+    outputs:
+      - extract_from: redact
+        conditions:
+          - type: vrl
+            source: "assert_eq!(.message, \"mail f***@m***.uk sent\")"
+  - name: fixture-021
+    inputs:
+      - insert_at: redact
+        type: log
+        log_fields: { message: "client 203.0.113.42 connected" }
+    outputs:
+      - extract_from: redact
+        conditions:
+          - type: vrl
+            source: "assert_eq!(.message, \"client 203.0.113.0 connected\")"
+  - name: fixture-022
+    inputs:
+      - insert_at: redact
+        type: log
+        log_fields: { message: "client 203.0.113.42:51234 connected" }
+    outputs:
+      - extract_from: redact
+        conditions:
+          - type: vrl
+            source: "assert_eq!(.message, \"client 203.0.113.0:51234 connected\")"
+  - name: fixture-023
+    inputs:
+      - insert_at: redact
+        type: log
+        log_fields: { message: "version 1.2.3 and 999.1.1.1 stay" }
+    outputs:
+      - extract_from: redact
+        conditions:
+          - type: vrl
+            source: "assert_eq!(.message, \"version 1.2.3 and 999.1.1.1 stay\")"
+  - name: fixture-024
+    inputs:
+      - insert_at: redact
+        type: log
+        log_fields: { message: "client 2001:db8:85a3:0:0:8a2e:370:7334 connected" }
+    outputs:
+      - extract_from: redact
+        conditions:
+          - type: vrl
+            source: "assert_eq!(.message, \"client 2001:db8:85a3:: connected\")"
+  - name: fixture-025
+    inputs:
+      - insert_at: redact
+        type: log
+        log_fields: { message: "client 2001:db8::1 connected" }
+    outputs:
+      - extract_from: redact
+        conditions:
+          - type: vrl
+            source: "assert_eq!(.message, \"client 2001:db8:0:: connected\")"
+  - name: fixture-026
+    inputs:
+      - insert_at: redact
+        type: log
+        log_fields: { message: "client ::1 connected" }
+    outputs:
+      - extract_from: redact
+        conditions:
+          - type: vrl
+            source: "assert_eq!(.message, \"client 0:0:0:: connected\")"
+  - name: fixture-027
+    inputs:
+      - insert_at: redact
+        type: log
+        log_fields: { message: "time 12:34:56 and Cache::bad stay" }
+    outputs:
+      - extract_from: redact
+        conditions:
+          - type: vrl
+            source: "assert_eq!(.message, \"time 12:34:56 and Cache::bad stay\")"
+  - name: fixture-028
+    inputs:
+      - insert_at: redact
+        type: log
+        log_fields: { message: "Authorization: Bearer abc.def.ghi" }
+    outputs:
+      - extract_from: redact
+        conditions:
+          - type: vrl
+            source: "assert_eq!(.message, \"Authorization: [redacted]\")"
+  - name: fixture-029
+    inputs:
+      - insert_at: redact
+        type: log
+        log_fields: { message: "{\"headers\":{\"cookie\":\"sid=abc; theme=dark\",\"accept\":\"*/*\"}}" }
+    outputs:
+      - extract_from: redact
+        conditions:
+          - type: vrl
+            source: "assert_eq!(.message, \"{\\\"headers\\\":{\\\"cookie\\\":\\\"[redacted]\\\",\\\"accept\\\":\\\"*/*\\\"}}\")"
+  - name: fixture-030
+    inputs:
+      - insert_at: redact
+        type: log
+        log_fields: { message: "Set-Cookie: sid=abc123; HttpOnly" }
+    outputs:
+      - extract_from: redact
+        conditions:
+          - type: vrl
+            source: "assert_eq!(.message, \"Set-Cookie: [redacted]\")"
+  - name: fixture-031
+    inputs:
+      - insert_at: redact
+        type: log
+        log_fields: { message: "GET /auth/callback?code=4%2F0AX4&state=xyz 302" }
+    outputs:
+      - extract_from: redact
+        conditions:
+          - type: vrl
+            source: "assert_eq!(.message, \"GET /auth/callback?code=[redacted]&state=xyz 302\")"
+  - name: fixture-032
+    inputs:
+      - insert_at: redact
+        type: log
+        log_fields: { message: "GET /api/x?access_token=abc123&a=1 200" }
+    outputs:
+      - extract_from: redact
+        conditions:
+          - type: vrl
+            source: "assert_eq!(.message, \"GET /api/x?access_token=[redacted]&a=1 200\")"
+  - name: fixture-033
+    inputs:
+      - insert_at: redact
+        type: log
+        log_fields: { message: "GET /api/shares/Zm9vYmFyYmF6cXV4MTIzNA/image 200" }
+    outputs:
+      - extract_from: redact
+        conditions:
+          - type: vrl
+            source: "assert_eq!(.message, \"GET /api/shares/[redacted]/image 200\")"
+  - name: fixture-034
+    inputs:
+      - insert_at: redact
+        type: log
+        log_fields: { message: "GET /api/shares/12 200" }
+    outputs:
+      - extract_from: redact
+        conditions:
+          - type: vrl
+            source: "assert_eq!(.message, \"GET /api/shares/12 200\")"
+  - name: fixture-035
+    inputs:
+      - insert_at: redact
+        type: log
+        log_fields: { message: "nothing personal here, 200 OK in 12ms" }
+    outputs:
+      - extract_from: redact
+        conditions:
+          - type: vrl
+            source: "assert_eq!(.message, \"nothing personal here, 200 OK in 12ms\")"
+# END GENERATED TESTS

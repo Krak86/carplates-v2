@@ -42,6 +42,8 @@ by re-reading this section before bumping. `.github/dependabot.yml` `ignore` mir
 
 - **Container images** are exact tags, never `latest` or a floating major: `postgres:18.6`, `caddy:2.11.9`, `redis:8.10.3-alpine` (added 2026-11-22; Redis 8 is AGPLv3, Valkey 9 is the BSD alternative if the licence ever matters). **`ioredis` `5.11.1`** (exact in `apps/api`) although `latest` is `6.0.0`: the throttler store only needs `eval`/`quit`; bump on purpose after reading its changelog. **`bullmq` `5.81.6`** (exact in `apps/api`, added 2026-11-22): it depends on exactly `ioredis` 5.11.1, so one copy; `latest` is 6.7.8 (ioredis only a peer there), move on purpose. `msgpackr-extract` build script is off (pure-JS fallback).
 
+- **Loki and Vector images** (added 2026-11-26, admin Logs tab, `docs/logs-plan.md`): `grafana/loki:3.7.10` (newest 3.7.x; 3.6.x still gets patches, no 4.x) and `timberio/vector:0.62.0-alpine` (newest 0.x). Both exact in `infra/docker-compose.prod.yml`, `infra/docker-compose.yml` (profile `logs`) and the CI step that runs `vector test` (`ci.yml`): bump all places together. A Vector bump needs `vector test` green (VRL syntax shifts between 0.x releases); a Loki bump needs `-verify-config` on `infra/loki.yaml`. Dependabot does not track compose tags.
+
 - **pnpm** — we _are_ on `latest` (`12.3.4`, pinned in `packageManager`). This
   machine's global launcher was broken (pnpm 10's self-management shim can't hand
   off to pnpm 12's layout, and pnpm 10 can't read a pnpm-12 lockfile); it was
@@ -1747,13 +1749,14 @@ Research result: worth it only as one small feed. The release log (`packages/sha
 - [ ] 5. Optional: batched auction-lots item (own caching) and a data-freshness feed
 - [ ] After deploy (owner): validate the feed (W3C feed validator), subscribe in one reader, check `robots.txt` does not block it
 
-## Admin logs (Vector + Loki + B2 archive) (plan 2026-11-26, step 1 of 5 built)
+## Admin logs (Vector + Loki + B2 archive) (plan 2026-11-26, steps 1-2 of 5 built)
 
 Redacted VPS container logs (plates / VINs / emails / IPs partly masked) searchable in a new `/admin` Logs tab: Vector reads the Docker json-file logs (no Docker socket), Loki keeps 14 days, a daily gz archive goes to a separate Backblaze B2 bucket (90 days; R2 is full). No Prometheus, no Grafana for now. Design, security model and steps: `docs/logs-plan.md`.
 
 - [x] 1. `packages/shared/src/log-redact.ts` + fixture-driven tests; `RedactingLogger` in the api
 - Step 1 notes: fixture `packages/shared/src/__fixtures__/log-lines.txt` is `raw<TAB>expected` per line (# comments); generate the Vector `tests:` YAML from it in step 2. Redaction is idempotent (tested). Soviet/short-series plates are masked only in URL paths and `plate=`/`vin=`/`q=` params, not free text.
-- [ ] 2. `infra/`: `tag` in `x-logging`, `vector` + `loki` services, `vector.yaml` (with `vector test` from the fixture), `loki.yaml`, pins in "Version pins"
+- [x] 2. `infra/`: `tag` in `x-logging`, `vector` + `loki` services, `vector.yaml` (with `vector test` from the fixture), `loki.yaml`, pins in "Version pins"
+- Step 2 notes: built 2026-11-26. `vector.yaml` + `gen-vector-tests.mjs` (regenerates the `tests:` block; `--check` and `vector test` run in `ci.yml`): all 35 fixture cases pass in `timberio/vector:0.62.0-alpine`, plus the envelope / level / own-log-drop paths checked by hand. Rust regexes have no lookarounds, so VRL emulates them with lead / trail captures (one known edge: an e-mail or IPv6 followed by a word char is left whole where JS could backtrack to a shorter match). `loki.yaml` passes `-verify-config`. The Loki image has no shell or wget, so the loki service has no healthcheck (vector has one). `LOKI_UID` + `../lokidata` + `../logs` are already seeded in `lib.sh` (compose needs the var to parse). Still step 5: copy `vector.yaml` / `loki.yaml` to the VPS in the deploy, `up -d loki vector` in `deploy-api.sh`, `LOKI_URL` in `deploy-api.yml`.
 - [ ] 3. `apps/api/src/logs/` (`GET /api/admin/logs`, `/containers`; LogQL built server-side; `docs/checklists.md` "new /api/* endpoint")
 - [ ] 4. Web `AdminLogsTab` (filters, live polling, URL state), i18n pack keys, release note
 - [ ] 5. `backup.sh logs` mode + cron, docs (`features-reference.md`, `security-checklist.md`)
