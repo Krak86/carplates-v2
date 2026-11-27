@@ -55,6 +55,35 @@ const readCapped = async (res: Response, maxBytes: number): Promise<string> => {
 const isTimeout = (err: unknown): boolean =>
   err instanceof Error && (err.name === 'TimeoutError' || err.name === 'AbortError')
 
+const PRIVATE_HOST_PREFIXES = ['127.', '10.', '192.168.', '169.254.', '0.', '[::', '[fc', '[fd', '[fe80']
+const PRIVATE_HOST_SUFFIXES = ['.local', '.internal', '.localhost']
+
+const isPrivateHost = (hostname: string): boolean => {
+  const host = hostname.toLowerCase()
+  if (host === 'localhost' || PRIVATE_HOST_PREFIXES.some(p => host.startsWith(p))) return true
+  if (PRIVATE_HOST_SUFFIXES.some(s => host.endsWith(s))) return true
+  const second = /^172\.(\d+)\./.exec(host)?.[1]
+  return second !== undefined && Number(second) >= 16 && Number(second) <= 31
+}
+
+/**
+ * SSRF guard: the target must be a plain https URL without credentials that points at a public host name or address.
+ * Callers build URLs from configured bases plus encoded path pieces; this keeps a bad base or a smuggled value from
+ * reaching loopback, link-local or private networks. Returns a URL rebuilt from the parsed parts.
+ */
+const assertSafeTarget = (url: string | URL): URL => {
+  let parsed: URL
+  try {
+    parsed = new URL(url)
+  } catch {
+    throw new FetchJsonError('network', 'invalid upstream URL')
+  }
+  if (parsed.protocol !== 'https:' || parsed.username || parsed.password || isPrivateHost(parsed.hostname)) {
+    throw new FetchJsonError('network', 'upstream URL is not allowed')
+  }
+  return new URL(`${parsed.origin}${parsed.pathname}${parsed.search}`)
+}
+
 /**
  * The one way the api reads JSON from an upstream: a timeout over the whole exchange, a byte cap on the body and a Zod
  * parse of the result (`as` casts of foreign data are what this replaces). Never returns unvalidated data; throws
@@ -65,9 +94,10 @@ export async function fetchJson<S extends z.ZodType>(
   schema: S,
   { timeoutMs, maxBytes, init }: FetchJsonOptions
 ): Promise<z.infer<S>> {
+  const target = assertSafeTarget(url)
   let text: string
   try {
-    const res = await fetch(url, { ...init, signal: AbortSignal.timeout(timeoutMs) })
+    const res = await fetch(target, { ...init, signal: AbortSignal.timeout(timeoutMs) })
     if (!res.ok) {
       await res.body?.cancel().catch(() => undefined)
       throw new FetchJsonError('status', `status ${res.status}`, res.status)

@@ -71,4 +71,20 @@ describe('fetchJson', () => {
     stub(async () => Promise.reject(new TypeError('fetch failed')))
     expect(await kindOf(fetchJson('https://x.test', schema, opts))).toBe('network')
   })
+
+  it.each([
+    'http://x.test',
+    'https://localhost/a',
+    'https://127.0.0.1/a',
+    'https://169.254.169.254/latest',
+    'https://172.20.0.5/a',
+    'https://[::1]/a',
+    'https://user:pw@x.test',
+    'not a url'
+  ])('refuses the unsafe target %s without calling fetch', async url => {
+    const fn = vi.fn(async () => new Response('{"ok":true}'))
+    stub(fn)
+    expect(await kindOf(fetchJson(url, schema, opts))).toBe('network')
+    expect(fn).not.toHaveBeenCalled()
+  })
 })
