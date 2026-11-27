@@ -76,6 +76,50 @@ const httpsUrl = (v: string | null | undefined): string | null => {
   }
 }
 
+/**
+ * Domains the `/api/market/go/:id` redirect may leave to: the websites of `MARKET_SOURCE_NAMES`. A host matches itself and
+ * its subdomains. A new CarAPIS source needs its domain here, otherwise its "open listing" click answers 204 (the web then
+ * falls back to a search link).
+ */
+export const LISTING_HOSTS: readonly string[] = [
+  'auto.ria.com',
+  'autoscout24.com',
+  'autoscout24.de',
+  'autoscout24.at',
+  'autoscout24.be',
+  'autoscout24.fr',
+  'autoscout24.it',
+  'autoscout24.nl',
+  'autoscout24.es',
+  'autoscout24.lu',
+  'autoscout24.pl',
+  'autoscout24.cz',
+  'kleinanzeigen.de',
+  'otomoto.pl',
+  'leboncoin.fr',
+  'subito.it',
+  'automobile.it',
+  '2dehands.be',
+  '2ememain.be',
+  'marktplaats.nl',
+  'willhaben.at',
+  'bazos.cz',
+  'autobazar.eu',
+  'autovit.ro',
+  'autotrader.co.uk',
+  'autotrader.ca',
+  'kijiji.ca'
+]
+
+/** An https URL whose host is on `LISTING_HOSTS` (CWE-601: the redirect must not become an open redirect). */
+export function isListingUrl(v: string | null | undefined): v is string {
+  if (!httpsUrl(v)) return false
+  const { hostname, username, password } = new URL(v as string)
+  if (username || password) return false
+  const host = hostname.toLowerCase().replace(/\.$/, '')
+  return LISTING_HOSTS.some(d => host === d || host.endsWith(`.${d}`))
+}
+
 export function mapRow(row: UpstreamRow): MarketCard {
   const thumb = typeof row.thumb === 'string' ? row.thumb : (row.thumb?.thumb_url ?? row.thumb?.url)
   return {

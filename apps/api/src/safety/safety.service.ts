@@ -1,53 +1,47 @@
 import { BadGatewayException, Injectable, Logger } from '@nestjs/common'
+import { z } from 'zod'
 import type { SafetyRating, SafetyRatingsResponse } from '@carplates/shared'
 
+import { DEFAULT_JSON_MAX_BYTES, fetchJson } from '../common/fetch-json.js'
 import { loadEnv } from '../env.js'
 import { nhtsaModelCandidates } from './nhtsa-models.js'
 
-interface NhtsaVariant {
-  VehicleId: number
-}
+const nhtsaVariantListSchema = z.object({ Results: z.array(z.object({ VehicleId: z.number() })).optional() })
+type NhtsaVariant = NonNullable<z.infer<typeof nhtsaVariantListSchema>['Results']>[number]
 
-interface NhtsaVariantList {
-  Results?: NhtsaVariant[]
-}
-
-interface NhtsaRatingDetail {
-  VehicleId: number
-  VehicleDescription: string
-  OverallRating?: string | null
-  OverallFrontCrashRating?: string | null
-  FrontCrashDriversideRating?: string | null
-  FrontCrashPassengersideRating?: string | null
-  FrontCrashPicture?: string | null
-  FrontCrashVideo?: string | null
-  OverallSideCrashRating?: string | null
-  SideCrashDriversideRating?: string | null
-  SideCrashPassengersideRating?: string | null
-  SideCrashPicture?: string | null
-  SideCrashVideo?: string | null
-  RolloverRating?: string | null
-  RolloverRating2?: string | null
-  RolloverPossibility?: number | string | null
-  RolloverPossibility2?: number | string | null
-  dynamicTipResult?: string | null
-  SidePoleCrashRating?: string | null
-  SidePolePicture?: string | null
-  SidePoleVideo?: string | null
-  'combinedSideBarrierAndPoleRating-Front'?: string | null
-  'combinedSideBarrierAndPoleRating-Rear'?: string | null
-  'sideBarrierRating-Overall'?: string | null
-  NHTSAElectronicStabilityControl?: string | null
-  NHTSAForwardCollisionWarning?: string | null
-  NHTSALaneDepartureWarning?: string | null
-  ComplaintsCount?: number | null
-  RecallsCount?: number | null
-  InvestigationCount?: number | null
-}
-
-interface NhtsaRatingDetailList {
-  Results?: NhtsaRatingDetail[]
-}
+const nhtsaRatingDetailSchema = z.object({
+  VehicleId: z.number(),
+  VehicleDescription: z.string(),
+  OverallRating: z.string().nullish(),
+  OverallFrontCrashRating: z.string().nullish(),
+  FrontCrashDriversideRating: z.string().nullish(),
+  FrontCrashPassengersideRating: z.string().nullish(),
+  FrontCrashPicture: z.string().nullish(),
+  FrontCrashVideo: z.string().nullish(),
+  OverallSideCrashRating: z.string().nullish(),
+  SideCrashDriversideRating: z.string().nullish(),
+  SideCrashPassengersideRating: z.string().nullish(),
+  SideCrashPicture: z.string().nullish(),
+  SideCrashVideo: z.string().nullish(),
+  RolloverRating: z.string().nullish(),
+  RolloverRating2: z.string().nullish(),
+  RolloverPossibility: z.union([z.number(), z.string()]).nullish(),
+  RolloverPossibility2: z.union([z.number(), z.string()]).nullish(),
+  dynamicTipResult: z.string().nullish(),
+  SidePoleCrashRating: z.string().nullish(),
+  SidePolePicture: z.string().nullish(),
+  SidePoleVideo: z.string().nullish(),
+  'combinedSideBarrierAndPoleRating-Front': z.string().nullish(),
+  'combinedSideBarrierAndPoleRating-Rear': z.string().nullish(),
+  'sideBarrierRating-Overall': z.string().nullish(),
+  NHTSAElectronicStabilityControl: z.string().nullish(),
+  NHTSAForwardCollisionWarning: z.string().nullish(),
+  NHTSALaneDepartureWarning: z.string().nullish(),
+  ComplaintsCount: z.number().nullish(),
+  RecallsCount: z.number().nullish(),
+  InvestigationCount: z.number().nullish()
+})
+const nhtsaRatingDetailListSchema = z.object({ Results: z.array(nhtsaRatingDetailSchema).optional() })
 
 const CACHE_MAX = 300
 const UPSTREAM_TIMEOUT_MS = 10_000
@@ -87,7 +81,7 @@ export class SafetyService {
   private async findVariants(make: string, model: string, year: number): Promise<NhtsaVariant[]> {
     for (const candidate of nhtsaModelCandidates(make, model)) {
       const url = `${this.base}/SafetyRatings/modelyear/${year}/make/${encodeURIComponent(make)}/model/${encodeURIComponent(candidate)}?format=json`
-      const variants = await this.get<NhtsaVariantList>(url)
+      const variants = await this.get(url, nhtsaVariantListSchema)
       if (variants.Results && variants.Results.length > 0) return variants.Results
     }
     return []
@@ -95,7 +89,7 @@ export class SafetyService {
 
   private async fetchRating(vehicleId: number): Promise<SafetyRating | undefined> {
     const url = `${this.base}/SafetyRatings/VehicleId/${vehicleId}?format=json`
-    const payload = await this.get<NhtsaRatingDetailList>(url)
+    const payload = await this.get(url, nhtsaRatingDetailListSchema)
     const raw = payload.Results?.[0]
     if (!raw) return undefined
 
@@ -133,11 +127,9 @@ export class SafetyService {
     }
   }
 
-  private async get<T>(url: string): Promise<T> {
+  private async get<S extends z.ZodType>(url: string, schema: S): Promise<z.infer<S>> {
     try {
-      const res = await fetch(url, { signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS) })
-      if (!res.ok) throw new Error(`status ${res.status}`)
-      return (await res.json()) as T
+      return await fetchJson(url, schema, { timeoutMs: UPSTREAM_TIMEOUT_MS, maxBytes: DEFAULT_JSON_MAX_BYTES })
     } catch (err) {
       this.logger.warn(`NHTSA safety ratings request failed: ${(err as Error).message}`)
       throw new BadGatewayException('NHTSA safety ratings request failed')

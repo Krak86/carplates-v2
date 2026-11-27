@@ -2,10 +2,12 @@ import { createReadStream } from 'node:fs'
 
 import { Controller, Get, Header, Inject, Query, Res } from '@nestjs/common'
 import { ApiExcludeEndpoint, ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger'
+import { Throttle } from '@nestjs/throttler'
 import type { FastifyReply } from 'fastify'
 import { z } from 'zod'
 
 import { ROLLUP_CACHE } from '../common/cache.js'
+import { SAFETY_VIDEO_THROTTLE } from '../common/throttle.js'
 import { zodParam } from '../common/zod-param.pipe.js'
 import { CncapRatingsDto } from './cncap.dto.js'
 import { CncapService } from './cncap.service.js'
@@ -116,6 +118,7 @@ export class SafetyController {
 
   // Binary stream, not a Zod DTO response — the one exception to "no @Res()" (see SpaController).
   @Get('video')
+  @Throttle(SAFETY_VIDEO_THROTTLE)
   @ApiExcludeEndpoint()
   async video(
     @Query(zodParam(videoQuerySchema)) query: z.infer<typeof videoQuerySchema>,

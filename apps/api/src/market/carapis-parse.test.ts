@@ -1,6 +1,30 @@
 import { describe, expect, it } from 'vitest'
 
-import { alnum, mapDetail, mapPage, pickModelSlug } from './carapis-parse.js'
+import { alnum, isListingUrl, mapDetail, mapPage, pickModelSlug } from './carapis-parse.js'
+
+describe('isListingUrl (redirect host allowlist)', () => {
+  it('accepts https listings on a source host or its subdomain', () => {
+    expect(isListingUrl('https://auto.ria.com/uk/auto_kia_ceed_1.html')).toBe(true)
+    expect(isListingUrl('https://www.autoscout24.de/angebote/x')).toBe(true)
+    expect(isListingUrl('https://WWW.Kleinanzeigen.DE./s-anzeige/x')).toBe(true)
+  })
+
+  it('refuses an off-list host', () => {
+    expect(isListingUrl('https://evil.example/auto.ria.com')).toBe(false)
+    expect(isListingUrl('https://auto.ria.com.evil.example/x')).toBe(false)
+    expect(isListingUrl('https://notauto.ria.com.evil.example/x')).toBe(false)
+    expect(isListingUrl('https://xauto.ria.com/x')).toBe(false)
+  })
+
+  it('refuses credentials in the URL, other schemes and junk', () => {
+    expect(isListingUrl('https://auto.ria.com@evil.example/x')).toBe(false)
+    expect(isListingUrl('https://user:pw@auto.ria.com/x')).toBe(false)
+    expect(isListingUrl('http://auto.ria.com/x')).toBe(false)
+    expect(isListingUrl('javascript:alert(1)')).toBe(false)
+    expect(isListingUrl('not a url')).toBe(false)
+    expect(isListingUrl(null)).toBe(false)
+  })
+})
 
 /** Shapes copied from live CarAPIS answers (2026-11-03), values made up. */
 const row = (over: Record<string, unknown> = {}) => ({

@@ -1,7 +1,9 @@
 import { Controller, Get, Inject, Query } from '@nestjs/common'
 import { ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger'
+import { Throttle } from '@nestjs/throttler'
 import { z } from 'zod'
 
+import { PHOTOS_THROTTLE } from '../common/throttle.js'
 import { zodParam } from '../common/zod-param.pipe.js'
 import { VehiclePhotosDto } from './photos.dto.js'
 import { PhotosService } from './photos.service.js'
@@ -18,6 +20,7 @@ export class PhotosController {
   constructor(@Inject(PhotosService) private readonly photosService: PhotosService) {}
 
   @Get()
+  @Throttle(PHOTOS_THROTTLE)
   @ApiQuery({ name: 'brand', required: false })
   @ApiQuery({ name: 'model', required: false })
   @ApiQuery({ name: 'year', required: false })

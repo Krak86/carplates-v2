@@ -31,6 +31,10 @@ export const GLOBAL_THROTTLE: ThrottlerModuleOptions = {
 /** Tighter per-route caps for the endpoints a registry scraper would enumerate (overrides `medium`). */
 export const PLATE_LOOKUP_THROTTLE = { medium: { limit: 100, ttl: 60_000 } }
 export const VIN_DECODE_THROTTLE = { medium: { limit: 30, ttl: 60_000 } }
+/** Pixabay photo search: every cache miss spends the free tier (100 requests per 60 s for the whole app). */
+export const PHOTOS_THROTTLE = { medium: { limit: 30, ttl: 60_000 } }
+/** NHTSA crash-test video: a cache miss downloads a file and runs ffmpeg for up to a minute, so a handful per minute per IP. */
+export const SAFETY_VIDEO_THROTTLE = { medium: { limit: 6, ttl: 60_000 }, long: { limit: 60, ttl: 3_600_000 } }
 /** Brand origin: the brand list is enumerable, though each answer is small. */
 export const ORIGIN_THROTTLE = { medium: { limit: 60, ttl: 60_000 } }
 /** 3DTuning link-out: a make x model x year set, one tiny cached answer. */
