@@ -76,6 +76,30 @@ describe('infra/Caddyfile security headers', () => {
     expect(rows[0]?.[1]).toBe('same-origin-allow-popups')
   })
 
+  it('HSTS is one year with includeSubDomains and preload (security-wiki step 17)', () => {
+    const rows = [...caddyfile.matchAll(/^\s*Strict-Transport-Security\s+"([^"]*)"/gm)]
+    expect(rows).toHaveLength(1)
+    expect(rows[0]?.[1]).toBe('max-age=31536000; includeSubDomains; preload')
+  })
+
+  it('CORP is same-site and the Server header is removed (step 16)', () => {
+    expect(caddyfile).toMatch(/^\s*Cross-Origin-Resource-Policy\s+"same-site"\s*$/m)
+    expect(caddyfile).toMatch(/^\s*-Server\s*$/m)
+  })
+
+  it('caps request bodies just above the 4 MB upload limit (step 16)', () => {
+    expect(caddyfile).toMatch(/request_body\s*\{\s*max_size 5MB\s*\}/)
+  })
+
+  it('writes a JSON access log to stdout and skips /healthz (step 16)', () => {
+    expect(caddyfile).toMatch(/log\s*\{\s*output stdout\s*format json\s*\}/)
+    expect(caddyfile).toMatch(/^\s*log_skip \/healthz\s*$/m)
+  })
+
+  it('keeps the admin API on: deploy-api.sh runs `caddy reload`, which needs it (so no `admin off`)', () => {
+    expect(caddyfile).not.toMatch(/^\s*admin\s+off\b/m)
+  })
+
   it('only Caddy sets COOP / Origin-Agent-Cluster / X-Permitted-Cross-Domain-Policies (api would double the values)', () => {
     const forbidden = /cross-origin-opener-policy|origin-agent-cluster|x-permitted-cross-domain-policies/i
     const offenders = sourceFiles(join(root, 'apps/api/src')).filter(f => forbidden.test(readFileSync(f, 'utf8')))

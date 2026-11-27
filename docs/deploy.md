@@ -394,7 +394,7 @@ Not worth tuning at current traffic (Cloudflare cache + per-IP limits sit in fro
 4. ✅ **Cloudflare settings (done 2026-10-28):** Full (strict), Always Use HTTPS, Min TLS 1.2, Automatic HTTPS Rewrites, HTTP/2 + HTTP/3 (Speed → Settings →
    Protocol; not on the Network page), Browser Cache TTL "Respect Existing Headers", Rocket Loader off, Bot Fight Mode, and one WAF rate-limit rule `api-lookup-limit`
    (Security → Security rules → zone level, not the Enterprise account WAF): `starts_with(uri.path, "/api/plate") or starts_with(…, "/api/vin")`, per IP, 30 requests
-   / 10 s, Block 10 s (verified: ~30 × 200 then 429). HSTS is sent by Caddy (`max-age=31536000`), so Cloudflare's HSTS toggle stays off (a second source would
+   / 10 s, Block 10 s (verified: ~30 × 200 then 429). HSTS is sent by Caddy (`max-age=31536000; includeSubDomains; preload`), so Cloudflare's HSTS toggle stays off (a second source would
    duplicate or override it). Not done: "Under Attack" is a manual toggle for incidents. DNSSEC was turned off at Squarespace for the nameserver move and re-enabled
    on 2026-11-26 (Cloudflare signs the zone, DS record added at Squarespace → DNS → DNSSEC).
 5. **Pre-deploy security gate** ([security-checklist.md §7](security-checklist.md)), partly done 2026-10-28. Passed against the live site: `pnpm audit --prod` has
@@ -479,8 +479,8 @@ and unbundled, so it says nothing about production.
   `curl -s -o /dev/null -D - -H 'accept-encoding: gzip, deflate, br, zstd' https://carsua.app/assets/<hash>.js | grep -i content-encoding` (must be `br`).
   Precompressing br11 at build time would save a further 15 % but needs the origin to serve `.br` files and Cloudflare to pass them through; not done.
 - **`Cf-Connecting-Ip` and friends are invisible in DevTools** (browser to Cloudflare leg only). Cloudflare adds `Cf-Connecting-Ip`, `Cf-Ipcountry`, `Cf-Ray`,
-  `Cf-Visitor`, `X-Forwarded-For/Proto`, `Cdn-Loop` on the way to Caddy. To see them, add a temporary `log { output stdout; format json }` block to the
-  `carsua.app` site (there is **no access log today**; check that `Cookie`/`Authorization` are redacted), read it with `docker logs`, then remove it.
+  `Cf-Visitor`, `X-Forwarded-For/Proto`, `Cdn-Loop` on the way to Caddy. To see them, read the Caddy JSON access log
+  (`docker compose logs caddy --tail 20`; on in the `carsua.app` site since 2026-11-27, `/healthz` skipped, `Cookie`/`Authorization` redacted by Caddy).
   A direct `curl` to the origin cannot show them: without Cloudflare's client cert (AOP mTLS) the TLS handshake fails.
 - **`/api/stats/version` is deliberately not edge-cached** (excluded in the "Cache API rollups" rule, no `Cache-Control`): it is the "did the data change?" probe
   (`getDataVersion` in `apps/web/src/lib/api.ts`, offline-copy staleness check), so a cached answer would delay that detection. If origin load ever matters,
