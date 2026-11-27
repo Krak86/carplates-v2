@@ -312,7 +312,9 @@ const SOURCES: readonly Source[] = [
   // No logo: plain tile.
   { key: 'onnx', label: 'ONNX Runtime Web', url: 'https://onnxruntime.ai', tile: 'bg-slate-500' },
   // No logo: commercial mark, no licence found; plain tile.
-  { key: 'contabo', label: 'Contabo', url: 'https://contabo.com', tile: 'bg-slate-500' }
+  { key: 'contabo', label: 'Contabo', url: 'https://contabo.com', tile: 'bg-slate-500' },
+  // No logo: commercial mark, no licence found; plain tile.
+  { key: 'backblaze', label: 'Backblaze B2', url: 'https://www.backblaze.com/cloud-storage', tile: 'bg-slate-500' }
 ]
 
 function SourceAvatar({ source }: { source: Source }): ReactNode {
