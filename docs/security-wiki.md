@@ -22,7 +22,7 @@ Legend: ✅ done · ❌ open (step #) · 🔍 verify · 🤖 code/config (diff s
 | 8   | API (NestJS)         | D27-D40, D57-D58 | 7-10           |
 | 9   | Postgres and Redis   | D41-D44          | 12, 15, 20     |
 | 10  | ALPR (Python)        | D45, D51         | -              |
-| 11  | Supply chain and CI  | D46-D49, D52-D55 | 24, 26, 30     |
+| 11  | Supply chain and CI  | D46-D49, D52-D55 | 24, 26         |
 | 12  | Accounts and people  | D50              | 32             |
 
 ## 2. Twelve-Factor and security
@@ -225,8 +225,15 @@ Branch protection on `main` is a ruleset since 2026-11-26. The `production` envi
 
 ## 5. Steps (open items)
 
-Tick the box and add a `docs/plan-done.md` entry when a step is finished. "Verify" is the concrete check. Suggested order:
-**1-4 → 21-22 → 23 → 5-6 → 11 → 13-15 → 7-10 → 16-18 → 19-20 → 25 → 24 → 26 → 27-30 → 12 → 31**; step 32 runs in parallel at any time.
+Tick the box and add a `docs/plan-done.md` entry when a step is finished. "Verify" is the concrete check. Order (updated 2026-11-27; `+` = do in one PR or one deploy, `∥` = runs in parallel):
+done: 1-6, 11, 21-23, 30, 33. Remaining, in order:
+
+1. **Step 32 leftovers (H7 origin IP, H11 SSH, optional terraforming)** ∥ everything below; owner-only, no code.
+2. **7 + (8 + 9)**: `fetchJson` first, then throttle and redirect allowlist. All code-only API work that closes real gaps, so it moves ahead of the infra batch.
+3. **13 + 14 + 15**, then **16 + 17 + 18**: all infra config, one compose and Caddy deploy (13-15 touch `docker-compose.prod.yml`, 16-18 touch the Caddyfile). 17 needs a subdomain HTTPS check first.
+4. **10**, then **19 + 20**: 10 is small API code; 19 and 20 are VPS work. **20 (backups) must be done before 12.**
+5. **25 → 24 → 26**, then **27 + 28** (same ESLint and iframe pass), **29**. 25 gives the lynis baseline that 19 is verified against, so run it right after 19 on the VPS.
+6. **12 (L)** last among the risky ones: role changes can break the app, so it needs the step 20 backup and a restore drill. **31** after that (needs a clean week of reports).
 
 ### A. Privacy and fail-closed config
 
