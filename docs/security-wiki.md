@@ -356,12 +356,12 @@ done: 1-9, 11, 21-23, 30, 33. Remaining, in order:
 
 ### Step 14 - Harden Caddy and Postgres containers [x] · M · 🤖 · layer 6
 
-- **What:** Caddy and Postgres lack `cap_drop`, `no-new-privileges`, memory limits; nothing sets `pids_limit`; api is not `read_only`. Caddy: `cap_drop: [ALL]` + `NET_BIND_SERVICE`. Postgres: drop all, add back `CHOWN`, `SETUID`, `SETGID`, `FOWNER`, `DAC_READ_SEARCH`. api: `read_only` + tmpfs `/tmp`.
+- **What:** Caddy and Postgres lack `cap_drop`, `no-new-privileges`, memory limits; nothing sets `pids_limit`; api is not `read_only`. Caddy: `cap_drop: [ALL]` + `NET_BIND_SERVICE` + `DAC_READ_SEARCH`. Postgres: drop all, add back `CHOWN`, `SETUID`, `SETGID`, `FOWNER`, `DAC_READ_SEARCH`. api: `read_only` + tmpfs `/tmp`.
 - **Files:** `infra/docker-compose.prod.yml`.
 - **Why:** Kinsing cryptominer campaigns (binary drops), CWE-400 (fork bombs).
 - **Alternatives:** rootless Docker (strongest; networking and port 443 friction).
 - **Verify:** `docker compose config -q`; stack boots and passes healthchecks; `docker-bench-security` before and after.
-- **Done 2026-11-27 (code):** every service now has `pids_limit` (caddy/api 512, postgres 1024, rest 256) and `no-new-privileges` + `cap_drop: [ALL]`. Caddy keeps `NET_BIND_SERVICE`, Postgres `CHOWN SETUID SETGID FOWNER DAC_READ_SEARCH`, api is `read_only` with tmpfs `/tmp` (the only runtime write path is the safety-video cache under `os.tmpdir()`). New `mem_limit`: caddy 512m, postgres 6g (shared_buffers 2 GB + 1 GB shm + 1 GB maintenance_work_mem; page cache is reclaimable). **Risk:** the capability sets and limits were validated with `docker compose config` only, not on the VPS; if Postgres fails to start, check `docker compose logs postgres` for `Operation not permitted` and add `DAC_OVERRIDE`.
+- **Done 2026-11-27 (code):** every service now has `pids_limit` (caddy/api 512, postgres 1024, rest 256) and `no-new-privileges` + `cap_drop: [ALL]`. Caddy keeps `NET_BIND_SERVICE` (443) and `DAC_READ_SEARCH` (added after the first deploy: root without `DAC_OVERRIDE` could not read `env/certs`, dir 700 + `origin.key` 600 owned by `deploy`, so Caddy crash-looped and the deploy failed at `caddy reload` with "container is restarting"), Postgres `CHOWN SETUID SETGID FOWNER DAC_READ_SEARCH`, api is `read_only` with tmpfs `/tmp` (the only runtime write path is the safety-video cache under `os.tmpdir()`). New `mem_limit`: caddy 512m, postgres 6g (shared_buffers 2 GB + 1 GB shm + 1 GB maintenance_work_mem; page cache is reclaimable). **Risk:** the capability sets and limits were validated with `docker compose config` only, not on the VPS; if Postgres fails to start, check `docker compose logs postgres` for `Operation not permitted` and add `DAC_OVERRIDE`.
 
 ### Step 15 - Pin image digests, hide the Redis password [x] · S-M · 🤖 · layer 6, 9
 
