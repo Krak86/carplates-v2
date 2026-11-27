@@ -135,6 +135,10 @@ const envSchema = z.object({
    *  in each process's memory (dev, tests). Redis down at runtime degrades to that memory store, never to a 5xx. */
   REDIS_URL: z.string().min(1).optional(),
 
+  /** Base URL of the internal Loki (`http://loki:3100`) behind the admin Logs tab. Unset = the tab shows "logs are not configured". Loki
+   *  down at runtime = a typed "unavailable" answer, never a 5xx. */
+  LOKI_URL: z.string().url().optional(),
+
   /** Swagger UI at /api/docs — off in production unless explicitly enabled. */
   ENABLE_SWAGGER: boolish,
 
@@ -196,5 +200,6 @@ export const alprLocalEnabled = (env: Env): boolean => Boolean(env.ALPR_LOCAL_UR
 export const sharesStorageConfigured = (env: Env): boolean =>
   Boolean(env.SHARES_R2_ENDPOINT && env.SHARES_R2_ACCESS_KEY_ID && env.SHARES_R2_SECRET_ACCESS_KEY)
 export const sharesEnabled = (env: Env): boolean => sharesStorageConfigured(env) && alprLocalEnabled(env)
+export const lokiEnabled = (env: Env): boolean => Boolean(env.LOKI_URL)
 export const marketEnabled = (env: Env): boolean => Boolean(env.CARAPIS_API_KEY)
 export const pixabayEnabled = (env: Env): boolean => Boolean(env.PIXABAY_API_KEY)
