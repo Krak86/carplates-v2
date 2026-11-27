@@ -50,9 +50,10 @@ services:
       - ../env/certs:/certs:ro # Cloudflare origin certificate: origin.pem + origin.key
       - caddy_data:/data
       - caddy_config:/config
-    # Binds 443 inside the container, so NET_BIND_SERVICE is the only capability it keeps.
+    # NET_BIND_SERVICE: binds 443 inside the container. DAC_READ_SEARCH: root without DAC_OVERRIDE cannot read ../env/certs
+    # (dir 700 and origin.key 600, both owned by the deploy user), so Caddy crash-looped on start. Read-only, no write bypass.
     cap_drop: [ALL]
-    cap_add: [NET_BIND_SERVICE]
+    cap_add: [NET_BIND_SERVICE, DAC_READ_SEARCH]
     security_opt: ['no-new-privileges:true']
     mem_limit: 512m
     pids_limit: 512
