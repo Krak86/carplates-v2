@@ -7,7 +7,7 @@ TAG="${1:?usage: deploy-alpr.sh <image-tag>}"
 . /opt/carsua/compose/lib.sh
 
 set_env ALPR_TAG "$TAG"
-docker compose pull alpr </dev/null
+pull_image alpr
 docker compose up -d --no-deps alpr </dev/null
 if wait_healthy alpr; then
   echo "alpr healthy"

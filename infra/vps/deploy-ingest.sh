@@ -8,7 +8,7 @@ TAG="${1:?usage: deploy-ingest.sh <image-tag>}"
 
 set_env INGEST_TAG "$TAG"
 install -d /opt/carsua/archive /opt/carsua/ingest-data
-docker compose pull ingest </dev/null
+pull_image ingest
 crontab ingest.cron
 prune_images
 echo "ingest image $TAG ready; crontab installed"

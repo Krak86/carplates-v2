@@ -6,6 +6,11 @@
 # Sourcing it enters the compose directory and selects the prod compose file.
 
 cd /opt/carsua/compose
+# One deploy at a time on this VPS: the api/ingest/alpr workflows have separate concurrency groups, so they can overlap, and one
+# deploy's image prune or layer extraction racing another's pull makes containerd fail with "lease does not exist: not found".
+# The lock fd lives as long as the deploy script, so it is released on exit (also on failure). Waits up to 15 min.
+exec 9>/opt/carsua/deploy.lock
+flock -w 900 9 || { echo "another deploy still holds /opt/carsua/deploy.lock after 15 min" >&2; exit 1; }
 export COMPOSE_FILE=docker-compose.prod.yml
 touch .env
 # docker-compose.prod.yml has no `latest` fallback and needs every tag to parse, so a tag that was never deployed gets a placeholder
@@ -32,6 +37,21 @@ prune_images() {
   docker image ls --filter 'reference=ghcr.io/*/carsua-*' --format '{{.Repository}}:{{.Tag}}' </dev/null \
     | awk -F: -v keep="${1:-3}" '++n[$1] > keep' \
     | xargs -r docker rmi >/dev/null 2>&1 || true
+}
+
+# pull_image SERVICE: docker compose pull with up to 3 attempts. containerd occasionally fails a layer commit ("lease does not exist",
+# "rename … no such file"); clearing stale partial downloads and retrying normally succeeds. Returns 1 if every attempt fails.
+pull_image() {
+  local attempt
+  for attempt in 1 2 3; do
+    docker compose pull "$1" </dev/null && return 0
+    [ "$attempt" = 3 ] && break
+    echo "pull of $1 failed (attempt $attempt), retrying…" >&2
+    docker image prune -f >/dev/null </dev/null || true
+    sleep $((attempt * 10))
+  done
+  echo "image pull of $1 failed after 3 attempts" >&2
+  return 1
 }
 
 # wait_healthy SERVICE: poll the container health check for up to ~90 s. Returns 1 on timeout and leaves the last status in
