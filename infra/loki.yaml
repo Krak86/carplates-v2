@@ -1,0 +1,53 @@
+# Loki, single binary, filesystem storage under /loki (bind mount ../lokidata). Internal network only: Vector pushes to :3100 and the
+# api queries it (apps/api/src/logs); nothing else can reach it, so auth is off. Design: docs/logs-plan.md. Pinned image: PLAN.md "Version pins".
+# Check this file without starting anything: docker run --rm -v ./infra/loki.yaml:/etc/loki/loki.yaml:ro grafana/loki:3.7.10 -config.file=/etc/loki/loki.yaml -verify-config
+auth_enabled: false
+
+server:
+  http_listen_port: 3100
+  grpc_listen_port: 9096
+  log_level: warn
+
+common:
+  instance_addr: 127.0.0.1
+  path_prefix: /loki
+  replication_factor: 1
+  ring:
+    kvstore:
+      store: inmemory
+  storage:
+    filesystem:
+      chunks_directory: /loki/chunks
+      rules_directory: /loki/rules
+
+schema_config:
+  configs:
+    - from: '2026-01-01'
+      store: tsdb
+      object_store: filesystem
+      schema: v13
+      index:
+        prefix: index_
+        period: 24h
+
+limits_config:
+  retention_period: 336h # 14 days searchable; the 90-day archive lives in B2
+  reject_old_samples: true
+  reject_old_samples_max_age: 168h # Vector replays the json-file backlog on its first start
+  ingestion_rate_mb: 4
+  ingestion_burst_size_mb: 8
+  max_label_names_per_series: 8 # we only send container + level
+  max_query_length: 48h
+  max_query_lookback: 336h
+  max_entries_limit_per_query: 1000
+  query_timeout: 30s
+
+compactor:
+  working_directory: /loki/compactor
+  retention_enabled: true # without this retention_period is never applied
+  retention_delete_delay: 2h
+  delete_request_store: filesystem
+  compaction_interval: 10m
+
+analytics:
+  reporting_enabled: false

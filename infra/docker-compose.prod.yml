@@ -1,14 +1,15 @@
 # Production stack. Lives on the VPS as /opt/carsua/compose/docker-compose.prod.yml (CI copies it on every api deploy;
 # paths below are relative to that folder). Only Caddy publishes ports; everything else is on the internal network.
 # Blue/green api: the deploy starts the idle colour with the new image, waits for /healthz, then stops the old one.
-# Colour tags come from /opt/carsua/compose/.env (written by the deploy): API_TAG_BLUE, API_TAG_GREEN, ALPR_TAG, INGEST_TAG, GH_OWNER, REDIS_UID.
+# Colour tags come from /opt/carsua/compose/.env (written by the deploy): API_TAG_BLUE, API_TAG_GREEN, ALPR_TAG, INGEST_TAG, GH_OWNER, REDIS_UID, LOKI_UID.
 # No `latest` fallback: compose needs every tag to parse the file, so lib.sh seeds a missing one with the placeholder `unset`
 # (never pulled by a deploy script: each pulls only the service whose tag it just set).
 name: carsua
 
 x-logging: &logging
   driver: json-file
-  options: { max-size: '10m', max-file: '5' }
+  # `tag` writes the container name into every json-file line (attrs.tag); Vector reads it as the `container` label (docs/logs-plan.md).
+  options: { max-size: '10m', max-file: '5', tag: '{{.Name}}' }
 
 x-api: &api
   restart: unless-stopped
@@ -136,6 +137,58 @@ services:
       retries: 10
     logging: *logging
 
+  # Log search for the /admin Logs tab (docs/logs-plan.md). Loki: single binary, internal network only (no `ports`, no auth: only the api
+  # and Vector can reach it), 14 days of masked lines. The image is distroless (no shell, no wget), so there is no container healthcheck;
+  # the api never waits for it (LOKI_URL down = the tab says "logs unavailable") and Vector buffers on disk while it is away.
+  # Runs as the deploy user (LOKI_UID seeded into .env by lib.sh) who owns ../lokidata.
+  loki:
+    image: grafana/loki:3.7.10 # exact pin (PLAN.md "Version pins"); bump on purpose
+    restart: unless-stopped
+    command: ['-config.file=/etc/loki/loki.yaml']
+    volumes:
+      - ./loki.yaml:/etc/loki/loki.yaml:ro
+      - ../lokidata:/loki
+    user: '${LOKI_UID:?LOKI_UID not set}:${LOKI_UID}'
+    read_only: true
+    tmpfs: ['/tmp']
+    stop_grace_period: 30s # flushes chunks on SIGTERM
+    mem_limit: 512m
+    cap_drop: [ALL]
+    security_opt: ['no-new-privileges:true']
+    logging: *logging
+
+  # Reads every container's Docker json-file log through a READ-ONLY bind mount (no Docker socket), masks plates / VINs / emails / IPs
+  # (infra/vector.yaml, same fixture as packages/shared/src/log-redact.ts), pushes to Loki and appends a daily gzip to ../logs
+  # (copied to Backblaze B2 by `backup.sh logs`). Root only to read Docker's root-owned files: every capability dropped (the owner
+  # permission bits suffice), read-only root filesystem, no-new-privileges. Its own logs are dropped (no feedback loop).
+  vector:
+    image: timberio/vector:0.62.0-alpine # exact pin (PLAN.md "Version pins"); bump on purpose
+    restart: unless-stopped
+    command: ['--config', '/etc/vector/vector.yaml']
+    environment:
+      VECTOR_LOG: warn
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - ./vector.yaml:/etc/vector/vector.yaml:ro
+      - ../logs:/logs
+      - vector_data:/var/lib/vector # file checkpoints + the Loki disk buffer
+    depends_on:
+      loki: { condition: service_started }
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://127.0.0.1:8686/health >/dev/null']
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    user: '0:0'
+    read_only: true
+    tmpfs: ['/tmp']
+    stop_grace_period: 30s # flushes the gzip archive
+    mem_limit: 256m
+    cap_drop: [ALL]
+    security_opt: ['no-new-privileges:true']
+    logging: *logging
+
 volumes:
   caddy_data:
   caddy_config:
+  vector_data:

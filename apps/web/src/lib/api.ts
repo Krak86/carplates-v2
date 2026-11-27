@@ -17,6 +17,8 @@ import {
   adminAnalyticsResponseSchema,
   adminCloudflareResponseSchema,
   adminLinksResponseSchema,
+  adminLogContainersResponseSchema,
+  adminLogsResponseSchema,
   adminServerResponseSchema,
   adminStatsResponseSchema,
   adminDigestStatusSchema,
@@ -137,6 +139,9 @@ import type {
   AdminAnalyticsResponse,
   AdminCloudflareResponse,
   AdminLinksResponse,
+  AdminLogContainersResponse,
+  AdminLogsQueryInput,
+  AdminLogsResponse,
   AdminServerResponse,
   AdminStatsResponse,
   AdminDigestStatus,
@@ -1092,6 +1097,20 @@ export async function getAdminLinks(): Promise<AdminLinksResponse> {
 
 export async function getAdminServer(): Promise<AdminServerResponse> {
   return adminServerResponseSchema.parse(await sendJson('GET', '/api/admin/server'))
+}
+
+/** Redacted container logs from Loki (`status` says whether the source is off or down; always HTTP 200). */
+export async function getAdminLogs(query: AdminLogsQueryInput): Promise<AdminLogsResponse> {
+  const params = new URLSearchParams()
+  for (const [key, value] of Object.entries(query)) {
+    if (value === undefined || value === '') continue
+    params.set(key, Array.isArray(value) ? value.join(',') : String(value))
+  }
+  return adminLogsResponseSchema.parse(await sendJson('GET', `/api/admin/logs?${params}`))
+}
+
+export async function getAdminLogContainers(): Promise<AdminLogContainersResponse> {
+  return adminLogContainersResponseSchema.parse(await sendJson('GET', '/api/admin/logs/containers'))
 }
 
 /** Pushes this device's favorites/history (tombstones included) and returns the merged server state. */

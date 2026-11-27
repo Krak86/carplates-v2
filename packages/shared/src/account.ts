@@ -246,6 +246,74 @@ export const adminServerResponseSchema = z.object({
 })
 export type AdminServerResponse = z.infer<typeof adminServerResponseSchema>
 
+/** Log levels of the Loki `level` label (Vector normalizes everything to these). */
+export const LOG_LEVELS = ['error', 'warn', 'info', 'debug'] as const
+export type LogLevel = (typeof LOG_LEVELS)[number]
+/** One query never spans more than this, and returns at most `LOG_MAX_LINES` lines (`docs/logs-plan.md`). */
+export const LOG_MAX_WINDOW_MS = 24 * 60 * 60_000
+export const LOG_MAX_LINES = 500
+export const DEFAULT_LOG_LINES = 200
+export const DEFAULT_LOG_WINDOW_MS = 60 * 60_000
+
+/** Docker container name, e.g. `carsua-api-blue-1`: only characters that are safe inside a LogQL label matcher. */
+export const logContainerSchema = z.string().regex(/^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$/)
+
+/**
+ * `GET /api/admin/logs` query. The client never sends LogQL: the api builds it from these fields. `level` is a comma list
+ * (`error,warn`); `from` / `to` default to the last hour and are clamped to `LOG_MAX_WINDOW_MS` server-side.
+ */
+export const adminLogsQuerySchema = z
+  .object({
+    container: logContainerSchema.optional(),
+    level: z
+      .string()
+      .transform(value => value.split(',').filter(Boolean))
+      .pipe(z.array(z.enum(LOG_LEVELS)).max(LOG_LEVELS.length))
+      .optional(),
+    /** Case-insensitive substring; plates / VINs / e-mails typed here are masked first, like the stored lines. */
+    q: z.string().trim().max(200).optional(),
+    from: z.iso.datetime({ offset: true }).optional(),
+    to: z.iso.datetime({ offset: true }).optional(),
+    limit: z.coerce.number().int().min(1).max(LOG_MAX_LINES).default(DEFAULT_LOG_LINES),
+    direction: z.enum(['backward', 'forward']).default('backward')
+  })
+  .refine(query => !query.from || !query.to || Date.parse(query.from) < Date.parse(query.to), {
+    message: 'from must be before to',
+    path: ['from']
+  })
+export type AdminLogsQuery = z.infer<typeof adminLogsQuerySchema>
+export type AdminLogsQueryInput = z.input<typeof adminLogsQuerySchema>
+
+/** `disabled` = no `LOKI_URL`; `unavailable` = Loki did not answer (the api itself keeps working). */
+export const LOGS_STATUSES = ['ok', 'disabled', 'unavailable'] as const
+
+export const adminLogLineSchema = z.object({
+  /** ISO time with milliseconds (the Docker time of the line). */
+  ts: z.string(),
+  container: z.string(),
+  level: z.enum(LOG_LEVELS),
+  /** Masked raw log text (Nest JSON in prod). */
+  message: z.string()
+})
+export type AdminLogLine = z.infer<typeof adminLogLineSchema>
+
+export const adminLogsResponseSchema = z.object({
+  status: z.enum(LOGS_STATUSES),
+  lines: z.array(adminLogLineSchema),
+  /** More lines matched than `limit`. */
+  truncated: z.boolean(),
+  /** The window actually queried after clamping. */
+  from: z.string(),
+  to: z.string()
+})
+export type AdminLogsResponse = z.infer<typeof adminLogsResponseSchema>
+
+export const adminLogContainersResponseSchema = z.object({
+  status: z.enum(LOGS_STATUSES),
+  containers: z.array(z.string())
+})
+export type AdminLogContainersResponse = z.infer<typeof adminLogContainersResponseSchema>
+
 /** PostHog numbers pulled server-side (HogQL). `configured: false` = no POSTHOG_PERSONAL_API_KEY / project id. */
 export const adminAnalyticsResponseSchema = z.object({
   configured: z.boolean(),

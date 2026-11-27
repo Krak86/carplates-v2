@@ -27,4 +27,8 @@ jobs:
       - run: pnpm format:check
         continue-on-error: true # advisory: docs-only formatting drift must not block the deploy chain
       - run: pnpm test
+      - name: Vector redaction (VRL must match the shared fixture, docs/logs-plan.md)
+        run: |
+          node infra/gen-vector-tests.mjs --check
+          docker run --rm -v "$PWD/infra:/etc/vector:ro" timberio/vector:0.62.0-alpine test /etc/vector/vector.yaml
       - run: pnpm audit --audit-level=high

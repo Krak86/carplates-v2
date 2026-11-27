@@ -5062,3 +5062,15 @@ Decisions: nothing was moved out of the existing workflows. Lint, type-check and
 ## Security wiki steps 5-6 - recognize upload checks and hostile-input tests (2026-11-26)
 
 `apps/api/src/recognize/read-upload.ts`: the single `image` field is required, the type comes from the magic bytes (`sniffImageMime`: JPEG, PNG, WebP; JPEG/WebP reuse `sniffShareFormat`), the client MIME type and filename are dropped (`UploadedImage` = buffer + mimetype). A rejected file is a 400 naming the format when it is recognisable (HEIC/HEIF, AVIF, GIF, BMP, TIFF). The services keep their own MIME allowlist (`ACCEPTED_MIME`, now exported from `read-upload.ts`) as defence in depth. 502 bodies of local ALPR, VIN OCR, Plate Recognizer, Pixabay and NHTSA (ratings, recalls, complaints, video) are fixed strings; the upstream message is logged with `Logger.warn`. Web: `recognize.badImage` (ua/ru/en) now says HEIC, GIF and AVIF do not work. Tests: `read-upload.test.ts`, hostile-path and escaping cases in `spa.controller.test.ts` and `meta.test.ts`. The `accept="image/*"` on the file inputs is unchanged (an explicit list would make iOS convert HEIC to JPEG, but needs a device check).
+
+## Admin logs - Vector + Loki + B2 archive (2026-11-26 to 2026-11-27)
+
+Redacted VPS container logs in a new `/admin?tab=logs` tab. Plan: `docs/logs-plan.md`; contract, redaction, URL params and live merge: `docs/features-reference.md` "Admin logs"; hardening: `docs/security-checklist.md` §4.
+
+1. **Redaction** (`packages/shared/src/log-redact.ts`, fixture-driven tests, `RedactingLogger` in the api): partial mask of plates, VINs, e-mails, IPs and tokens, idempotent.
+2. **Infra** (`infra/vector.yaml`, `infra/loki.yaml`, `vector` + `loki` services, `tag` in `x-logging`, pins): Vector reads the json-file logs without the Docker socket, redacts in VRL (same fixture via `gen-vector-tests.mjs` + `vector test` in CI), pushes to Loki (14 days) and writes `/opt/carsua/logs/YYYY-MM-DD.ndjson.gz`.
+3. **API** (`apps/api/src/logs/`): `GET /api/admin/logs` and `/containers`, LogQL built server-side from enums + an escaped literal, window <= 24 h, <= 500 lines, audit line per query, status `ok | disabled | unavailable`.
+4. **Web** (`routes/admin/logs/`): filters in URL params, 5 s live polling with merge, expandable lines, `admin.logs.*` keys, release v2.1531.
+5. **Deploy + archive** (2026-11-27): `backup.sh logs` (own `logs-archive.env`, `rclone copy --immutable` of yesterday's and older files to the B2 bucket, local files older than 3 days deleted, skipped with a warning when the env file is missing, own `HC_PING_LOGS` ping), cron at 03:50 in `bootstrap.sh`; `deploy-api.sh` brings up `loki vector` and `deploy-api.yml` rsyncs `vector.yaml` / `loki.yaml` and writes `LOKI_URL=http://loki:3100`.
+
+Decisions: UI only in `/admin` (no Grafana), polling instead of a websocket, B2 not R2 (R2's 10 GB is already used by backups and shared photos), write-only archive key so a compromised VPS cannot read or delete the archive, no Prometheus. Owner steps (bucket, key, env file, deploy, verification) are under "After deploy" in `PLAN.md`.

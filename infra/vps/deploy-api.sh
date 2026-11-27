@@ -25,7 +25,7 @@ for attempt in 1 2 3; do
 done
 
 # Stateful services first (no-ops when already up). `up -d` never recreates them unless their definition changed.
-docker compose up -d postgres redis alpr caddy
+docker compose up -d postgres redis alpr caddy loki vector
 # The api does not depend on Redis (it throttles per process without it), but start counting shared from the first request.
 wait_healthy redis || echo "warn: redis is $HEALTH_STATUS, the new api throttles per process until it is up" >&2
 

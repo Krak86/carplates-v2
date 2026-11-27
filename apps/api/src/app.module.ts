@@ -50,6 +50,7 @@ import { SafetyModule } from './safety/safety.module.js'
 import { SearchModule } from './search/search.module.js'
 import { SpaModule } from './spa/spa.module.js'
 import { StatsModule } from './stats/stats.module.js'
+import { LogsModule } from './logs/logs.module.js'
 import { UsageModule } from './usage/usage.module.js'
 import { BrandsModule } from './brands/brands.module.js'
 import { CatalogModule } from './catalog/catalog.module.js'
@@ -77,6 +78,7 @@ import { WikispecsModule } from './wikispecs/wikispecs.module.js'
     SharesModule,
     SyncModule,
     SettingsModule,
+    LogsModule,
     UsageModule,
     PlateModule,
     CardModule,
