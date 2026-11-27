@@ -159,8 +159,9 @@ services:
 
   # Reads every container's Docker json-file log through a READ-ONLY bind mount (no Docker socket), masks plates / VINs / emails / IPs
   # (infra/vector.yaml, same fixture as packages/shared/src/log-redact.ts), pushes to Loki and appends a daily gzip to ../logs
-  # (copied to Backblaze B2 by `backup.sh logs`). Root only to read Docker's root-owned files: every capability dropped (the owner
-  # permission bits suffice), read-only root filesystem, no-new-privileges. Its own logs are dropped (no feedback loop).
+  # (copied to Backblaze B2 by `backup.sh logs`). Root only to read Docker's root-owned files: every capability dropped except
+  # DAC_OVERRIDE (root without it cannot write the deploy-owned ../logs: "Permission denied" on the archive sink, seen 2026-11-27),
+  # read-only root filesystem, no-new-privileges. Its own logs are dropped (no feedback loop).
   vector:
     image: timberio/vector:0.62.0-alpine # exact pin (PLAN.md "Version pins"); bump on purpose
     restart: unless-stopped
@@ -185,6 +186,7 @@ services:
     stop_grace_period: 30s # flushes the gzip archive
     mem_limit: 256m
     cap_drop: [ALL]
+    cap_add: [DAC_OVERRIDE]
     security_opt: ['no-new-privileges:true']
     logging: *logging
 

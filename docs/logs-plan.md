@@ -21,7 +21,7 @@ containers ──json-file (tag = container name)──▶ /var/lib/docker/conta
 browser /admin?tab=logs ──▶ api GET /api/admin/logs (AdminGuard, Zod) ──LogQL built server-side──▶ loki
 ```
 
-How Vector reads: Docker already writes each container's stdout/stderr to `/var/lib/docker/containers/<id>/<id>-json.log` (one JSON line: `log`, `stream`, `time`, `attrs.tag`). Vector mounts that folder read-only, follows the files like `tail -F` (checkpoints in its own volume, so no duplicates on restart; handles the 10m × 5 rotation), parses and masks each line, then pushes to Loki and appends to the daily gz file. It runs as uid 0 only to read Docker's root-owned files, with every capability dropped, a read-only root filesystem and `no-new-privileges`.
+How Vector reads: Docker already writes each container's stdout/stderr to `/var/lib/docker/containers/<id>/<id>-json.log` (one JSON line: `log`, `stream`, `time`, `attrs.tag`). Vector mounts that folder read-only, follows the files like `tail -F` (checkpoints in its own volume, so no duplicates on restart; handles the 10m × 5 rotation), parses and masks each line, then pushes to Loki and appends to the daily gz file. It runs as uid 0 only to read Docker's root-owned files, with every capability dropped except `DAC_OVERRIDE` (to write the deploy-owned archive directory), a read-only root filesystem and `no-new-privileges`.
 
 B2 confirmed over Oracle/GCS/AWS/Azure (permanent 10 GB, EU region, write-only scoped key, lifecycle rules).
 
