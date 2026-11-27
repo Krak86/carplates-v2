@@ -1,6 +1,6 @@
 # API image. Build context = repo root:  docker build -f apps/api/Dockerfile .
 # Serves /api, per-plate <meta> and the SPA from WEB_DIST_DIR (bind-mounted by compose, not baked in).
-FROM node:24-slim AS build
+FROM node:24-slim@sha256:873f586f3794f52281bd039bf02c048a0be08fde619338f9941bad1eb6b34530 AS build
 ENV PNPM_HOME=/pnpm PATH=/pnpm:$PATH
 RUN corepack enable
 WORKDIR /repo
@@ -23,7 +23,7 @@ RUN pnpm --filter @carplates/api deploy --prod --legacy /deployed \
   && cp -r apps/api/dist /deployed/dist \
   && cp -r /deployed /out && rm -rf /deployed
 
-FROM node:24-slim
+FROM node:24-slim@sha256:873f586f3794f52281bd039bf02c048a0be08fde619338f9941bad1eb6b34530
 ENV NODE_ENV=production PORT=3000
 # npm/npx/corepack are not used at runtime (CMD and HEALTHCHECK are plain node); their bundled deps only add trivy findings.
 RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack

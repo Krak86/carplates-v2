@@ -345,29 +345,32 @@ done: 1-9, 11, 21-23, 30, 33. Remaining, in order:
 
 ### D. Containers and edge
 
-### Step 13 - Network segmentation [ ] · M · 🤖 · layer 6
+### Step 13 - Network segmentation [x] · M · 🤖 · layer 6
 
 - **What:** no `networks:` block today, so alpr (parses untrusted images) can reach Postgres and Redis. Add `edge` (caddy, api), `backend` (api, postgres, redis, ingest), `alpr_net` (api, alpr, `internal: true`).
 - **Files:** `infra/docker-compose.prod.yml`, `docs/deploy.md`.
 - **Why:** CWE-923 lateral movement.
 - **Alternatives:** separate compose projects (more deploy complexity).
 - **Verify:** `docker compose exec alpr nc -z postgres 5432` fails; `/healthz` and plate lookup work; blue/green still switches.
+- **Done 2026-11-27 (code; deploy checks open in PLAN.md):** top-level `networks:` `edge` (caddy, api), `backend` (api, postgres, redis, ingest, loki, vector), `alpr_net` (`internal: true`: api, alpr). Loki and Vector sit on `backend` too (the api queries Loki). The implicit `default` network is gone, so the load-test recipe in `docs/deploy.md` now uses `carsua_backend`.
 
-### Step 14 - Harden Caddy and Postgres containers [ ] · M · 🤖 · layer 6
+### Step 14 - Harden Caddy and Postgres containers [x] · M · 🤖 · layer 6
 
 - **What:** Caddy and Postgres lack `cap_drop`, `no-new-privileges`, memory limits; nothing sets `pids_limit`; api is not `read_only`. Caddy: `cap_drop: [ALL]` + `NET_BIND_SERVICE`. Postgres: drop all, add back `CHOWN`, `SETUID`, `SETGID`, `FOWNER`, `DAC_READ_SEARCH`. api: `read_only` + tmpfs `/tmp`.
 - **Files:** `infra/docker-compose.prod.yml`.
 - **Why:** Kinsing cryptominer campaigns (binary drops), CWE-400 (fork bombs).
 - **Alternatives:** rootless Docker (strongest; networking and port 443 friction).
 - **Verify:** `docker compose config -q`; stack boots and passes healthchecks; `docker-bench-security` before and after.
+- **Done 2026-11-27 (code):** every service now has `pids_limit` (caddy/api 512, postgres 1024, rest 256) and `no-new-privileges` + `cap_drop: [ALL]`. Caddy keeps `NET_BIND_SERVICE`, Postgres `CHOWN SETUID SETGID FOWNER DAC_READ_SEARCH`, api is `read_only` with tmpfs `/tmp` (the only runtime write path is the safety-video cache under `os.tmpdir()`). New `mem_limit`: caddy 512m, postgres 6g (shared_buffers 2 GB + 1 GB shm + 1 GB maintenance_work_mem; page cache is reclaimable). **Risk:** the capability sets and limits were validated with `docker compose config` only, not on the VPS; if Postgres fails to start, check `docker compose logs postgres` for `Operation not permitted` and add `DAC_OVERRIDE`.
 
-### Step 15 - Pin image digests, hide the Redis password [ ] · S-M · 🤖 · layer 6, 9
+### Step 15 - Pin image digests, hide the Redis password [x] · S-M · 🤖 · layer 6, 9
 
 - **What:** base images are floating tags (`node:24-slim`, `python:3.12-slim`) and compose images are exact tags, none by digest. The Redis password is on a `sh -c` command line (`compose:93`). Pin digests (Dependabot bumps them); read the Redis password from a mounted file.
 - **Files:** `apps/api/Dockerfile`, `scripts/Dockerfile`, `services/alpr/Dockerfile`, `docker-compose.prod.yml`.
 - **Why:** CWE-494, tag mutability.
 - **Alternatives:** exact tags only (readable; a tag can be repointed) · Compose `secrets:` for all secrets (hidden from `docker inspect`; app must read `*_FILE`).
 - **Verify:** `docker inspect` does not show the Redis password; images build; Dependabot opens a digest PR.
+- **Done 2026-11-27 (code):** `tag@sha256:<index digest>` on all three Dockerfile bases and on caddy, redis, postgres, loki, vector (digests read with `docker buildx imagetools inspect`, multi-arch index). Dependabot: the `docker` entry already covers the Dockerfile folders; the existing `docker-compose` entry on `/infra` bumps tag and digest of the compose images. Redis: `deploy-api.yml` writes `env/redis.conf` (`requirepass <pw>`, mode 600) instead of `env/redis.env`; Redis starts as plain `redis-server /etc/redis/redis.conf ...` (no `sh -c`), the healthcheck reads the password from the file. **Not done:** the api still gets `REDIS_URL` with the password in `api.env`, so it stays visible in the api container env (Compose `secrets:` + `*_FILE` support would be a later step); Postgres and ALPR secrets are unchanged. A stale `env/redis.env` on the VPS can be deleted after the deploy.
 
 ### Step 16 - Caddyfile hardening [ ] · S · 🤖 · layer 7
 
