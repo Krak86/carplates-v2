@@ -1,6 +1,6 @@
 # Admin "Logs" tab: redacted VPS container logs (Vector + Loki + Backblaze B2 archive)
 
-Status: planned 2026-11-26, steps 1 (shared redaction + RedactingLogger) and 2 (infra files) built 2026-11-26, step 3 (api) 2026-11-27, steps 4-5 not yet. Backlog boxes: `PLAN.md` "Admin logs (Vector + Loki + B2 archive)".
+Status: planned 2026-11-26, steps 1 (shared redaction + RedactingLogger) and 2 (infra files) built 2026-11-26, step 3 (api) and step 4 (web tab, `apps/web/src/routes/admin/logs/`) 2026-11-27, step 5 (backup/deploy/docs) not yet. Backlog boxes: `PLAN.md` "Admin logs (Vector + Loki + B2 archive)".
 
 ## Context
 

@@ -2,6 +2,7 @@ import { infiniteQueryOptions, keepPreviousData, queryOptions } from '@tanstack/
 import type { QueryClient, QueryKey } from '@tanstack/react-query'
 import { normalizePlate } from '@carplates/shared'
 import type {
+  AdminLogsQueryInput,
   AuctionListQuery,
   CardBundleResponse,
   LossCategory,
@@ -36,6 +37,8 @@ import {
   getCatalogModel,
   getCatalogYears,
   getAdminLinks,
+  getAdminLogContainers,
+  getAdminLogs,
   getAdminServer,
   getAdminStats,
   getAdminDigest,
@@ -952,6 +955,25 @@ export function adminServerQuery() {
     staleTime: 15_000,
     refetchInterval: 30_000
   })
+}
+
+/** Not offline-cached. `windowMs` = "the last N ms" resolved at fetch time, so the key stays stable between polls. */
+export type AdminLogsParams = AdminLogsQueryInput & { windowMs?: number }
+
+export function adminLogsRequest({ windowMs, ...query }: AdminLogsParams): AdminLogsQueryInput {
+  return windowMs ? { ...query, from: new Date(Date.now() - windowMs).toISOString() } : query
+}
+
+export function adminLogsQuery(params: AdminLogsParams) {
+  return queryOptions({
+    queryKey: ['admin', 'logs', params],
+    queryFn: () => getAdminLogs(adminLogsRequest(params)),
+    staleTime: 0
+  })
+}
+
+export function adminLogContainersQuery() {
+  return queryOptions({ queryKey: ['admin', 'log-containers'], queryFn: getAdminLogContainers, staleTime: 60_000 })
 }
 
 export function adminCloudflareQuery() {

@@ -7,11 +7,12 @@ import { useSession } from '@/components/auth/use-session'
 import Spinner from '@/components/ui/Spinner'
 import { cn } from '@/lib/cn'
 import AdminLinksTab from '@/routes/admin/AdminLinksTab'
+import AdminLogsTab from '@/routes/admin/logs/AdminLogsTab'
 import AdminServerTab from '@/routes/admin/AdminServerTab'
 import AdminStatsTab from '@/routes/admin/AdminStatsTab'
 import AdminUsersTab from '@/routes/admin/AdminUsersTab'
 
-const ADMIN_TABS = ['users', 'stats', 'server', 'links'] as const
+const ADMIN_TABS = ['users', 'stats', 'server', 'logs', 'links'] as const
 type AdminTab = (typeof ADMIN_TABS)[number]
 const DEFAULT_TAB: AdminTab = 'users'
 
@@ -60,6 +61,7 @@ export default function AdminRoute(): ReactNode {
         {tab === 'users' && <AdminUsersTab />}
         {tab === 'stats' && <AdminStatsTab />}
         {tab === 'server' && <AdminServerTab />}
+        {tab === 'logs' && <AdminLogsTab />}
         {tab === 'links' && <AdminLinksTab />}
       </div>
     </div>

@@ -4,6 +4,18 @@ import type { ReleaseDay } from './core.js'
 /** 2026-11: newest day first. */
 export const DAYS: readonly ReleaseDay[] = [
   {
+    date: '2026-11-27',
+    version: 'v2.1531',
+    items: [
+      item(
+        'improved',
+        "В адмінці з'явилась вкладка «Логи»: пошук і фільтри за контейнером, рівнем і часом, режим «Наживо»; номери, VIN, e-mail та IP у логах частково замасковані",
+        'В админке появилась вкладка «Логи»: поиск и фильтры по контейнеру, уровню и времени, режим «Вживую»; номера, VIN, e-mail и IP в логах частично замаскированы',
+        'The admin page has a new "Logs" tab: search and filters by container, level and time, a "Live" mode; plates, VINs, e-mails and IPs in the logs are partly masked'
+      )
+    ]
+  },
+  {
     date: '2026-11-26',
     version: 'v2.1526',
     items: [
