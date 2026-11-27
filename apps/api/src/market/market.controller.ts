@@ -6,6 +6,7 @@ import type { MarketDetail, MarketResponse } from '@carplates/shared'
 
 import { MARKET_THROTTLE } from '../common/throttle.js'
 import { zodParam } from '../common/zod-param.pipe.js'
+import { isListingUrl } from './carapis-parse.js'
 import { MarketService } from './market.service.js'
 
 /**
@@ -29,7 +30,7 @@ export class MarketController {
   @Redirect()
   async go(@Param('id', zodParam(marketIdSchema)) id: string): Promise<{ url: string; statusCode: number }> {
     const url = await this.market.listingUrl(id)
-    if (!url) throw new HttpException('No link', HttpStatus.NO_CONTENT)
+    if (!isListingUrl(url)) throw new HttpException('No link', HttpStatus.NO_CONTENT)
     return { url, statusCode: HttpStatus.FOUND }
   }
 

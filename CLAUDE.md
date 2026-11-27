@@ -28,16 +28,16 @@ Version pins (PLAN.md "Version pins"): never use `latest`.
   don't — new fields there are `.nullable().optional()`. A new offline-capable `/api/*` query goes into `lib/offline-cache.ts`.
 - **NestJS**: Zod-validated inputs, no logic in controllers, never `@Res()` (except SPA catch-all). Link previews
   come from the API, never Vite.
-- **i18n: per-language, per-slice lazy packs** (`i18n/packs.ts`; read `docs/features-reference.md` "Language dictionaries" before touching it). Rules: a pack's prefix may only be used by its `owners` (shared users' keys go in its `keep`, staying core; `packs.test.ts`); routes load packs via `lazyWithPacks`; a language with gaps needs a `DELTAS` entry; tests `await i18nReady`, never `import '@/i18n'`.
+- **i18n: per-language lazy packs** (`i18n/packs.ts`; read `docs/features-reference.md` "Language dictionaries" first; `packs.test.ts` enforces pack `owners`/`keep`). Routes load packs via `lazyWithPacks`; a language with gaps needs a `DELTAS` entry; tests `await i18nReady`, never `import '@/i18n'`.
 - **Zod `jitless`**: `@/lib/zod-config` stays the first import of `main.tsx`; `vendor-zod` / `zod-config` stay separate chunks (else CSP `eval`).
 - **Checklists** (`docs/checklists.md`, read the item first): new `/api/*` endpoint, `LazySection`s, deploy, new public route, docs after a feature, app version.
 
 ## Workflow
 
-- **Open to-dos / "what is left after deploy":** `grep -n "\[ \]" PLAN.md` (`⏳` = blocked). A feature needing a VPS step or prod check adds its boxes under "After deploy".
+- **Open to-dos:** `grep -n "[ ]" PLAN.md` (`⏳` = blocked); a VPS step or prod check adds its boxes under "After deploy".
 - After a big update suggest a commit message (subject + bullet per change; **no `Co-Authored-By` / agent attribution line**). Never `git commit` / `git push` unless asked.
 - Seed CSVs mirror scraped tables: after changing one, re-run its `pnpm export:*:csv`.
-- `pnpm format` first (not `scripts/src/fixtures`). Tests: Vitest, colocated `*.test.ts(x)`.
-- Any web app change: bump the day's `version` in `packages/shared/src/releases/<yyyy-mm>.ts`; docs after a feature: both in `docs/checklists.md`.
+- `pnpm format` first (not `scripts/src/fixtures`). Tests: colocated `*.test.ts(x)`.
+- Web app change ⇒ bump the day's release `version`; docs after a feature: both in `docs/checklists.md`.
 
 @CLAUDE_RULES.md

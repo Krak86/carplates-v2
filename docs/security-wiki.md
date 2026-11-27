@@ -22,7 +22,7 @@ Legend: ✅ done · ❌ open (step #) · 🔍 verify · 🤖 code/config (diff s
 | 8   | API (NestJS)         | D27-D40, D57-D58 | 7-10           |
 | 9   | Postgres and Redis   | D41-D44          | 12, 15, 20     |
 | 10  | ALPR (Python)        | D45, D51         | -              |
-| 11  | Supply chain and CI  | D46-D49, D52-D55 | 24, 26, 30     |
+| 11  | Supply chain and CI  | D46-D49, D52-D55 | 24, 26         |
 | 12  | Accounts and people  | D50              | 32             |
 
 ## 2. Twelve-Factor and security
@@ -176,9 +176,11 @@ Open: CORP, Server header, admin off, body limit, access log → 16; HSTS flags 
 | D39 | Share uploads: magic bytes, EXIF stripped, sharp pixel limit                                                                                                                                           | `shares/helpers.ts:20-36`                                            | CVE-2023-4863, CVE-2016-3714                                     |
 | D40 | `fastify` 5.12.7 / `@nestjs/platform-fastify` 11.2.7 via `pnpm.overrides` (finding #1, fixed 2026-10-13)                                                                                               | `pnpm-workspace.yaml:29-35`                                          | Known high advisories                                            |
 | D58 | Recognize uploads: `image` field required, magic-byte type check (JPEG/PNG/WebP), client filename and MIME dropped, generic 502 bodies on ALPR, VIN OCR, Plate Recognizer, Pixabay and NHTSA           | `apps/api/src/recognize/read-upload.ts`                              |
+| D59 | `fetchJson`: timeout over the whole exchange, byte cap, Zod parse; used by VIN decode, photos, safety ratings, Turnstile                                                                               | `common/fetch-json.ts`                                               | CWE-400, CWE-770, CWE-20                                         |
+| D60 | Own throttle on `/api/photos` and `/api/safety/video`; `/api/market/go/:id` redirects only to listed source domains                                                                                    | `common/throttle.ts`, `market/carapis-parse.ts`                      | CWE-770, CWE-601                                                 |
 | D57 | Sentry `beforeSend`/`beforeSendTransaction` drop body, query, cookies, Cookie/Authorization headers; plate, VIN, card and share paths, Referer, transaction and breadcrumb URLs become route templates | `apps/api/src/sentry-scrub.ts`, `instrument.ts`                      | CWE-532                                                          |
 
-Open: 5-10.
+Open: 10.
 
 ### Layer 9 - Postgres and Redis
 
@@ -225,8 +227,14 @@ Branch protection on `main` is a ruleset since 2026-11-26. The `production` envi
 
 ## 5. Steps (open items)
 
-Tick the box and add a `docs/plan-done.md` entry when a step is finished. "Verify" is the concrete check. Suggested order:
-**1-4 → 21-22 → 23 → 5-6 → 11 → 13-15 → 7-10 → 16-18 → 19-20 → 25 → 24 → 26 → 27-30 → 12 → 31**; step 32 runs in parallel at any time.
+Tick the box and add a `docs/plan-done.md` entry when a step is finished. "Verify" is the concrete check. Order (updated 2026-11-27; `+` = do in one PR or one deploy, `∥` = runs in parallel):
+done: 1-9, 11, 21-23, 30, 33. Remaining, in order:
+
+1. **Step 32 leftovers (H7 origin IP, H11 SSH, optional terraforming)** ∥ everything below; owner-only, no code.
+2. **13 + 14 + 15**, then **16 + 17 + 18**: all infra config, one compose and Caddy deploy (13-15 touch `docker-compose.prod.yml`, 16-18 touch the Caddyfile). 17 needs a subdomain HTTPS check first.
+3. **10**, then **19 + 20**: 10 is small API code; 19 and 20 are VPS work. **20 (backups) must be done before 12.**
+4. **25 → 24 → 26**, then **27 + 28** (same ESLint and iframe pass), **29**. 25 gives the lynis baseline that 19 is verified against, so run it right after 19 on the VPS.
+5. **12 (L)** last among the risky ones: role changes can break the app, so it needs the step 20 backup and a restore drill. **31** after that (needs a clean week of reports).
 
 ### A. Privacy and fail-closed config
 
@@ -281,29 +289,32 @@ Tick the box and add a `docs/plan-done.md` entry when a step is finished. "Verif
 - **Verify:** tests pass, and fail when the escaping is removed.
 - **Done 2026-11-26:** `meta.test.ts` (markup, quotes and `&` in title, description, image, og:url) and `spa.controller.test.ts` "hostile paths" (nine traversal variants: plain, encoded, double-encoded, backslash, NUL; malformed %-escapes are never 5xx; a `<script>` plate is not reflected). Checked by replacing `esc` with the identity: 4 tests fail.
 
-### Step 7 - `fetchJson` helper (timeout, byte cap, Zod) [ ] · M · 🤖 · layer 8
+### Step 7 - `fetchJson` helper (timeout, byte cap, Zod) [x] · M · 🤖 · layer 8
 
 - **What:** one helper `fetchJson(url, schema, { timeoutMs, maxBytes })`. Today `vin/vin.service.ts:44` has no timeout, nothing caps response size (checklist rule 3), and recognize, `photos.service.ts:57`, `safety.service.ts:139`, `turnstile.ts:26` use plain `as` casts.
 - **Files:** new `apps/api/src/common/fetch-json.ts`; migrate the callers above (cloud recognize is skipped).
 - **Why:** CWE-400, CWE-770, CWE-20.
 - **Alternatives:** `ky` or `got` with hooks (battle-tested; new dependency, Zod still manual) · undici `Agent` limits (no schema validation).
 - **Verify:** tests: timeout, oversize body, schema failure each reject; existing service tests green.
+- **Done 2026-11-27:** `common/fetch-json.ts` `fetchJson(url, schema, { timeoutMs, maxBytes, init })`: one `AbortSignal.timeout` over the connection and the body read, a `Content-Length` pre-check plus a streamed byte count (the reader is cancelled at the cap), JSON parse, `schema.safeParse`. It throws `FetchJsonError` (`kind`: network, timeout, status, too-large, invalid-json, schema; `status` for a non-ok answer) whose message never carries response content. Migrated: `vin.service` (NHTSA decode, which had no timeout at all; a failure still falls back to the registry rows), `photos.service` (a 429 still maps to 503), `safety.service` (the hand-written `interface`s became Zod schemas), `turnstile` (still fails closed). 2 MiB default cap (`DEFAULT_JSON_MAX_BYTES`), 64 KiB for Turnstile. **Not migrated:** cloud recognize (as planned), and the other `fetch` callers (`fx`, `losses`, `stocks`, `ria`, `nhtsa.service`, `carapis.provider`, `ukrainealarm`, `logs`, `mail`, `usage/*`, `safety-video` file download): they are outside this step's list; the video download still reads the whole body into memory with only a 30 s timeout (its URL is pinned to one NHTSA path pattern).
 
-### Step 8 - Throttle the expensive routes [ ] · S · 🤖 · layer 8
+### Step 8 - Throttle the expensive routes [x] · S · 🤖 · layer 8
 
 - **What:** `safety/video` (downloads a file and runs ffmpeg) and `photos` (spends Pixabay quota) only have the global limit. Add `@Throttle` values in `common/throttle.ts`.
 - **Files:** `safety/safety.controller.ts:118`, `photos` controller, `common/throttle.ts`.
 - **Why:** CVE-2016-1897/1898 show the ffmpeg attack surface; CWE-770.
 - **Alternatives:** Cloudflare WAF rate rule (blocks at the edge; free plan has few rules).
 - **Verify:** throttle test; follow the checklist "new `/api/*` endpoint" item.
+- **Done 2026-11-27:** `PHOTOS_THROTTLE` (30/min per IP) on `GET /api/photos`; `SAFETY_VIDEO_THROTTLE` (6/min and 60/h per IP) on `GET /api/safety/video`. `throttle.test.ts` reads the decorator metadata off both handlers. A cached clip still counts against the cap (the throttler runs before the cache lookup).
 
-### Step 9 - Host allowlist on the `/go/:id` redirect [ ] · S · 🤖 · layer 8 (bundle with step 8)
+### Step 9 - Host allowlist on the `/go/:id` redirect [x] · S · 🤖 · layer 8 (bundle with step 8)
 
 - **What:** the redirect only checks `https:`. Add an allowlist of upstream hosts.
 - **Files:** `apps/api/src/market/carapis-parse.ts:73,145`, `market.controller.ts:26-33`.
 - **Why:** CWE-601 (open redirect).
 - **Alternatives:** interstitial "leaving carsua.app" page (visible to users; extra click).
 - **Verify:** test: an off-list host is refused.
+- **Done 2026-11-27:** `LISTING_HOSTS` and `isListingUrl` in `market/carapis-parse.ts`; `GET /api/market/go/:id` answers 204 (the web falls back to a search link) unless the stored URL is https, has no credentials and its host is a listed domain or a subdomain of one (`evilauto.ria.com`, `auto.ria.com.evil.example` and `auto.ria.com@evil.example` are refused). The check runs at redirect time, so URLs already stored in the Postgres cache are covered. The list is built from the 17 source names in `MARKET_SOURCE_NAMES` and is **a best guess of each source's domain, not verified against live CarAPIS answers** (only `auto.ria.com` was in the fixtures): after deploy, open the listing link of one card per source and add any domain that answers 204.
 
 ### Step 10 - Origin fallback headers [ ] · S · 🤖 · layer 8
 
@@ -322,7 +333,7 @@ Tick the box and add a `docs/plan-done.md` entry when a step is finished. "Verif
 - **Why:** CWE-400.
 - **Alternatives:** `ALTER ROLE ... SET statement_timeout` after step 12 (enforced server-side; needs roles first) · PgBouncer (rejected in origin-hardening §5).
 - **Verify:** test: `SELECT pg_sleep(60)` is cancelled; ingest still completes.
-- **Done 2026-11-27:** `createDb(url, limits?)` takes `DbLimits` (`max`, connect and idle timeouts, `statement_timeout`, `idle_in_transaction_session_timeout`, `lock_timeout` via the libpq `options` string; `buildPgOptions` is unit-tested). Limits are **opt-in per caller**: only the API (`DbService`) passes them, from env `DB_POOL_MAX` 10, `DB_CONNECT_TIMEOUT_MS` 5000, `DB_IDLE_TIMEOUT_MS` 30000, `DB_STATEMENT_TIMEOUT_MS` 15000, `DB_IDLE_IN_TX_TIMEOUT_MS` 30000, `DB_LOCK_TIMEOUT_MS` 5000 (0 disables a timeout). Ingest and scripts call `createDb()` with no limits, so long `COPY`/`REFRESH` statements are unaffected and need no env override. Still to check after deploy: `SELECT pg_sleep(60)` through the API pool is cancelled, and no real endpoint (stats, search, sync) hits 15 s.
+- **Done 2026-11-27:** `createDb(url, limits?)` takes `DbLimits` (`max`, connect and idle timeouts, `statement_timeout`, `idle_in_transaction_session_timeout`, `lock_timeout` via the libpq `options` string; `buildPgOptions` is unit-tested). Limits are **opt-in per caller**: only the API (`DbService`) passes them, from env `DB_POOL_MAX` 10, `DB_CONNECT_TIMEOUT_MS` 5000, `DB_IDLE_TIMEOUT_MS` 30000, `DB_STATEMENT_TIMEOUT_MS` 30000, `DB_IDLE_IN_TX_TIMEOUT_MS` 30000, `DB_LOCK_TIMEOUT_MS` 5000 (0 disables a timeout). Ingest and scripts call `createDb()` with no limits, so long `COPY`/`REFRESH` statements are unaffected and need no env override. **Statement timeout is 30 s, not the 15 s in "What":** on 2026-11-27 a cold-cache advanced search (`oper=215`, with and without `color`) took 8 s and 12 s in the browser; the same query is 25-70 ms warm (`EXPLAIN`: index scan, ~28k scattered pages of a 5.9 GB heap, 241-byte rows). The cold reads happen right after an ingest refresh rewrites `current_registration`. `pg_prewarm` was rejected: the heap is 5.9 GB of 11 GiB RAM shared with a 23 GB database, so it would evict everything else. Still to check after deploy: `SELECT pg_sleep(60)` through the API pool is cancelled, and no real endpoint hits 30 s.
 
 ### Step 12 - Least-privilege roles [ ] · L · 🤖👤 · layer 9
 
@@ -570,10 +581,10 @@ Existing: `origin.guard`, `caddyfile-headers`, `csp.controller`, `throttle`, `th
 | 4     | pytest: ALPR exits without a key, `/docs` is 404              |
 | 5     | recognize rejects wrong magic bytes, 502 body is generic      |
 | 6     | hostile-plate meta escaping, SPA path traversal               |
-| 7     | `fetchJson` timeout, byte cap, schema failure                 |
-| 8-9   | throttle decorators present, redirect allowlist               |
+| 7     | `fetchJson` timeout, byte cap, schema failure (done)          |
+| 8-9   | throttle decorators present, redirect allowlist (done)        |
 | 10    | fallback headers only when absent                             |
-| 11    | pool options                                                  |
+| 11    | pool options (`client.test.ts`, done)                         |
 | 12    | integration: app role cannot `DROP` or `TRUNCATE`             |
 | 16-17 | extended `caddyfile-headers` assertions                       |
 | 27    | the lint run itself                                           |

@@ -3,18 +3,20 @@ import { registrations } from '@carplates/db'
 import { isVin } from '@carplates/shared'
 import type { VinDecodeResponse, VinRegistry } from '@carplates/shared'
 import { and, desc, eq, inArray, isNull } from 'drizzle-orm'
+import { z } from 'zod'
 
+import { DEFAULT_JSON_MAX_BYTES, fetchJson } from '../common/fetch-json.js'
 import { DbService } from '../db/db.service.js'
 import { loadEnv } from '../env.js'
 import { MissedService } from '../missed/missed.service.js'
 import { toRegistrationDto } from '../plate/plate.dto.js'
 
-interface NhtsaResult {
-  Variable?: string
-  Value?: string | null
-}
+const nhtsaDecodeSchema = z.object({
+  Results: z.array(z.object({ Variable: z.string().nullish(), Value: z.string().nullish() })).optional()
+})
 
 const CACHE_MAX = 500
+const UPSTREAM_TIMEOUT_MS = 10_000
 
 @Injectable()
 export class VinService {
@@ -39,11 +41,12 @@ export class VinService {
     if (cached) return { ...cached, registry }
 
     const url = `${this.base}/decodevin/${encodeURIComponent(vin)}?format=json`
-    let payload: { Results?: NhtsaResult[] }
+    let payload: z.infer<typeof nhtsaDecodeSchema>
     try {
-      const res = await fetch(url)
-      if (!res.ok) throw new Error(`status ${res.status}`)
-      payload = (await res.json()) as { Results?: NhtsaResult[] }
+      payload = await fetchJson(url, nhtsaDecodeSchema, {
+        timeoutMs: UPSTREAM_TIMEOUT_MS,
+        maxBytes: DEFAULT_JSON_MAX_BYTES
+      })
     } catch (err) {
       // NHTSA down but our own registry knows the car: answer with the registry rows (not cached, so the decode returns later).
       if (registry) return { vin, results: [], registry }

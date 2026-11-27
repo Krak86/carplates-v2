@@ -5080,3 +5080,9 @@ Decisions: UI only in `/admin` (no Grafana), polling instead of a websocket, B2 
 ## Admin Dashboards: Backblaze B2 link, About security text (2026-11-27)
 
 `ADMIN_LINKS` (`apps/api/src/features/admin-links.ts`) gained "Backblaze B2 - logs archive bucket" (`secure.backblaze.com/b2_buckets.htm`; the bucket is `carsua-logs`). The About `about.feature.security` entry (ua/ru/en) now mentions security.txt, private vulnerability reporting and the partial masking of personal data in logs; release v2.1538. No new data source: B2 is infrastructure, not shown under About sources.
+
+## Security wiki steps 7-9: fetchJson, route throttles, redirect allowlist (2026-11-27)
+
+API-only hardening, no user-visible change. `common/fetch-json.ts` is the one helper for reading upstream JSON (timeout over connect and body, byte cap, Zod parse, `FetchJsonError`); VIN decode, photos, safety ratings and Turnstile use it. `/api/photos` and `/api/safety/video` got their own throttles (`PHOTOS_THROTTLE`, `SAFETY_VIDEO_THROTTLE`). `/api/market/go/:id` redirects only to `LISTING_HOSTS` (else 204). Details and the open follow-ups in `docs/security-wiki.md` steps 7-9. Owner check after deploy: open one listing link per market source (the domain list is not verified against live data).
+
+Same day: About page lists Backblaze B2 under sources (log archive; supersedes the earlier "infrastructure, not a source" call) and its security entry mentions the outside-request limits and the listing-link check; release v2.1544; CLAUDE.md trimmed (i18n bullet, workflow lines) and CLAUDE_RULES.md gained the `fetchJson` rule. The About "brief" card (every feature, between the intro and the sources) already existed and needed no new entry: no user-visible feature shipped.

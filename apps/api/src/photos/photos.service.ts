@@ -1,23 +1,30 @@
 import {
   BadGatewayException,
   BadRequestException,
-  HttpException,
   Injectable,
   Logger,
   ServiceUnavailableException
 } from '@nestjs/common'
 import type { VehiclePhotosResponse } from '@carplates/shared'
+import { z } from 'zod'
 
+import { DEFAULT_JSON_MAX_BYTES, FetchJsonError, fetchJson } from '../common/fetch-json.js'
 import { loadEnv, pixabayEnabled } from '../env.js'
 
-interface PixabayHit {
-  id: number
-  pageURL: string
-  tags: string
-  previewURL: string
-  webformatURL: string
-  user: string
-}
+const pixabaySchema = z.object({
+  hits: z
+    .array(
+      z.object({
+        id: z.number(),
+        pageURL: z.string(),
+        tags: z.string(),
+        previewURL: z.string(),
+        webformatURL: z.string(),
+        user: z.string()
+      })
+    )
+    .optional()
+})
 
 const CACHE_MAX = 200
 const UPSTREAM_TIMEOUT_MS = 10_000
@@ -51,14 +58,16 @@ export class PhotosService {
     url.searchParams.set('safesearch', 'true')
     url.searchParams.set('per_page', '20')
 
-    let payload: { hits?: PixabayHit[] }
+    let payload: z.infer<typeof pixabaySchema>
     try {
-      const res = await fetch(url, { signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS) })
-      if (res.status === 429) throw new ServiceUnavailableException('Photo search quota exceeded, try again later')
-      if (!res.ok) throw new Error(`status ${res.status}`)
-      payload = (await res.json()) as { hits?: PixabayHit[] }
+      payload = await fetchJson(url, pixabaySchema, {
+        timeoutMs: UPSTREAM_TIMEOUT_MS,
+        maxBytes: DEFAULT_JSON_MAX_BYTES
+      })
     } catch (err) {
-      if (err instanceof HttpException) throw err // don't let this swallow the mapping above
+      if (err instanceof FetchJsonError && err.status === 429) {
+        throw new ServiceUnavailableException('Photo search quota exceeded, try again later')
+      }
       this.logger.warn(`Pixabay request failed: ${(err as Error).message}`)
       throw new BadGatewayException('Photo search request failed')
     }

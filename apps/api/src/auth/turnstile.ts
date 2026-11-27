@@ -1,8 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common'
+import { z } from 'zod'
 
+import { fetchJson } from '../common/fetch-json.js'
 import { loadEnv } from '../env.js'
 
 const VERIFY_URL = 'https://challenges.cloudflare.com/turnstile/v0/siteverify'
+const verifySchema = z.object({ success: z.boolean().optional() })
 
 /** Cloudflare Turnstile server-side check. Without `TURNSTILE_SECRET_KEY` every token passes (local dev). */
 @Injectable()
@@ -21,9 +24,11 @@ export class TurnstileService {
     try {
       const body = new URLSearchParams({ secret, response: token })
       if (ip) body.set('remoteip', ip)
-      const res = await fetch(VERIFY_URL, { method: 'POST', body, signal: AbortSignal.timeout(5_000) })
-      if (!res.ok) return false
-      const json = (await res.json()) as { success?: boolean }
+      const json = await fetchJson(VERIFY_URL, verifySchema, {
+        timeoutMs: 5_000,
+        maxBytes: 64 * 1024,
+        init: { method: 'POST', body }
+      })
       return json.success === true
     } catch (err) {
       // Fail closed: a Turnstile outage must not open the mail-sending endpoint to bots.

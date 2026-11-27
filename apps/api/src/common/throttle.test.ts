@@ -1,8 +1,11 @@
+import 'reflect-metadata'
 import type { ExecutionContext } from '@nestjs/common'
 import { describe, expect, it } from 'vitest'
 
 import { type Env, throttleDisabled } from '../env.js'
-import { GLOBAL_THROTTLE } from './throttle.js'
+import { PhotosController } from '../photos/photos.controller.js'
+import { SafetyController } from '../safety/safety.controller.js'
+import { GLOBAL_THROTTLE, PHOTOS_THROTTLE, SAFETY_VIDEO_THROTTLE } from './throttle.js'
 
 const ctxFor = (url: string): ExecutionContext =>
   ({ switchToHttp: () => ({ getRequest: () => ({ url }) }) }) as unknown as ExecutionContext
@@ -35,5 +38,18 @@ describe('GLOBAL_THROTTLE.skipIf', () => {
     for (const url of ['/assets/index.js', '/og/AA1234AA.png', '/healthz', '/about', '/sitemap.xml']) {
       expect(skipIf(ctxFor(url))).toBe(true)
     }
+  })
+})
+
+describe('expensive routes carry their own cap', () => {
+  const limitOf = (handler: object, name: string): unknown => Reflect.getMetadata(`THROTTLER:LIMIT${name}`, handler)
+
+  it('photos spends the Pixabay quota', () => {
+    expect(limitOf(PhotosController.prototype.search, 'medium')).toBe(PHOTOS_THROTTLE.medium.limit)
+  })
+
+  it('safety video downloads and transcodes', () => {
+    expect(limitOf(SafetyController.prototype.video, 'medium')).toBe(SAFETY_VIDEO_THROTTLE.medium.limit)
+    expect(limitOf(SafetyController.prototype.video, 'long')).toBe(SAFETY_VIDEO_THROTTLE.long.limit)
   })
 })

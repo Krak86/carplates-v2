@@ -1123,7 +1123,7 @@ in-memory store resets on restart and isn't shared across instances), body-email
 
 ### Deploy-time security checklist (do when setting up the VPS)
 
-Security wiki (per-layer status, 33 numbered steps (11 done, rest open) with alternatives and CVE index, test inventory): [docs/security-wiki.md](docs/security-wiki.md). Owner-only open items (details in its step 32):
+Security wiki (per-layer status, 33 numbered steps (15 done, rest open) with alternatives and CVE index, test inventory): [docs/security-wiki.md](docs/security-wiki.md). Owner-only open items (details in its step 32):
 
 - [ ] Change the origin IP (H7) and test the IPv6 lockdown from outside; decide H11 (SSH over Tunnel or Tailscale).
 - [x] Least-scope Cloudflare purge token and the referrer-restricted Maps embed key (`VITE_GOOGLE_MAPS_EMBED_KEY`), done 2026-11-26. Optional: cf-terraforming export.

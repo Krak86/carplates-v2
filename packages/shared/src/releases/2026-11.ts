@@ -5,8 +5,20 @@ import type { ReleaseDay } from './core.js'
 export const DAYS: readonly ReleaseDay[] = [
   {
     date: '2026-11-27',
-    version: 'v2.1538',
+    version: 'v2.1544',
     items: [
+      item(
+        'improved',
+        'Запити сервера до зовнішніх джерел (розшифрування VIN, фото, рейтинги безпеки, перевірка ботів) тепер мають ліміт часу й розміру відповіді та перевіряють її формат; пошук фото й відео краш-тестів мають власні ліміти запитів, а кнопка «Відкрити оголошення» веде лише на відомі майданчики',
+        'Запросы сервера к внешним источникам (расшифровка VIN, фото, рейтинги безопасности, проверка ботов) теперь имеют лимит времени и размера ответа и проверяют его формат; поиск фото и видео краш-тестов имеют собственные лимиты запросов, а кнопка «Открыть объявление» ведёт только на известные площадки',
+        'Server requests to outside sources (VIN decode, photos, safety ratings, bot check) now have a time and response-size limit and check the response format; photo search and crash-test videos have their own rate limits, and the "Open listing" button only leads to known marketplaces'
+      ),
+      item(
+        'improved',
+        'У розділі «Про застосунок» додано Backblaze B2 до джерел (архів логів сервера), а в пункті про безпеку згадано ліміти зовнішніх запитів і перевірку посилань на оголошення',
+        'В разделе «О приложении» добавлен Backblaze B2 в источники (архив логов сервера), а в пункте о безопасности упомянуты лимиты внешних запросов и проверка ссылок на объявления',
+        'The About page now lists Backblaze B2 among the sources (server log archive), and the security entry mentions the limits on outside requests and the listing-link check'
+      ),
       item(
         'improved',
         "В адмінці з'явилась вкладка «Логи»: пошук і фільтри за контейнером, рівнем і часом, режим «Наживо»; номери, VIN, e-mail та IP у логах частково замасковані",

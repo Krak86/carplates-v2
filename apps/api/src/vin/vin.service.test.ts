@@ -18,18 +18,18 @@ describe('VinService.decode when NHTSA is down', () => {
   afterEach(() => vi.unstubAllGlobals())
 
   it('answers with the registry rows instead of a 502, and does not cache the empty decode', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 503 }))
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('{}', { status: 503 })))
     const service = make(true)
     await expect(service.decode(VIN)).resolves.toMatchObject({ vin: VIN, results: [], registry })
     vi.stubGlobal(
       'fetch',
-      vi.fn().mockResolvedValue({ ok: true, json: async () => ({ Results: [{ Variable: 'Make', Value: 'KIA' }] }) })
+      vi.fn().mockResolvedValue(new Response(JSON.stringify({ Results: [{ Variable: 'Make', Value: 'KIA' }] })))
     )
     await expect(service.decode(VIN)).resolves.toMatchObject({ results: [{ variable: 'Make', value: 'KIA' }] })
   })
 
   it('still throws 502 when the registry does not know the VIN', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 503 }))
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('{}', { status: 503 })))
     await expect(make(false).decode(VIN)).rejects.toBeInstanceOf(BadGatewayException)
   })
 })
