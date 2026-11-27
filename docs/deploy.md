@@ -82,10 +82,10 @@ add columns/tables first, deploy, drop/rename in a _later_ release.
 ## Folder layout on the VPS (`/opt/carsua`)
 
 ```
-compose/   docker-compose.prod.yml, Caddyfile, maintenance.html, backup.sh, .env (image tags), flags/MAINTENANCE   ← CI copies on every api deploy
-env/       api.env, alpr.env, postgres.env, redis.env, backup.env (mode 600, written by CI) · certs/origin.pem + origin.key (Cloudflare origin cert) + cf-aop.pem (client cert Cloudflare presents, Authenticated Origin Pulls)
+compose/   docker-compose.prod.yml, Caddyfile, maintenance.html, backup.sh, vector.yaml, loki.yaml, .env (image tags), flags/MAINTENANCE   ← CI copies on every api deploy
+env/       api.env, alpr.env, postgres.env, redis.env, backup.env (mode 600, written by CI) · logs-archive.env (B2 key for `backup.sh logs`, created by hand, mode 600, never in CI) · certs/origin.pem + origin.key (Cloudflare origin cert) + cf-aop.pem (client cert Cloudflare presents, Authenticated Origin Pulls)
 web/       releases/<git-sha>/ (5 kept) and `current` → the live release (a symlink the api container serves from /web/current)
-pgdata/    Postgres data (the ~23 GB DB)        redisdata/  Redis AOF (a few MB; created by lib.sh, owned by deploy)        backups/  staging for dumps before upload        archive/  data.gov.ua source ZIPs
+pgdata/    Postgres data (the ~23 GB DB)        redisdata/  Redis AOF (a few MB; created by lib.sh, owned by deploy)        backups/  staging for dumps before upload        archive/  data.gov.ua source ZIPs        lokidata/  Loki chunks (14 days)        logs/  Vector daily `*.ndjson.gz`, uploaded to B2 by `backup.sh logs`, local copies deleted after 3 days
 ```
 
 ### Disk usage and image cleanup (checked 2026-11-21)
@@ -156,6 +156,8 @@ one var set? `grep -c '^AUTH_SECRET=.' /opt/carsua/env/api.env`; what the contai
 `VITE_*` values are bundled into public JS — restrict `VITE_GOOGLE_MAPS_EMBED_KEY` to the `carsua.app` referrer in Google Cloud. Also set
 `https://carsua.app` as an authorised origin for the Google client, and Telegram `/setdomain carsua.app`. `NODE_ENV`, `TRUST_PROXY`,
 `WEB_DIST_DIR`, `ALPR_LOCAL_URL` are fixed in the compose file; `GIT_SHA` is set per deploy.
+
+`LOKI_URL` (`http://loki:3100`) is fixed in `deploy-api.yml` (a `printf` into `api.env`, like `REDIS_URL`; no secret or variable). Loki and Vector are started by `deploy-api.sh` (`up -d loki vector`) from `vector.yaml` / `loki.yaml`, rsynced next to the compose file. `backup.sh logs` runs from `/etc/cron.d/carsua-backup` at 03:50 (bootstrap.sh; re-run it, or add the line by hand, on an existing VPS). Logs archive setup: bucket `carsua-logs` on Backblaze B2 (private, SSE-B2, 90-day lifecycle rule), an application key limited to that bucket with only `writeFiles` + `listBuckets`, then `/opt/carsua/env/logs-archive.env` (`RCLONE_CONFIG_B2_TYPE=b2`, `RCLONE_CONFIG_B2_ACCOUNT`, `RCLONE_CONFIG_B2_KEY`, `LOGS_BUCKET=carsua-logs`, optional `HC_PING_LOGS`). Details: `docs/features-reference.md` "Admin logs".
 
 Env vars the api reads that `deploy-api.yml` does **not** pass (so production uses the default; to change one, add it to the `env:` block of
 `deploy-api.yml` and to this page): `PORT`, `ENABLE_SWAGGER`, `WIKI_IMAGE_SOURCE`, `ACCOUNT_DELETION_GRACE_DAYS`, `SESSION_TTL_DAYS`,

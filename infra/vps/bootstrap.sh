@@ -72,6 +72,7 @@ install -d -o deploy -g deploy /opt/carsua/compose/flags /opt/carsua/web/release
 # nightly off-box backup (script + credentials are delivered by the api deploy; until then the job just fails harmlessly)
 cat > /etc/cron.d/carsua-backup <<'EOF'
 30 3 * * * deploy bash /opt/carsua/compose/backup.sh nightly >> /opt/carsua/backups/backup.log 2>&1
+50 3 * * * deploy bash /opt/carsua/compose/backup.sh logs >> /opt/carsua/backups/backup.log 2>&1
 EOF
 chmod 644 /etc/cron.d/carsua-backup
 # scheduled ingest jobs: the ingest deploy installs infra/vps/ingest.cron as the deploy user's crontab (no root needed)

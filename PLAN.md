@@ -1749,7 +1749,7 @@ Research result: worth it only as one small feed. The release log (`packages/sha
 - [ ] 5. Optional: batched auction-lots item (own caching) and a data-freshness feed
 - [ ] After deploy (owner): validate the feed (W3C feed validator), subscribe in one reader, check `robots.txt` does not block it
 
-## Admin logs (Vector + Loki + B2 archive) (plan 2026-11-26, steps 1-4 of 5 built)
+## Admin logs (Vector + Loki + B2 archive) (plan 2026-11-26, steps 1-5 of 5 built)
 
 Redacted VPS container logs (plates / VINs / emails / IPs partly masked) searchable in a new `/admin` Logs tab: Vector reads the Docker json-file logs (no Docker socket), Loki keeps 14 days, a daily gz archive goes to a separate Backblaze B2 bucket (90 days; R2 is full). No Prometheus, no Grafana for now. Design, security model and steps: `docs/logs-plan.md`.
 
@@ -1761,5 +1761,17 @@ Redacted VPS container logs (plates / VINs / emails / IPs partly masked) searcha
 - Step 3 notes: built 2026-11-27. `GET /api/admin/logs?container&level(comma list)&q&from&to&limit&direction` and `/api/admin/logs/containers`; both `{ status: 'ok' | 'disabled' | 'unavailable', ... }` (`disabled` = no `LOKI_URL`, `unavailable` = Loki down / non-2xx / bad shape, always HTTP 200). Window defaults to the last hour and is clamped to 24 h keeping `to`; response echoes the clamped `from` / `to`; `limit` <= 500 (service asks Loki for limit + 1 to set `truncated`); `ts` has millisecond precision, so live polling should use `from = last ts` and drop already-seen lines. `q` is a case-insensitive literal (regex-escaped, masked with `redactLogText` first so a raw plate finds its masked form). Throttle `LOGS_ADMIN_THROTTLE` 60/min; audit line `admin logs query {admin, logql, from, to, ...}` logged through the redacting logger. Shared: `adminLogsQuerySchema` / `adminLogsResponseSchema` / `adminLogContainersResponseSchema`, `LOG_LEVELS`, `LOG_MAX_*` in `account.ts`.
 - [x] 4. Web `AdminLogsTab` (filters, live polling, URL state), i18n pack keys, release note
 - Step 4 notes: built 2026-11-27. `apps/web/src/routes/admin/logs/` (`AdminLogsTab`, `use-admin-logs-actions`, `helpers`, test); `'logs'` tab before `links`. Filters live in URL params (`container`, `level`, `q`, `range` 15m/1h/6h/24h/custom, `from`/`to`, `live=1`; all re-validated in `parseFilters`). Presets send only `from = now - window` (`adminLogsRequest`, resolved at fetch time so the query key is stable). Live = `refetchInterval` 5 s, limit 500, asks `from = newest ts` and merges via `mergeLiveLines` (drops same ts+container+message); disabled for a custom range. `admin.logs.*` keys are in the existing `admin` pack (owner `src/routes/admin/` covers the subfolder). Release v2.1531 (2026-11-27).
-- [ ] 5. `backup.sh logs` mode + cron, docs (`features-reference.md`, `security-checklist.md`)
-- [ ] After deploy (owner): create the B2 bucket + write-only scoped key + 90-day lifecycle rule, dirs on the VPS, check a known plate is masked in Loki and in a B2 file, Loki unreachable from outside, non-admin gets 403
+- [x] 5. `backup.sh logs` mode + cron, deploy wiring, docs (`features-reference.md`, `security-checklist.md`, `deploy.md`, `plan-done.md`)
+- Step 5 notes: built 2026-11-27, nothing run on Docker / the VPS. `backup.sh logs` reads `logs-archive.env` (exit 0 with a warning if missing), ping var `HC_PING_LOGS`; cron `50 3 * * *` added to the `bootstrap.sh` cron file (an existing VPS needs it re-run or the line added by hand). `deploy-api.sh` does `up -d ... loki vector`; `deploy-api.yml` rsyncs `vector.yaml` / `loki.yaml` and writes `LOKI_URL` (`infra/**` was already in `paths`). Write-up: `docs/plan-done.md`.
+- [x] ✅ Admin logs built end to end (steps 1-5); write-up in `docs/plan-done.md` "Admin logs - Vector + Loki + B2 archive"
+- After deploy (owner, nothing here is run by the agent):
+  - [ ] Backblaze B2: create private bucket `carsua-logs` (EU region), enable SSE-B2, add a lifecycle rule (delete after 90 days), create an application key scoped to that bucket with only `writeFiles` + `listBuckets`
+  - [ ] On the VPS: create `/opt/carsua/env/logs-archive.env` (mode 600: `RCLONE_CONFIG_B2_TYPE=b2`, `RCLONE_CONFIG_B2_ACCOUNT`, `RCLONE_CONFIG_B2_KEY`, `LOGS_BUCKET=carsua-logs`, optional `HC_PING_LOGS` from a new healthchecks.io check); add the 03:50 cron line (re-run `bootstrap.sh` or edit `/etc/cron.d/carsua-backup`)
+  - [ ] Run "Deploy API"; check `docker compose ps` shows `loki` and `vector` healthy and `/opt/carsua/lokidata` + `/opt/carsua/logs` are deploy-owned
+  - [ ] Hit `/api/plate/<a known plate>`, then in Loki (`/admin?tab=logs`, search the plate) and in today's `/opt/carsua/logs/*.ndjson.gz` check only the masked form (`AA****BB`) appears
+  - [ ] Run `bash /opt/carsua/compose/backup.sh logs` once (day after the first logs), check the file is in B2 and a second run changes nothing; local files older than 3 days are gone
+  - [ ] Verify the B2 key cannot delete or download (`rclone deletefile` and `rclone copy B2:carsua-logs/<file> .` both fail)
+  - [ ] Check Loki is unreachable from outside (`curl -m 5 http://<vps-ip>:3100/ready` times out)
+  - [ ] Check a non-admin (and a logged-out request) gets 403 on `/api/admin/logs`
+  - [ ] Open `/admin?tab=logs` in a browser: filters, live toggle, expand + copy a line, URL state survives a reload
+  - [ ] After a week: check real log volume (Loki disk, B2 size) against the 0.2-1 GB / 90 days estimate in `docs/logs-plan.md`

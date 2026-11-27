@@ -70,7 +70,7 @@ jobs:
       - name: Sync compose files
         # --inplace: Caddy bind-mounts single files, and a rename would leave the container on the old inode.
         run: |
-          rsync -az --inplace infra/docker-compose.prod.yml infra/Caddyfile infra/maintenance.html infra/vps/backup.sh infra/vps/cf-firewall.sh infra/vps/restore-replay-deletions.sh infra/vps/lib.sh vps:/opt/carsua/compose/
+          rsync -az --inplace infra/docker-compose.prod.yml infra/Caddyfile infra/vector.yaml infra/loki.yaml infra/maintenance.html infra/vps/backup.sh infra/vps/cf-firewall.sh infra/vps/restore-replay-deletions.sh infra/vps/lib.sh vps:/opt/carsua/compose/
 
       - name: Write env files and origin certificate
         env:
@@ -138,6 +138,7 @@ jobs:
           {
             printf 'DATABASE_URL=postgres://carplates:%s@postgres:5432/carplates\n' "$POSTGRES_PASSWORD"
             printf 'REDIS_URL=redis://:%s@redis:6379\n' "$REDIS_PASSWORD"
+            printf 'LOKI_URL=http://loki:3100\n' # admin Logs tab; Loki is internal-only (no published port)
             printf 'GIT_SHA=%s\n' "$IMAGE_TAG"
             emit AUTH_SECRET PUBLIC_SITE_URL MAIL_TRANSPORT MAIL_FROM MAIL_REPLY_TO MAIL_FROM_NEWS DIGEST_ENABLED MAIL_QUEUE RESEND_API_KEY CONTACT_TO SMTP_URL \
               GOOGLE_CLIENT_ID TELEGRAM_BOT_TOKEN TELEGRAM_BOT_USERNAME TURNSTILE_SITE_KEY TURNSTILE_SECRET_KEY \
