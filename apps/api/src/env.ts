@@ -18,6 +18,13 @@ const envSchema = z.object({
   PORT: z.coerce.number().int().positive().default(3000),
   /** Dev default only; production refuses to boot with it (see `assertProductionEnv`). */
   DATABASE_URL: z.string().default(`postgres://${DEV_DB_CREDENTIALS}localhost:5432/carplates`),
+  /** API pool and session limits (CWE-400); 0 disables a timeout. Ingest does not use these. */
+  DB_POOL_MAX: z.coerce.number().int().positive().default(10),
+  DB_CONNECT_TIMEOUT_MS: z.coerce.number().int().nonnegative().default(5000),
+  DB_IDLE_TIMEOUT_MS: z.coerce.number().int().nonnegative().default(30000),
+  DB_STATEMENT_TIMEOUT_MS: z.coerce.number().int().nonnegative().default(15000),
+  DB_IDLE_IN_TX_TIMEOUT_MS: z.coerce.number().int().nonnegative().default(30000),
+  DB_LOCK_TIMEOUT_MS: z.coerce.number().int().nonnegative().default(5000),
 
   /** Absolute or relative path to the built web app; unset in dev (Vite serves it). */
   WEB_DIST_DIR: z.string().optional(),

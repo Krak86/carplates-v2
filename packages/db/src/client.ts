@@ -49,9 +49,45 @@ export function resolveDatabaseUrl(explicit?: string): string {
   return explicit ?? process.env.DATABASE_URL ?? LOCAL_DATABASE_URL
 }
 
+/**
+ * Pool and per-session limits (CWE-400). All optional: omitted = driver/server default,
+ * so ingest and scripts (long COPY / REFRESH statements) stay unlimited. The API passes
+ * its own limits. A timeout of 0 disables that limit.
+ */
+export type DbLimits = {
+  max?: number
+  connectionTimeoutMillis?: number
+  idleTimeoutMillis?: number
+  /** Postgres `statement_timeout`, ms. */
+  statementTimeoutMs?: number
+  /** Postgres `idle_in_transaction_session_timeout`, ms. */
+  idleInTransactionTimeoutMs?: number
+  /** Postgres `lock_timeout`, ms. */
+  lockTimeoutMs?: number
+}
+
+/** Build the libpq `options` string; undefined when no server-side limit is set. */
+export function buildPgOptions(limits: DbLimits): string | undefined {
+  const parts: string[] = []
+  if (limits.statementTimeoutMs !== undefined) parts.push(`-c statement_timeout=${limits.statementTimeoutMs}`)
+  if (limits.idleInTransactionTimeoutMs !== undefined)
+    parts.push(`-c idle_in_transaction_session_timeout=${limits.idleInTransactionTimeoutMs}`)
+  if (limits.lockTimeoutMs !== undefined) parts.push(`-c lock_timeout=${limits.lockTimeoutMs}`)
+  return parts.length > 0 ? parts.join(' ') : undefined
+}
+
 /** Create a pooled Drizzle client. Caller owns the returned pool's lifetime via `close`. */
-export function createDb(url = resolveDatabaseUrl()): { db: Db; pool: Pool; close: () => Promise<void> } {
-  const pool = new Pool({ connectionString: url })
+export function createDb(
+  url = resolveDatabaseUrl(),
+  limits: DbLimits = {}
+): { db: Db; pool: Pool; close: () => Promise<void> } {
+  const pool = new Pool({
+    connectionString: url,
+    max: limits.max,
+    connectionTimeoutMillis: limits.connectionTimeoutMillis,
+    idleTimeoutMillis: limits.idleTimeoutMillis,
+    options: buildPgOptions(limits)
+  })
   const db = drizzle(pool, { schema })
   return { db, pool, close: () => pool.end() }
 }
