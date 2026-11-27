@@ -23,6 +23,8 @@ export class RedactingLogger extends ConsoleLogger {
   }
 
   protected override printStackTrace(stack: string): void {
-    super.printStackTrace(redactLogText(stack))
+    // Nest passes `undefined` for an exception without a stack (e.g. an HttpException); redacting it threw inside the
+    // exception filter and replaced the real error (a 502) with a crash.
+    super.printStackTrace(typeof stack === 'string' ? redactLogText(stack) : stack)
   }
 }

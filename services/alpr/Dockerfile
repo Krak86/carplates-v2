@@ -22,13 +22,16 @@ COPY models ./models
 
 # Bakes the ONNX model weights into this image layer at build time, so the
 # container has no runtime network dependency once built.
-RUN python warmup.py
+# HOME is the models' cache root (~/.cache): it must be the same path at build and run time and readable by the
+# unprivileged user. Building as root under /root and running with HOME=/tmp (a tmpfs) made the service re-download
+# the weights at startup, fail on the internal alpr_net ("Temporary failure in name resolution") and restart-loop.
+ENV HOME=/opt/alpr-home
+RUN mkdir -p "$HOME" && python warmup.py && chmod -R a+rX "$HOME"
 
 # Untrusted images are parsed here: run unprivileged (compose also sets read_only + cap_drop). The model weights
-# baked in above stay readable; HOME/tmp are the only writable places (compose mounts a tmpfs on /tmp).
+# baked in above stay readable (HOME, read-only); /tmp is the only writable place (compose mounts a tmpfs on it).
 RUN useradd --uid 10001 --no-create-home --shell /usr/sbin/nologin alpr
 USER 10001
-ENV HOME=/tmp
 
 EXPOSE 8088
 HEALTHCHECK --interval=10s --timeout=5s --start-period=30s --retries=3 \
