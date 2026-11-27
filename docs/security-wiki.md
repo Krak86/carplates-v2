@@ -580,7 +580,7 @@ Existing: `origin.guard`, `caddyfile-headers`, `csp.controller`, `throttle`, `th
 | 7     | `fetchJson` timeout, byte cap, schema failure                 |
 | 8-9   | throttle decorators present, redirect allowlist               |
 | 10    | fallback headers only when absent                             |
-| 11    | pool options                                                  |
+| 11    | pool options (`client.test.ts`, done)                         |
 | 12    | integration: app role cannot `DROP` or `TRUNCATE`             |
 | 16-17 | extended `caddyfile-headers` assertions                       |
 | 27    | the lint run itself                                           |
