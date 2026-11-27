@@ -1769,10 +1769,11 @@ Redacted VPS container logs (plates / VINs / emails / IPs partly masked) searcha
   - [x] On the VPS: `/opt/carsua/env/logs-archive.env` created and the 03:50 cron line added to `/etc/cron.d/carsua-backup`
   - [ ] Optional: healthchecks.io check for `HC_PING_LOGS` (skipped for now; add the URL to `logs-archive.env` later)
   - [x] Deploy API run (PR #278, then the `cap_add: [DAC_OVERRIDE]` fix in #279); `loki` and `vector` up, `vector` healthy, `/opt/carsua/logs` holds `2026-11-27.ndjson.gz`
-  - [ ] Masking check on **prod** (`https://carsua.app/admin?tab=logs`, not localhost): the api does not log plate lookups, so search `AA1234BB` once, then search `admin logs query`: the audit line must show `AA****BB` in its LogQL, never the raw plate. In the archive: `zcat /opt/carsua/logs/<day>.ndjson.gz 2>/dev/null | grep -c AA1234BB` must print 0 (a file still being written ends with "unexpected end of file", that is normal)
+  - [x] Masking in Loki checked on prod 2026-11-27: the `admin logs query` audit line holds `AA****BB` in its LogQL, no raw plate. Still open: the archive file (`zcat /opt/carsua/logs/<day>.ndjson.gz 2>/dev/null | grep -c AA1234BB` must print 0; a file still being written ends with "unexpected end of file", that is normal, check it after the day ends)
   - [ ] Run `bash /opt/carsua/compose/backup.sh logs` once (day after the first logs), check the file is in B2 and a second run changes nothing; local files older than 3 days are gone
   - [ ] Verify the B2 key cannot delete or download (`rclone deletefile` and `rclone copy B2:carsua-logs/<file> .` both fail)
-  - [ ] Check Loki is unreachable from outside (`curl -m 5 http://<vps-ip>:3100/ready` times out)
-  - [ ] Check a non-admin (and a logged-out request) gets 403 on `/api/admin/logs`
-  - [ ] Open `/admin?tab=logs` in a browser: filters, live toggle, expand + copy a line, URL state survives a reload
+  - [x] Loki unreachable from outside (`curl -m 5 http://<vps-ip>:3100/ready` timed out, 2026-11-27)
+  - [x] Logged-out request gets 401 on `/api/admin/logs` (2026-11-27)
+  - [ ] A signed-in non-admin gets 403 on `/api/admin/logs` (covered by the controller test, not yet tried on prod)
+  - [x] `/admin?tab=logs` on prod: lines load, a line expands to JSON, Copy works, search highlighting (2026-11-27). Not yet looked at: the live toggle, reload keeping the URL filters
   - [ ] After a week: check real log volume (Loki disk, B2 size) against the 0.2-1 GB / 90 days estimate in `docs/logs-plan.md`
