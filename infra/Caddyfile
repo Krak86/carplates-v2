@@ -42,7 +42,24 @@ carsua.app {
 		Cross-Origin-Opener-Policy "same-origin-allow-popups"
 		Origin-Agent-Cluster "?1"
 		X-Permitted-Cross-Domain-Policies "none"
+		# same-site: other sites cannot embed our responses via no-cors <img>/<script> (Spectre-class leaks); crawlers and link previews are not browsers, so unaffected.
+		Cross-Origin-Resource-Policy "same-site"
+		# Do not advertise the server software.
+		-Server
 	}
+
+	# Largest legitimate body is the 4 MB ALPR photo upload (multipart cap in apps/api/src/main.ts) plus form overhead; Caddy rejects bigger ones with 413 before the api sees them.
+	request_body {
+		max_size 5MB
+	}
+
+	# JSON access log on stdout: the json-file driver rotates it (10m x 5) and Vector masks plates / VINs / IPs before Loki, so there is no file to roll.
+	# Caddy already redacts Cookie / Authorization. /healthz (uptime probes, deploy checks) is skipped to keep the noise out.
+	log {
+		output stdout
+		format json
+	}
+	log_skip /healthz
 
 	# CSP directives, one per row (a Caddyfile string cannot span lines); the headers below join them with "; ".
 	# upgrade-insecure-requests is only valid in an enforced header (browsers ignore it in Report-Only and log a console error per frame).

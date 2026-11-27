@@ -18,7 +18,7 @@ Legend: ✅ done · ❌ open (step #) · 🔍 verify · 🤖 code/config (diff s
 | 4   | Network and provider | D15              | 32             |
 | 5   | Ubuntu host          | D16-D19          | 19, 25         |
 | 6   | Docker               | D20-D23          | 13, 14, 15, 19 |
-| 7   | Caddy                | D24-D26          | 16, 17, 18     |
+| 7   | Caddy                | D24-D26          | 18             |
 | 8   | API (NestJS)         | D27-D40, D57-D58 | 7-10           |
 | 9   | Postgres and Redis   | D41-D44          | 12, 15, 20     |
 | 10  | ALPR (Python)        | D45, D51         | -              |
@@ -42,7 +42,7 @@ about authentication, input handling, least privilege, the network or the supply
 | VIII | Concurrency         | Partly           | Ingest is its own process (advisory lock). Timers run inside the API (fine at one replica)             | n/a                                |
 | IX   | Disposability       | Fully            | `enableShutdownHooks`, exec-form `CMD`, healthchecks, `stop_grace_period: 30s`                         | Fast patch rollout                 |
 | X    | Dev/prod parity     | Fully            | Same Postgres 18.6 and Redis in dev and prod; dev binds 127.0.0.1                                      | Bugs reproducible locally          |
-| XI   | Logs                | Partly           | stdout JSON, rotated json-file, Sentry. PII scrubbed (D56, D57). No Caddy access log → step 16         | Audit trail vs PII leak            |
+| XI   | Logs                | Partly           | stdout JSON, rotated json-file, Sentry. PII scrubbed (D56, D57). Caddy access log on stdout (step 16)  | Audit trail vs PII leak            |
 | XII  | Admin processes     | Fully            | Migrations, seed, ingest as one-off `compose run --rm` with the release image                          | Same audited image for admin tasks |
 
 "Beyond the Twelve-Factor App" (Hoffman, 2016) adds **API first**, **Telemetry**, **Authentication and authorization**. Mapped here: curated public OpenAPI
@@ -155,7 +155,7 @@ Open: segmentation → 13; Caddy and Postgres hardening, pids limits → 14; dig
 | D25 | HSTS 1 year, Permissions-Policy, COOP, Origin-Agent-Cluster                                                | `Caddyfile:37-44`   | Downgrade and cross-origin isolation                              |
 | D26 | Maintenance flag and `handle_errors`                                                                       | `Caddyfile:90-131`  | Controlled failure pages                                          |
 
-Open: CORP, Server header, admin off, body limit, access log → 16; HSTS flags → 17; IP list drift → 18.
+Added 2026-11-27 (steps 16-17): CORP `same-site`, `-Server`, 5 MB `request_body`, JSON access log on stdout, HSTS `includeSubDomains; preload` (all pinned by `caddyfile-headers.test.ts`). `admin off` deliberately not set (`caddy reload` needs the admin API). Open: IP list drift → 18.
 
 ### Layer 8 - API (NestJS on Fastify)
 
@@ -372,18 +372,19 @@ done: 1-9, 11, 21-23, 30, 33. Remaining, in order:
 - **Verify:** `docker inspect` does not show the Redis password; images build; Dependabot opens a digest PR.
 - **Done 2026-11-27 (code):** `tag@sha256:<index digest>` on all three Dockerfile bases and on caddy, redis, postgres, loki, vector (digests read with `docker buildx imagetools inspect`, multi-arch index). Dependabot: the `docker` entry already covers the Dockerfile folders; the existing `docker-compose` entry on `/infra` bumps tag and digest of the compose images. Redis: `deploy-api.yml` writes `env/redis.conf` (`requirepass <pw>`, mode 600) instead of `env/redis.env`; Redis starts as plain `redis-server /etc/redis/redis.conf ...` (no `sh -c`), the healthcheck reads the password from the file. **Not done:** the api still gets `REDIS_URL` with the password in `api.env`, so it stays visible in the api container env (Compose `secrets:` + `*_FILE` support would be a later step); Postgres and ALPR secrets are unchanged. A stale `env/redis.env` on the VPS can be deleted after the deploy.
 
-### Step 16 - Caddyfile hardening [ ] · S · 🤖 · layer 7
+### Step 16 - Caddyfile hardening [x] · S · 🤖 · layer 7
 
 - **What:** add `Cross-Origin-Resource-Policy: same-site`, `-Server`, global `admin off`, `request_body { max_size 5MB }`, a JSON access log with roll. Today there is no access log and the body limit is Fastify's alone.
 - **Files:** `infra/Caddyfile`, `apps/api/src/csp/caddyfile-headers.test.ts`.
 - **Why:** CVE-2023-44487 Rapid Reset (resource exhaustion class), CWE-770.
 - **Alternatives:** Cloudflare Transform Rules for headers (config lives outside the repo).
 - **Verify:** extended header test; `curl -sI` locally; reload Caddy, then passive check on live.
+- **Done 2026-11-27 (code; deploy checks open in PLAN.md):** `Cross-Origin-Resource-Policy "same-site"`, `-Server`, `request_body { max_size 5MB }` (4 MB multipart cap + overhead) and a JSON access log in the `carsua.app` block. **Deviations:** (1) **no `admin off`**: `infra/vps/deploy-api.sh` runs `caddy reload`, which talks to the admin API (`localhost:2019`, inside the container only, never published); turning it off would break every deploy. A test pins this. Alternative if wanted later: `admin unix//run/caddy-admin.sock` plus `caddy reload --address unix//run/caddy-admin.sock`. (2) The access log goes to **stdout**, not a file with `roll`: the json-file driver already rotates (10m x 5), Vector masks plates / VINs / IPs before Loki, and Caddy redacts `Cookie` / `Authorization` itself. `log_skip /healthz` keeps uptime probes out. Tests: `caddyfile-headers.test.ts`.
 
-### Step 17 - HSTS `includeSubDomains; preload` [ ] · S · 👤🤖 · layer 7
+### Step 17 - HSTS `includeSubDomains; preload` [x] · S · 👤🤖 · layer 7
 
 - **What:** currently `max-age=31536000` only. Confirm every subdomain serves HTTPS, then add the flags; submit to hstspreload.org after a month of stable running.
-- **Status (2026-11-27):** DNS checked (apex + www proxied; `send`/`rsend` are Resend email CNAMEs, no web). Flags added to `infra/Caddyfile`; needs a Caddy reload on the VPS. Still open: `curl -sI` check after reload, hstspreload.org submit after ~2026-12-27.
+- **Status (2026-11-27):** DNS checked (apex + www proxied; `send`/`rsend` are Resend email CNAMEs, no web). Flags added to `infra/Caddyfile` and **deployed** (the deploy was red until the Caddy cert fix of step 14, then green). A header test pins the exact value. Still open: `curl -sI` check, hstspreload.org submit after ~2026-12-27.
 - **Files:** `infra/Caddyfile:38`, header test.
 - **Why:** sslstrip (2009), CWE-319.
 - **Alternatives / con:** preloading is hard to undo; skip the preload flag if any subdomain may ever be plain HTTP.
