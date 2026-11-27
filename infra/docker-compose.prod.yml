@@ -4,6 +4,9 @@
 # Colour tags come from /opt/carsua/compose/.env (written by the deploy): API_TAG_BLUE, API_TAG_GREEN, ALPR_TAG, INGEST_TAG, GH_OWNER, REDIS_UID, LOKI_UID.
 # No `latest` fallback: compose needs every tag to parse the file, so lib.sh seeds a missing one with the placeholder `unset`
 # (never pulled by a deploy script: each pulls only the service whose tag it just set).
+# Networks (security-wiki step 13): `edge` = caddy + api; `backend` = api, postgres, redis, ingest, loki, vector; `alpr_net` = api + alpr and is
+# `internal: true` (no route out), so alpr, which parses untrusted images, can reach neither Postgres nor Redis nor the internet.
+# Images are pinned by tag AND digest (step 15): `tag@sha256:...`. Dependabot (docker-compose, /infra) bumps both together.
 name: carsua
 
 x-logging: &logging
@@ -28,11 +31,15 @@ x-api: &api
   mem_limit: 1g
   cap_drop: [ALL]
   security_opt: ['no-new-privileges:true']
+  pids_limit: 512
+  read_only: true # nothing writes to the image; the safety-video cache and uploads use /tmp
+  tmpfs: ['/tmp']
+  networks: [edge, backend, alpr_net]
   logging: *logging
 
 services:
   caddy:
-    image: caddy:2.11.9 # exact pin (PLAN.md "Version pins"); bump on purpose, never `caddy:2`
+    image: caddy:2.11.9@sha256:4851e54a46b206517c574821bb5cc67f170d2156041e9fbc4c9193b45e84a75b # exact pin (PLAN.md "Version pins"); bump on purpose, never `caddy:2`
     restart: unless-stopped
     # Only 443/tcp is published (origin lockdown H4): Cloudflare reaches the origin over TCP, browsers speak h3 to Cloudflare.
     ports: ['443:443']
@@ -43,6 +50,13 @@ services:
       - ../env/certs:/certs:ro # Cloudflare origin certificate: origin.pem + origin.key
       - caddy_data:/data
       - caddy_config:/config
+    # Binds 443 inside the container, so NET_BIND_SERVICE is the only capability it keeps.
+    cap_drop: [ALL]
+    cap_add: [NET_BIND_SERVICE]
+    security_opt: ['no-new-privileges:true']
+    mem_limit: 512m
+    pids_limit: 512
+    networks: [edge]
     logging: *logging
 
   api-blue:
@@ -63,6 +77,8 @@ services:
     cap_drop: [ALL]
     security_opt: ['no-new-privileges:true']
     mem_limit: 1536m
+    pids_limit: 256
+    networks: [alpr_net]
     cpus: 3 # of 6 (Cloud VPS 6); ONNX Runtime sizes its thread pool from the host cores, so a low quota throttles it
     logging: *logging
 
@@ -77,39 +93,58 @@ services:
     depends_on:
       postgres: { condition: service_healthy }
     mem_limit: 2g
+    pids_limit: 512
     cap_drop: [ALL]
     security_opt: ['no-new-privileges:true']
+    networks: [backend]
     logging: *logging
 
   # Shared counters for the api throttler (both blue/green colours, survives api restarts); the BullMQ base later. Internal network only
   # (no `ports`). The api never waits for it: Redis down = per-process throttling (apps/api/src/common/throttle-storage.ts).
   # AOF so a Redis restart keeps the windows; `noeviction` so a counter is never silently dropped (keys all carry a TTL, so 256 MB is ample).
   redis:
-    image: redis:8.10.3-alpine # exact pin (PLAN.md "Version pins"); bump on purpose
+    image: redis:8.10.3-alpine@sha256:7958cfbb9d152f87dadfbc89f1b0b15938f0b81ff8982feb327476f4911935c3 # exact pin (PLAN.md "Version pins"); bump on purpose
     restart: unless-stopped
-    env_file: ../env/redis.env # REDIS_PASSWORD
+    # The password lives only in the mounted config file (`requirepass <pw>`, written by deploy-api.yml, mode 600, owned by the deploy user):
+    # not on the command line (`ps`, `docker inspect`) and not in the container environment.
     command:
-      - sh
-      - -c
-      - exec redis-server --requirepass "$$REDIS_PASSWORD" --appendonly yes --appendfsync everysec --save "" --maxmemory 256mb --maxmemory-policy noeviction
+      - redis-server
+      - /etc/redis/redis.conf
+      - --appendonly
+      - 'yes'
+      - --appendfsync
+      - everysec
+      - --save
+      - ''
+      - --maxmemory
+      - 256mb
+      - --maxmemory-policy
+      - noeviction
     volumes:
       - ../redisdata:/data
+      - ../env/redis.conf:/etc/redis/redis.conf:ro
     healthcheck:
-      test: ['CMD-SHELL', 'REDISCLI_AUTH="$$REDIS_PASSWORD" redis-cli ping | grep -q PONG']
+      test:
+        [
+          'CMD-SHELL',
+          'REDISCLI_AUTH="$(sed -n "s/^requirepass //p" /etc/redis/redis.conf)" redis-cli ping | grep -q PONG'
+        ]
       interval: 5s
       timeout: 3s
       retries: 10
     stop_grace_period: 30s # SIGTERM flushes the AOF
     mem_limit: 384m
-    # Runs as the deploy user (uid seeded into .env by lib.sh), who owns ../redisdata: the image's own entrypoint only chowns /data
-    # and drops privileges when the command is literally `redis-server`, and here `sh -c` expands the password from the env file.
+    pids_limit: 256
+    networks: [backend]
+    # Runs as the deploy user (uid seeded into .env by lib.sh), who owns ../redisdata and the config file (mode 600): the image's own
+    # entrypoint only chowns /data and drops privileges when it starts as root, which it no longer does.
     user: '${REDIS_UID:?REDIS_UID not set}:${REDIS_UID}'
     cap_drop: [ALL]
     security_opt: ['no-new-privileges:true']
     logging: *logging
 
   postgres:
-    image: postgres:18.6
+    image: postgres:18.6@sha256:e3d24f6906d0760bf4da0dae872415391ededefad23fd471c47dc53b0ddf3c42
     restart: unless-stopped
     env_file: ../env/postgres.env # POSTGRES_USER / POSTGRES_PASSWORD / POSTGRES_DB
     # Sized for the 8 GB box: hot set is current_registration + indexes (~9 GB), so most of it lives in the OS cache.
@@ -135,6 +170,14 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+    # The official entrypoint starts as root, chowns the data dir and drops to `postgres` (gosu): that needs exactly these capabilities.
+    cap_drop: [ALL]
+    cap_add: [CHOWN, SETUID, SETGID, FOWNER, DAC_READ_SEARCH]
+    security_opt: ['no-new-privileges:true']
+    # shared_buffers 2 GB + shm 1 GB + backends + maintenance_work_mem 1 GB; the OS page cache is reclaimable and not a reason to raise it.
+    mem_limit: 6g
+    pids_limit: 1024
+    networks: [backend]
     logging: *logging
 
   # Log search for the /admin Logs tab (docs/logs-plan.md). Loki: single binary, internal network only (no `ports`, no auth: only the api
@@ -142,7 +185,7 @@ services:
   # the api never waits for it (LOKI_URL down = the tab says "logs unavailable") and Vector buffers on disk while it is away.
   # Runs as the deploy user (LOKI_UID seeded into .env by lib.sh) who owns ../lokidata.
   loki:
-    image: grafana/loki:3.7.10 # exact pin (PLAN.md "Version pins"); bump on purpose
+    image: grafana/loki:3.7.10@sha256:b43c257ccfc925d4a50b8717cac61a3b51df8c48d01847936057e5c4075a24a7 # exact pin (PLAN.md "Version pins"); bump on purpose
     restart: unless-stopped
     command: ['-config.file=/etc/loki/loki.yaml']
     volumes:
@@ -153,8 +196,10 @@ services:
     tmpfs: ['/tmp']
     stop_grace_period: 30s # flushes chunks on SIGTERM
     mem_limit: 512m
+    pids_limit: 256
     cap_drop: [ALL]
     security_opt: ['no-new-privileges:true']
+    networks: [backend]
     logging: *logging
 
   # Reads every container's Docker json-file log through a READ-ONLY bind mount (no Docker socket), masks plates / VINs / emails / IPs
@@ -163,7 +208,7 @@ services:
   # DAC_OVERRIDE (root without it cannot write the deploy-owned ../logs: "Permission denied" on the archive sink, seen 2026-11-27),
   # read-only root filesystem, no-new-privileges. Its own logs are dropped (no feedback loop).
   vector:
-    image: timberio/vector:0.62.0-alpine # exact pin (PLAN.md "Version pins"); bump on purpose
+    image: timberio/vector:0.62.0-alpine@sha256:149c77c09aabf16a3aa543abf9cea2e2152c1d9a7d4a45669fe7ad05f4ed8b27 # exact pin (PLAN.md "Version pins"); bump on purpose
     restart: unless-stopped
     command: ['--config', '/etc/vector/vector.yaml']
     environment:
@@ -185,10 +230,18 @@ services:
     tmpfs: ['/tmp']
     stop_grace_period: 30s # flushes the gzip archive
     mem_limit: 256m
+    pids_limit: 256
     cap_drop: [ALL]
     cap_add: [DAC_OVERRIDE]
     security_opt: ['no-new-privileges:true']
+    networks: [backend]
     logging: *logging
+
+networks:
+  edge:
+  backend:
+  alpr_net:
+    internal: true
 
 volumes:
   caddy_data:

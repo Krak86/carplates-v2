@@ -1,6 +1,6 @@
 # Ingest image (scheduled jobs). Build context = repo root:  docker build -f scripts/Dockerfile .
 # Runs one-shot `tsx src/run-job.ts <job>` commands started by host cron (infra/vps/run-ingest.sh); no long-running process.
-FROM node:24-slim
+FROM node:24-slim@sha256:873f586f3794f52281bd039bf02c048a0be08fde619338f9941bad1eb6b34530
 ENV PNPM_HOME=/pnpm PATH=/pnpm:$PATH
 RUN corepack enable
 WORKDIR /repo

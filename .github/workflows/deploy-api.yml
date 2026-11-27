@@ -150,9 +150,9 @@ jobs:
           emit ALPR_API_KEY > alpr.env
           printf 'POSTGRES_USER=carplates\nPOSTGRES_PASSWORD=%s\nPOSTGRES_DB=carplates\n' "$POSTGRES_PASSWORD" > postgres.env
 
-          printf 'REDIS_PASSWORD=%s\n' "$REDIS_PASSWORD" > redis.env
+          printf 'requirepass %s\n' "$REDIS_PASSWORD" > redis.conf
           push_env api.env /opt/carsua/env/api.env
-          push_env redis.env /opt/carsua/env/redis.env
+          push_env redis.conf /opt/carsua/env/redis.conf
           push_env postgres.env /opt/carsua/env/postgres.env
           push_env alpr.env /opt/carsua/env/alpr.env
           # GH_OWNER lives in compose/.env next to the colour tags; replace just that line (lib.sh was synced above).
@@ -189,7 +189,7 @@ jobs:
             fi
             push_env backup.env /opt/carsua/env/backup.env
           fi
-          rm -f api.env alpr.env postgres.env redis.env backup.env
+          rm -f api.env alpr.env postgres.env redis.conf backup.env
 
       - name: Start Postgres only (sync_only)
         if: ${{ inputs.sync_only }}

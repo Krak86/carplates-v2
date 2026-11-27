@@ -1123,7 +1123,7 @@ in-memory store resets on restart and isn't shared across instances), body-email
 
 ### Deploy-time security checklist (do when setting up the VPS)
 
-Security wiki (per-layer status, 33 numbered steps (15 done, rest open) with alternatives and CVE index, test inventory): [docs/security-wiki.md](docs/security-wiki.md). Owner-only open items (details in its step 32):
+Security wiki (per-layer status, 33 numbered steps (18 done, rest open) with alternatives and CVE index, test inventory): [docs/security-wiki.md](docs/security-wiki.md). Owner-only open items (details in its step 32):
 
 - [ ] Change the origin IP (H7) and test the IPv6 lockdown from outside; decide H11 (SSH over Tunnel or Tailscale).
 - [x] Least-scope Cloudflare purge token and the referrer-restricted Maps embed key (`VITE_GOOGLE_MAPS_EMBED_KEY`), done 2026-11-26. Optional: cf-terraforming export.
@@ -1135,6 +1135,7 @@ Security wiki (per-layer status, 33 numbered steps (15 done, rest open) with alt
 - [x] GitHub: Dependabot malware alerts and private vulnerability reporting on (2026-11-26).
 - [x] Cloudflare Email Routing: `security@carsua.app` → Gmail, test mail delivered 2026-11-26.
 - [x] After deploy: `/.well-known/security.txt` is served as text, not rewritten to `index.html` (verified 2026-11-26).
+- [ ] After deploy (wiki steps 13-15, 2026-11-27): "Deploy API" on the VPS recreates caddy, postgres, redis, loki, vector with new networks and limits (brief Postgres restart: do it off-peak). Then `docker compose ps` all healthy; `docker compose exec alpr nc -z postgres 5432` fails (alpr has no network route to Postgres/Redis); `/healthz`, a plate lookup, a photo share (alpr) and the `/admin` Logs tab work; blue/green still switches on the next deploy; `docker inspect carsua-redis-1 | grep -i pass` prints nothing; `docker stats --no-stream` shows the memory limits; no `Operation not permitted` in `docker compose logs postgres`; delete the stale `/opt/carsua/env/redis.env`; Dependabot opens a `docker-compose` PR; re-run `docker-bench-security` (step 25) to compare.
 - [ ] First `lynis` + `docker-bench-security` baseline on the VPS (wiki step 25) and a decrypt-and-restore drill once backups are encrypted (step 20).
 
 Code-level audit findings and the full pre-deploy gate: [docs/security-checklist.md](docs/security-checklist.md) (re-verified 2026-11-05; §1b has the infra settings status, finding #2 the CSP report-sink design). Local pentest runbook (never against production): [docs/pentest-lab.md](docs/pentest-lab.md).
