@@ -1764,6 +1764,7 @@ Redacted VPS container logs (plates / VINs / emails / IPs partly masked) searcha
 - [x] 5. `backup.sh logs` mode + cron, deploy wiring, docs (`features-reference.md`, `security-checklist.md`, `deploy.md`, `plan-done.md`)
 - Step 5 notes: built 2026-11-27, nothing run on Docker / the VPS. `backup.sh logs` reads `logs-archive.env` (exit 0 with a warning if missing), ping var `HC_PING_LOGS`; cron `50 3 * * *` added to the `bootstrap.sh` cron file (an existing VPS needs it re-run or the line added by hand). `deploy-api.sh` does `up -d ... loki vector`; `deploy-api.yml` rsyncs `vector.yaml` / `loki.yaml` and writes `LOKI_URL` (`infra/**` was already in `paths`). Write-up: `docs/plan-done.md`.
 - [x] ✅ Admin logs built end to end (steps 1-5); write-up in `docs/plan-done.md` "Admin logs - Vector + Loki + B2 archive"
+- [x] ✅ Backblaze B2 link added to the admin Dashboards tab; About security entry updated (`docs/plan-done.md` "Admin Dashboards: Backblaze B2 link")
 - After deploy (owner, nothing here is run by the agent; done 2026-11-27 unless unticked):
   - [x] Backblaze B2: private bucket `carsua-logs` (EU Central), SSE-B2 on, custom lifecycle rule (hide after 90 days, delete 1 day later), Write Only application key scoped to the bucket (2FA is on for the account)
   - [x] On the VPS: `/opt/carsua/env/logs-archive.env` created and the 03:50 cron line added to `/etc/cron.d/carsua-backup`

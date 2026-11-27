@@ -5,13 +5,19 @@ import type { ReleaseDay } from './core.js'
 export const DAYS: readonly ReleaseDay[] = [
   {
     date: '2026-11-27',
-    version: 'v2.1531',
+    version: 'v2.1538',
     items: [
       item(
         'improved',
         "В адмінці з'явилась вкладка «Логи»: пошук і фільтри за контейнером, рівнем і часом, режим «Наживо»; номери, VIN, e-mail та IP у логах частково замасковані",
         'В админке появилась вкладка «Логи»: поиск и фильтры по контейнеру, уровню и времени, режим «Вживую»; номера, VIN, e-mail и IP в логах частично замаскированы',
         'The admin page has a new "Logs" tab: search and filters by container, level and time, a "Live" mode; plates, VINs, e-mails and IPs in the logs are partly masked'
+      ),
+      item(
+        'improved',
+        'У розділі «Про застосунок» оновлено пункт про безпеку: security.txt, приватне повідомлення про вразливості та часткове маскування персональних даних у логах сервера',
+        'В разделе «О приложении» обновлен пункт о безопасности: security.txt, приватное сообщение об уязвимостях и частичное маскирование персональных данных в логах сервера',
+        'The About page security entry now mentions security.txt, private vulnerability reporting and the partial masking of personal data in server logs'
       )
     ]
   },
