@@ -60,10 +60,24 @@ case "$MODE" in
     ;;
   logs)
     : "${LOGS_BUCKET:?LOGS_BUCKET missing in logs-archive.env}"
-    # Today's file is still being appended to: upload everything except it. --immutable = never overwrite or change a remote file;
-    # the key cannot delete, and copy never deletes remotely. A failure stops here (set -e), so nothing local is removed unsent.
-    rclone copy /opt/carsua/logs "B2:$LOGS_BUCKET" --immutable --include '*.ndjson.gz' --exclude "$(date -u +%F).ndjson.gz"
-    find /opt/carsua/logs -maxdepth 1 -name '*.ndjson.gz' -mtime +3 -delete
+    # Today's file is still being appended to: upload everything except it. The B2 key is write-only (no listFiles, no delete),
+    # so rclone cannot list the bucket: --no-check-dest skips the listing and a local .sent/ marker makes reruns a no-op.
+    # A failure stops here (set -e), so no marker is written and nothing local is removed unsent.
+    today="$(date -u +%F).ndjson.gz"
+    mkdir -p /opt/carsua/logs/.sent
+    for f in /opt/carsua/logs/*.ndjson.gz; do
+      [ -e "$f" ] || continue
+      name="$(basename "$f")"
+      [ "$name" = "$today" ] && continue
+      [ -e "/opt/carsua/logs/.sent/$name" ] && continue
+      rclone copyto "$f" "B2:$LOGS_BUCKET/$name" --no-check-dest
+      touch "/opt/carsua/logs/.sent/$name"
+    done
+    # Only sent files older than 3 days are removed locally.
+    find /opt/carsua/logs -maxdepth 1 -name '*.ndjson.gz' -mtime +3 | while read -r f; do
+      [ -e "/opt/carsua/logs/.sent/$(basename "$f")" ] && rm -f "$f"
+    done
+    find /opt/carsua/logs/.sent -type f -mtime +30 -delete
     ;;
   *)
     echo "unknown mode: $MODE" >&2
