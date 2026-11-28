@@ -228,7 +228,7 @@ Branch protection on `main` is a ruleset since 2026-11-26. The `production` envi
 ## 5. Steps (open items)
 
 Tick the box and add a `docs/plan-done.md` entry when a step is finished. "Verify" is the concrete check. Order (updated 2026-11-27; `+` = do in one PR or one deploy, `∥` = runs in parallel):
-done: 1-9, 11, 21-23, 30, 33. Remaining, in order:
+done: 1-9, 11, 13-18, 21-23, 30, 33. Remaining, in order:
 
 1. **Step 32 leftovers (H7 origin IP, H11 SSH, optional terraforming)** ∥ everything below; owner-only, no code.
 2. **13 + 14 + 15**, then **16 + 17 + 18**: all infra config, one compose and Caddy deploy (13-15 touch `docker-compose.prod.yml`, 16-18 touch the Caddyfile). 17 needs a subdomain HTTPS check first.
@@ -390,13 +390,14 @@ done: 1-9, 11, 21-23, 30, 33. Remaining, in order:
 - **Alternatives / con:** preloading is hard to undo; skip the preload flag if any subdomain may ever be plain HTTP.
 - **Verify:** `curl -sI` shows the flags; hstspreload.org check is green.
 
-### Step 18 - Single source for the Cloudflare IP list [ ] · M · 🤖 · layer 7
+### Step 18 - Single source for the Cloudflare IP list [x] · M · 🤖 · layer 7
 
 - **What:** `trusted_proxies` in the Caddyfile is hard-coded while the firewall refreshes daily, so they can drift. Let `cf-firewall.sh` write a Caddy snippet that the Caddyfile imports.
 - **Files:** `infra/vps/cf-firewall.sh`, `infra/Caddyfile`, `deploy.md`.
 - **Why:** drift loses the real client IP or lets it be spoofed.
 - **Alternatives:** `caddy-cloudflare-ip` module (custom Caddy build) · **Cloudflare Tunnel** (no public origin IP at all, which also settles H7 and H11; adds a cloudflared container and full dependence on Cloudflare).
 - **Verify:** change the snippet, reload, `req.ip` stays correct behind Cloudflare.
+- **Done 2026-11-28 (code; deploy checks open in PLAN.md):** `cf-firewall.sh apply` (daily cron and boot) now also writes `/opt/carsua/compose/cloudflare-ips.caddy` (one `trusted_proxies static ...` line) from the same fetched ranges as the ipsets, and runs `caddy reload` only when the list changed (previous snippet restored if the reload fails; nothing written unless both v4 and v6 fetched fresh). The Caddyfile does `import /etc/caddy/cloudflare-ips.caddy` inside `servers {}`; compose bind-mounts it read-only. **Deviation:** a committed baseline `infra/cloudflare-ips.caddy` exists so the mount and the first reload work before the script ever ran; the deploy copies it with `rsync --ignore-existing`, otherwise every deploy would revert the live list to the repo snapshot. Tests: `caddyfile-headers.test.ts`.
 
 ### E. VPS and backups
 

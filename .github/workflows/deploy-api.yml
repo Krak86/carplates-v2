@@ -71,6 +71,8 @@ jobs:
         # --inplace: Caddy bind-mounts single files, and a rename would leave the container on the old inode.
         run: |
           rsync -az --inplace infra/docker-compose.prod.yml infra/Caddyfile infra/vector.yaml infra/loki.yaml infra/maintenance.html infra/vps/backup.sh infra/vps/cf-firewall.sh infra/vps/restore-replay-deletions.sh infra/vps/lib.sh vps:/opt/carsua/compose/
+          # Baseline only: the live file is rewritten daily by cf-firewall.sh, a plain rsync would revert it to this snapshot.
+          rsync -az --inplace --ignore-existing infra/cloudflare-ips.caddy vps:/opt/carsua/compose/
 
       - name: Write env files and origin certificate
         env:
