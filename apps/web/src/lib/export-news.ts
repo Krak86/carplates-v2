@@ -139,7 +139,6 @@ const NEWS_OUTLET_URL: Readonly<Record<string, string>> = {
   infocar: 'https://infocar.ua',
   eauto: 'https://eauto.org.ua',
   autoua: 'https://autoua.net',
-  mezha: 'https://mezha.ua',
   'novyny-live': 'https://novyny.live',
   topgir: 'https://topgir.com.ua',
   caranddriver: 'https://www.caranddriver.com',

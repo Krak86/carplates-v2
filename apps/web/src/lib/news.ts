@@ -25,7 +25,6 @@ export const NEWS_SOURCE_GROUPS = [
   { key: 'infocar', label: 'infocar.ua', hue: 25, ids: ['infocar-news', 'infocar-new-models', 'infocar-tests'] },
   { key: 'eauto', label: 'eauto.org.ua', hue: 60, ids: ['eauto'] },
   { key: 'autoua', label: 'autoua.net', hue: 95, ids: ['autoua'] },
-  { key: 'mezha', label: 'mezha.ua', hue: 140, ids: ['mezha'] },
   { key: 'novyny-live', label: 'novyny.live', hue: 170, ids: ['novyny-live'] },
   { key: 'topgir', label: 'topgir.com.ua', hue: 205, ids: ['topgir'] },
   { key: 'caranddriver', label: 'Car and Driver', hue: 240, ids: ['caranddriver'] },

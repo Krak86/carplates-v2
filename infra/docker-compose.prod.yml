@@ -45,6 +45,7 @@ services:
     ports: ['443:443']
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./cloudflare-ips.caddy:/etc/caddy/cloudflare-ips.caddy:ro # trusted_proxies list, rewritten daily by cf-firewall.sh (step 18)
       - ./maintenance.html:/srv/maintenance.html:ro
       - ./flags:/flags:ro # `touch flags/MAINTENANCE` = planned maintenance page
       - ../env/certs:/certs:ro # Cloudflare origin certificate: origin.pem + origin.key

@@ -27,6 +27,30 @@ const sourceFiles = (dir: string): string[] =>
         : []
   })
 
+describe('infra/Caddyfile trusted_proxies (security-wiki step 18)', () => {
+  const snippet = readFileSync(join(root, 'infra/cloudflare-ips.caddy'), 'utf8')
+  const compose = readFileSync(join(root, 'infra/docker-compose.prod.yml'), 'utf8')
+
+  it('imports the generated snippet instead of inlining the ranges', () => {
+    expect(caddyfile).toContain('import /etc/caddy/cloudflare-ips.caddy')
+    expect(caddyfile).not.toMatch(/^\s*trusted_proxies\s/m)
+  })
+
+  it('the baseline snippet is one trusted_proxies line of valid CIDRs', () => {
+    const lines = snippet.split('\n').filter(l => l.trim() && !l.startsWith('#'))
+    expect(lines).toHaveLength(1)
+    const cidrs = (lines[0] as string).replace('trusted_proxies static', '').trim().split(/\s+/)
+    expect(cidrs.length).toBeGreaterThanOrEqual(5)
+    for (const c of cidrs) expect(c).toMatch(/^[0-9a-fA-F:.]+\/\d+$/)
+  })
+
+  it('compose mounts the snippet and the deploy never overwrites a refreshed copy', () => {
+    expect(compose).toContain('./cloudflare-ips.caddy:/etc/caddy/cloudflare-ips.caddy')
+    const wf = readFileSync(join(root, '.github/workflows/deploy-api.yml'), 'utf8')
+    expect(wf).toContain('--ignore-existing infra/cloudflare-ips.caddy')
+  })
+})
+
 describe('infra/Caddyfile security headers', () => {
   it('defines the site and Telegram-frame CSP headers independently', () => {
     expect(cspHeaders).toHaveLength(2)
