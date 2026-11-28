@@ -1576,15 +1576,16 @@ Speaker icon beside the brand name on catalog pages; lazy popup with ua / ru / e
 - [ ] One SSH on the VPS: `/opt/carsua/compose/lib.sh` exists; `compose/.env` has `GH_OWNER`, `API_TAG_*`, `INGEST_TAG`, `ALPR_TAG` once each; `stat -c '%a' /opt/carsua/env/*.env` is `600`; `crontab -l` still lists the ingest jobs.
 - [ ] Optional: `sync_only` dispatch of Deploy API (fresh-VPS path, only matters for a rebuild).
 
-## One ordered deploy (`deploy.yml`) - built 2026-11-28, awaiting first run
+## One ordered deploy (`deploy.yml`) - built and first run green 2026-11-28, a few checks left
 
 Before: a push could start api, web and ingest deploys in parallel (3 CI runs); an api failure still let the new web go live, and ingest could run before the api migration. Now `deploy.yml` is the only trigger: `changes` -> CI once -> build all in parallel -> deploy api -> ingest -> alpr -> web, stop at the first failure (`docs/deploy.md` "Deploy order"). The four `deploy-*.yml` became reusable (`phase: build|deploy`), so env-var edits, `caddyfile-headers.test.ts` and the docs that name `deploy-api.yml` still hold. Web build -> artifact -> deploy (pins: `upload-artifact` v7.0.2, `download-artifact` v8.0.2).
 
-- [ ] Nothing was run: YAML parses, but no `actionlint`, no GitHub run, and the `changes` bash was not dry-run. First: push `stage` -> `main` (or "Run workflow" with `components=alpr`) and check the run graph: one CI, parallel builds, serial deploys.
-- [ ] `components=all` once: web artifact has `.well-known/`, `releases/<sha>/` on the VPS looks like the old rsync, `current` points at it.
+- [x] First push (PR #287, run #1) failed at startup: "nested job 'build' is requesting 'packages: write', but is only allowed 'packages: none'". GitHub checks nested job permissions before the run starts, even for jobs `if:` skips, so the deploy-api / -ingest / -alpr callers got `packages: write` too (their `deploy` jobs stay `contents: read`). Nothing was deployed.
+- [x] Run #2 (PR #288, 16m 2s) green: one CI (3m), four builds in parallel, then deploy api -> ingest -> alpr -> web in order; the `changes` job deployed all four (no successful push run to diff against yet, as designed); the `production` environment secrets and vars reached the reusable workflows through `secrets: inherit` (the api env step passed). The `⊘` boxes in the graph are the skipped half of each called workflow (`phase`), not a problem.
+- [ ] On the VPS: the web release came from the artifact (`ls -a /opt/carsua/web/releases/<sha>/` has `.well-known/`, `current` points at it).
 - [ ] Failure drill: dispatch with `image_tag` = a valid-looking SHA not in GHCR -> `deploy-api` fails, `deploy-web` shows skipped, the old api keeps serving.
 - [ ] A docs-only commit starts nothing; a `packages/shared` commit builds api + ingest + web and skips alpr; the next push after a failed run redeploys what failed (diff against the last successful push run).
-- [ ] Reusable workflows read the `production` environment secrets/vars through `secrets: inherit`: confirm `VPS_*`, `POSTGRES_PASSWORD` and `vars.PUBLIC_SITE_URL` are non-empty in the first run (a missing secret fails the api env step loudly).
+- [ ] Optional: the `production` environment asks for approval per deploy job (up to four per full run); remove required reviewers there if that is too much, the PR checks already gate `main`.
 
 ## CI log cleanup - lint warnings + noisy test output (found in Deploy Web #111 logs, 2026-11-13)
 

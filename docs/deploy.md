@@ -70,6 +70,13 @@ changes -> ci (once) -> build api | ingest | alpr | web (parallel) -> deploy api
 - **One production deploy at a time**: concurrency group `deploy-production` (a newer push replaces a queued run; the next run's diff covers it).
 - **Manual runs**: `components` = `auto` / `all` / `api` / `web` / `ingest` / `alpr`; `image_tag` = api rollback (see "Rollback"); `sync_only` = first-setup api step.
   After a run with failed jobs, "Re-run failed jobs" continues the same chain; a fresh `auto` run redeploys the components that did not finish.
+- **Reading the run graph.** Every component workflow holds both a `build` and a `deploy` job, and `phase` picks one, so each called workflow draws two boxes: the one that
+  ran and a `⊘` (skipped) one. `build-<x> / build` and `deploy-<x> / deploy` are the real ones; `deploy-<x> / build` and `build-<x> / deploy` are always skipped.
+- **Permissions gotcha.** A caller job must grant every permission any nested job asks for, even a job its `if:` skips (`packages: write` for the `build` jobs), or the whole run
+  fails at startup with "nested job ... is requesting 'packages: write', but is only allowed 'packages: none'". That is why the `deploy-*` callers in `deploy.yml` also carry it.
+- **Environment approvals.** `environment: production` on each deploy job means a required reviewer is asked once per job (up to four in a full run).
+- **Quality and Security** (`quality.yml`, `security.yml`) run on the same push in parallel and do **not** gate the deploy; the PR checks (required status checks in the `main` ruleset) are the gate.
+  `ci.yml` has no `push` trigger: it runs on PRs and again inside `deploy.yml` on the merged result.
 
 | Workflow          | Triggers on                                                                 | Does                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ----------------- | --------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
