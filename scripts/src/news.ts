@@ -20,7 +20,7 @@ import { join } from 'node:path'
 import { createDb, infocarVersions, newsItems } from '@carplates/db'
 import type { Db, NewsItemInsert } from '@carplates/db'
 import { tagNews } from '@carplates/shared'
-import { lt, sql } from 'drizzle-orm'
+import { inArray, lt, sql } from 'drizzle-orm'
 
 import { readCsv, writeCsv } from './csv-io.js'
 import { isAllowed, parseRobots } from './infocar-robots.js'
@@ -257,9 +257,14 @@ async function main(): Promise<void> {
     }
     const cutoff = new Date(Date.now() - args.keepDays * 86_400_000)
     const pruned = await db.delete(newsItems).where(lt(newsItems.publishedAt, cutoff)).returning({ url: newsItems.url })
+    // A disabled source (blocked feed, dropped outlet) must not linger in /news: drop its leftover rows.
+    const disabledIds = all.filter(s => !s.enabled).map(s => s.id)
+    const dropped = disabledIds.length
+      ? await db.delete(newsItems).where(inArray(newsItems.source, disabledIds)).returning({ url: newsItems.url })
+      : []
     const [count] = await db.select({ n: sql<number>`count(*)::int` }).from(newsItems)
     log(
-      `done: ${total} items upserted, ${pruned.length} pruned (> ${args.keepDays} days), ${count?.n ?? 0} in the table`
+      `done: ${total} items upserted, ${pruned.length} pruned (> ${args.keepDays} days), ${dropped.length} from disabled sources, ${count?.n ?? 0} in the table`
     )
   } finally {
     await close()

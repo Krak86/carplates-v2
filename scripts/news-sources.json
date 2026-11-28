@@ -44,7 +44,7 @@
     "name": "mezha.ua",
     "url": "https://mezha.ua/feed/",
     "lang": "uk",
-    "enabled": true,
+    "enabled": false,
     "onlyCategories": ["Авто", "Електромобілі"],
     "note": "tech whole-site feed, only 10 items (~3 h) — onlyCategories keeps the car tags (\"Авто\"/\"Електромобілі\", make is also a tag); poll hourly. itc.ua/ua/feed/ is NOT usable: its robots.txt has \"Disallow: */feed/\""
   },

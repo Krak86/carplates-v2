@@ -4,6 +4,18 @@ import type { ReleaseDay } from './core.js'
 /** 2026-11: newest day first. */
 export const DAYS: readonly ReleaseDay[] = [
   {
+    date: '2026-11-28',
+    version: 'v2.1555',
+    items: [
+      item(
+        'improved',
+        'Із автоновин прибрано джерело mezha.ua: його стрічку блокує захист сайту, тому нових новин звідти не було.',
+        'Из автоновостей убран источник mezha.ua: его ленту блокирует защита сайта, поэтому новых новостей оттуда не было.',
+        'The mezha.ua source is gone from the auto news: the site blocks our feed requests, so no new items had arrived from it'
+      )
+    ]
+  },
+  {
     date: '2026-11-27',
     version: 'v2.1544',
     items: [

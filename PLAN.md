@@ -627,12 +627,16 @@ and the CSV is committed.
 `NewsTicker`, result-card 📰 News section (last) and a desktop-only scroll-in `NewsWidget`. **/news archive built 2026-10-06** (`c04716c`; write-up in
 `docs/plan-done.md`, "Auto news archive"): paged list with outlet chips, date sort and title search, linked from the sidebar and the ticker. **Open:**
 
-- **Schedule it:** cron on the VPS (Phase 4), daily per `docs/SCHEDULE.md` (every ~6 h / hourly only if the tiny-window whole-site feed, mezha, should pay off). Not part of `ingest:all`.
+- **Schedule it:** cron on the VPS (Phase 4), daily per `docs/SCHEDULE.md`. Not part of `ingest:all`.
 - **Measure** (the plan's step 7): items/day per source, % tagged with a make / model, and for the top-50 registry (brand, model) pairs how many have ≥1 news
   item in 30/180 days — the DB has had one manual run so far.
 - **English sources added 2026-10-05:** Car and Driver, Motor1, Carscoops (news + reviews) — verified, see the table in `docs/plan-done.md`. Open: the Ukrainian UI sends `lang=uk` so it never shows them; decide whether English items should appear for uk/ru users, and re-measure tag rates after a few days.
 - **More sources:** topgir.com.ua added 2026-10-09 (`docs/plan-done.md`, "topgir.com.ua feed"); still to check: auto.ria.com/news, autocentre.ua, avtoradnyk, nv.ua/auto (robots first, then categories, then a tagger run on the real items).
-- **Backfill** beyond the feed windows: `news.infocar.ua` paging and mezha's `/tag/avto/` HTML pages (robots check first) — not RSS.
+- **Backfill** beyond the feed windows: `news.infocar.ua` paging — not RSS.
+- [x] mezha.ua RSS disabled (2026-11-28): Cloudflare challenges the VPS IP (see `docs/plan-done.md` source table); chip, seed rows and DB rows removed, the ingest now drops rows of any disabled source
+  - [ ] After deploy: `pnpm ingest:news` once on the VPS (log shows `N from disabled sources`)
+  - [ ] Optional: ask mezha.ua to allowlist the VPS IP / user agent `carsua.app-ingest/1.0`, then set `enabled: true`
+  - [ ] Check `ingest:press` (mezha.ua HTML, same VPS) in the job logs / `/data-status`; if it is challenged too, decide whether to hide the mezha press links and the About entry
 - **Hot / News toggle** (the original design's `kind='hot'`: ≤7 days AND (model match OR new-models source)) — not built; the News section lists model then make news.
 - Tagger limits seen: "Stellantis" resolves to Peugeot, "ID.4 and ID.5 → ID.Tiguan" to the Tiguan; brands outside the infocar catalog (Alpine) stay untagged.
 - Browser-check the widget/section at tablet and phone widths (only desktop was checked); with the left sidebar open at ~1400 px the widget may overlap the card.
