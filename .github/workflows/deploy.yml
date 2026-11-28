@@ -170,9 +170,15 @@ jobs:
 
   # Phase 2: deploy in dependency order. Each job lists every earlier job in `needs`, so one failure anywhere upstream skips the rest
   # (a skipped component, one that did not change, does not block the chain).
+  # The deploy callers carry `packages: write` too: GitHub checks every nested job's permissions against the caller before the run starts,
+  # even a job that `if:` skips, and the called workflows' `build` jobs need it. The `deploy` jobs themselves stay at `contents: read`
+  # (the called workflows' top-level permissions).
   deploy-api:
     needs: [changes, build-api, build-ingest, build-alpr, build-web]
     if: ${{ !cancelled() && !contains(needs.*.result, 'failure') && needs.changes.outputs.api == 'true' }}
+    permissions:
+      contents: read
+      packages: write
     uses: ./.github/workflows/deploy-api.yml
     with:
       phase: deploy
@@ -183,6 +189,9 @@ jobs:
   deploy-ingest:
     needs: [changes, build-api, build-ingest, build-alpr, build-web, deploy-api]
     if: ${{ !cancelled() && !contains(needs.*.result, 'failure') && needs.changes.outputs.ingest == 'true' }}
+    permissions:
+      contents: read
+      packages: write
     uses: ./.github/workflows/deploy-ingest.yml
     with:
       phase: deploy
@@ -191,6 +200,9 @@ jobs:
   deploy-alpr:
     needs: [changes, build-api, build-ingest, build-alpr, build-web, deploy-api, deploy-ingest]
     if: ${{ !cancelled() && !contains(needs.*.result, 'failure') && needs.changes.outputs.alpr == 'true' }}
+    permissions:
+      contents: read
+      packages: write
     uses: ./.github/workflows/deploy-alpr.yml
     with:
       phase: deploy
