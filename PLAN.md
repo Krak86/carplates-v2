@@ -1773,9 +1773,9 @@ Redacted VPS container logs (plates / VINs / emails / IPs partly masked) searcha
   - [x] On the VPS: `/opt/carsua/env/logs-archive.env` created and the 03:50 cron line added to `/etc/cron.d/carsua-backup`
   - [ ] Optional: healthchecks.io check for `HC_PING_LOGS` (skipped for now; add the URL to `logs-archive.env` later)
   - [x] Deploy API run (PR #278, then the `cap_add: [DAC_OVERRIDE]` fix in #279); `loki` and `vector` up, `vector` healthy, `/opt/carsua/logs` holds `2026-11-27.ndjson.gz`
-  - [x] Masking in Loki checked on prod 2026-11-27: the `admin logs query` audit line holds `AA****BB` in its LogQL, no raw plate. Still open: the archive file (`zcat /opt/carsua/logs/<day>.ndjson.gz 2>/dev/null | grep -c AA1234BB` must print 0; a file still being written ends with "unexpected end of file", that is normal, check it after the day ends)
-  - [ ] Run `bash /opt/carsua/compose/backup.sh logs` once (day after the first logs), check the file is in B2 and a second run changes nothing; local files older than 3 days are gone
-  - [ ] Verify the B2 key cannot delete or download (`rclone deletefile` and `rclone copy B2:carsua-logs/<file> .` both fail)
+  - [x] Masking in Loki checked on prod 2026-11-27: the `admin logs query` audit line holds `AA****BB` in its LogQL, no raw plate. Archive file checked 2026-11-28: `zcat /opt/carsua/logs/2026-11-27.ndjson.gz | grep -c AA1234BB` printed 0
+  - [x] Ran `backup.sh logs` 2026-11-28: `2026-11-27.ndjson.gz` is in B2 (914 KB), a second run uploads nothing. Fix needed first: the write-only key cannot list, so `rclone copy --immutable` got 401; now `copyto --no-check-dest` + `logs/.sent/` markers. Still to see: local files older than 3 days are gone (first on 2026-12-01)
+  - [x] B2 key cannot delete or download (`rclone deletefile` and `rclone copy B2:carsua-logs/<file> .` both 401, 2026-11-28); the key was rotated afterwards (its secret had been pasted in screenshots)
   - [x] Loki unreachable from outside (`curl -m 5 http://<vps-ip>:3100/ready` timed out, 2026-11-27)
   - [x] Logged-out request gets 401 on `/api/admin/logs` (2026-11-27)
   - [ ] A signed-in non-admin gets 403 on `/api/admin/logs` (covered by the controller test, not yet tried on prod)
