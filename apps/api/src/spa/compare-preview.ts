@@ -3,7 +3,7 @@ import { denormalizePlate, parseCompareRef, type CompareRef } from '@carplates/s
 
 import { CatalogService } from '../catalog/catalog.service.js'
 import { PreviewService } from './preview.service.js'
-import { SITE_NAME, type Lang } from './spa-text.js'
+import { DEFAULT_LANG, LANGS, SITE_NAME, type Lang } from './spa-text.js'
 
 /** One side of a shared comparison, short enough for a link-preview title and the card. */
 export type CompareSide = {
@@ -34,13 +34,14 @@ export function composeComparePreview(lang: Lang, a: CompareSide, b: CompareSide
   // Plates are written in Latin letters (short, and the same as in the shared link).
   const name = (s: CompareSide): string => s.car || s.id || '-'
   const tail = (s: CompareSide): string => [s.id, s.year].filter(Boolean).join(' ')
+  // `LANGS.includes` guard: an unknown key would call `undefined(...)` (CodeQL js/unvalidated-dynamic-method-call, CWE-754).
   return {
     title: `${sideLabel(a) || '-'} vs ${sideLabel(b) || '-'} | ${SITE_NAME}`,
-    description: DESCRIPTION[lang](withYear(a), withYear(b)),
+    description: DESCRIPTION[LANGS.includes(lang) ? lang : DEFAULT_LANG](withYear(a), withYear(b)),
     // The card has a big headline (two short lines) and a small description: names above, plates and years below.
     card: {
       title: `${name(a)} vs ${name(b)}`,
-      description: `${CARD_TITLE[lang]}: ${tail(a)} / ${tail(b)}`
+      description: `${CARD_TITLE[LANGS.includes(lang) ? lang : DEFAULT_LANG]}: ${tail(a)} / ${tail(b)}`
     }
   }
 }

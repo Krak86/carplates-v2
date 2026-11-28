@@ -35,8 +35,10 @@ export const alternateLinks = (siteUrl: string, path: string): { hreflang: strin
   { hreflang: 'x-default', href: langUrl(siteUrl, path, DEFAULT_LANG) }
 ]
 
+// Escapes all five HTML-special characters, `'` included, so a value is safe in text and in either attribute quote
+// (CodeQL js/reflected-xss, CWE-79/116).
 const esc = (s: string): string =>
-  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')
 
 /** Render the per-page meta block injected into index.html. */
 export function renderMetaTags(m: MetaInput): string {
@@ -92,10 +94,14 @@ export function injectMeta(html: string, metaBlock: string): string {
   const base = metaBlock.includes(HERO_PRELOAD_MARK)
     ? html.replace(/<link rel="preload" as="image" type="image\/avif"[^>]*>\s*/, '')
     : html
-  return base
-    .replace(/<title>[\s\S]*?<\/title>\s*/i, '')
-    .replace(/<meta\s+name="description"[^>]*>\s*/i, '')
-    .replace('</head>', `    ${metaBlock}\n  </head>`)
+  return (
+    base
+      .replace(/<title>[\s\S]*?<\/title>\s*/i, '')
+      .replace(/<meta\s+name="description"[^>]*>\s*/i, '')
+      // A replacer function: a string would read `$&` / `$'` in the (user-influenced) meta block as replacement patterns,
+      // copying parts of index.html into the page (CodeQL js/reflected-xss, CWE-79/116).
+      .replace('</head>', () => `    ${metaBlock}\n  </head>`)
+  )
 }
 
 /**

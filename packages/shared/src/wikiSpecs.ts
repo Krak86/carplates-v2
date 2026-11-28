@@ -626,7 +626,9 @@ function splitTop(text: string, seps: readonly string[]): string[] {
   return out
 }
 
-const CELL_ATTRS = /^\s*(?:[\w-]+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s"']+)\s*)+$/
+// The unquoted value excludes `=` and must end at whitespace: otherwise `a=!-=!-=…` could be split into attributes in
+// exponentially many ways (CodeQL js/redos, CWE-1333 / CWE-400).
+const CELL_ATTRS = /^\s*(?:[\w-]+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s"'=]+(?!\S))\s*)+$/
 
 /** `style="x" rowspan=2 | text` → attributes + text; a single `|` outside templates / links separates them. */
 function splitCellAttrs(s: string): { attrs: string; body: string } {
@@ -654,8 +656,10 @@ function spanOf(attrs: string, name: 'rowspan' | 'colspan'): number {
 }
 
 function headingOf(line: string): { level: number; text: string } | null {
-  const m = /^(={2,6})\s*(.*?)\s*\1\s*$/.exec(line)
-  return m ? { level: m[1]!.length, text: expandWikitext(m[2]!).join(' ') } : null
+  // Trimmed first: `\s*(.*?)\s*` around a lazy group is quadratic on long runs of spaces
+  // (CodeQL js/polynomial-redos, CWE-1333 / CWE-400).
+  const m = /^(={2,6})(.*?)\1$/.exec(line.trim())
+  return m ? { level: m[1]!.length, text: expandWikitext(m[2]!.trim()).join(' ') } : null
 }
 
 type RawCell = { attrs: string; body: string; header: boolean }
@@ -998,7 +1002,9 @@ function addDim(out: TableSpecs['dims'], kind: DimKind, lines: string[]): void {
 
 /** `1999–2002` / `2003` / `2017–present` → [from, to]; null for anything else. */
 function yearSpan(label: string): [number, number] | null {
-  const m = /^\s*(\d{4})\s*(?:[–—-]\s*(\d{4}|present|now)?\s*)?$/i.exec(label)
+  // Trimmed first, so no `\s*` sits next to another one (quadratic on long runs of spaces;
+  // CodeQL js/polynomial-redos, CWE-1333 / CWE-400).
+  const m = /^(\d{4})(?:\s*[–—-]\s*(\d{4}|present|now)?)?$/i.exec(label.trim())
   if (!m) return null
   const from = Number(m[1])
   const open = !m[2] ? /[–—-]/.test(m[0]) : !/^\d/.test(m[2])

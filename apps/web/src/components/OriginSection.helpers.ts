@@ -207,7 +207,10 @@ export function buildOriginChip(
 export function sourceLabel(url: string): string {
   try {
     const host = new URL(url).hostname.replace(/^www\./, '')
-    return host.endsWith('wikidata.org') ? 'Wikidata' : host.endsWith('wikipedia.org') ? 'Wikipedia' : host
+    // Exact host or a subdomain: a bare `endsWith('wikidata.org')` also matched `evilwikidata.org`
+    // (CodeQL js/incomplete-url-substring-sanitization, CWE-20).
+    const onDomain = (domain: string): boolean => host === domain || host.endsWith(`.${domain}`)
+    return onDomain('wikidata.org') ? 'Wikidata' : onDomain('wikipedia.org') ? 'Wikipedia' : host
   } catch {
     return url
   }

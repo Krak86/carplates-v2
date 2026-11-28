@@ -198,7 +198,8 @@ describe('buildExportReport', () => {
     expect(videos?.type).toBe('links')
     // Euro NCAP's photos are not cleared for reuse (DATASETS_PLAN "Euro NCAP terms") — never exported.
     const imageUrls = images?.type === 'links' ? images.links.map(l => l.url) : []
-    expect(imageUrls.some(u => u.includes('euroncap.com'))).toBe(false)
+    // Compare the parsed host, not a substring (CodeQL js/incomplete-url-substring-sanitization, CWE-20).
+    expect(imageUrls.some(u => new URL(u).hostname.endsWith('euroncap.com'))).toBe(false)
     if (videos?.type === 'links') expect(videos.links.map(l => l.url)).toContain('https://youtu.be/abcdefghijk')
   })
 

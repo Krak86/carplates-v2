@@ -52,10 +52,11 @@ const decode = (s: string): string =>
   s
     .replace(/&#39;|&apos;/g, "'")
     .replace(/&quot;/g, '"')
-    .replace(/&amp;/g, '&')
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
     .replace(/&nbsp;/g, ' ')
+    // Last, or `&amp;lt;` would be unescaped twice (CodeQL js/double-escaping, CWE-20/116).
+    .replace(/&amp;/g, '&')
 
 /** `aug-20` → `{ year: 2020, month: 8 }`. */
 export function parseMonthSlug(slug: string): { year: number; month: number } | null {
@@ -119,10 +120,12 @@ export function parseMonthCards(html: string, year: number): MonthCard[] {
 }
 
 function tokens(html: string): string[] {
+  // Case-insensitive, whitespace-tolerant end tags: `<SCRIPT>` / `</script >` slipped past the old filters
+  // (CodeQL js/bad-tag-filter, CWE-20/80/116/184/185/186). Output is plain text, never rendered as HTML.
   return decode(
     html
-      .replace(/<svg[\s\S]*?<\/svg>/g, '')
-      .replace(/<script[\s\S]*?<\/script>/g, '')
+      .replace(/<svg[\s\S]*?<\/svg\s*>/gi, '')
+      .replace(/<script[\s\S]*?<\/script\s*>/gi, '')
       .replace(/<[^>]+>/g, '|')
   )
     .split('|')

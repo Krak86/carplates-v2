@@ -41,7 +41,9 @@ export function toPlainText(report: ExportReport): string {
 }
 
 function escapeMd(value: string): string {
-  return value.replace(/\|/g, '\\|').replace(/\r?\n/g, '<br>')
+  // The backslash is escaped first, or a value ending in `\` would cancel the `\|` escape that follows
+  // (CodeQL js/incomplete-sanitization, CWE-20/80/116).
+  return value.replace(/\\/g, '\\\\').replace(/\|/g, '\\|').replace(/\r?\n/g, '<br>')
 }
 
 function sectionToMarkdown(section: ExportSection): string[] {

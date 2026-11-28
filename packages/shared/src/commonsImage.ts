@@ -40,11 +40,17 @@ export function titleMentionsModel(title: string, model: string): boolean {
   return !key || normalize(title).includes(key)
 }
 
+/**
+ * A year as regex source: only its digits, escaped, so it can never change the meaning of the pattern it is put into.
+ * CodeQL js/regex-injection (CWE-400): a value built into a RegExp must be escaped (ReDoS / altered match).
+ */
+const yearSource = (year: number): string => String(Math.trunc(year)).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
 /** The year as its own token — not part of a date stamp like `(2008-11-12)` or a longer number. */
 export function hasStandaloneYear(title: string, year: number): boolean {
   // Full dates (2008-11-12) and year-month stamps (2026-09) say when a photo was taken, not which model year it shows.
   const withoutDates = title.replace(/\d{4}-\d{2}(?:-\d{2})?(?!\d)/g, ' ')
-  return new RegExp(`(?<!\\d)${year}(?!\\d)`).test(withoutDates)
+  return new RegExp(`(?<!\\d)${yearSource(year)}(?!\\d)`).test(withoutDates)
 }
 
 /**
@@ -54,10 +60,11 @@ export function hasStandaloneYear(title: string, year: number): boolean {
  */
 export function isModelYearTitle(title: string, year: number): boolean {
   const name = title.replace(/^File:/i, '').replace(/_/g, ' ')
-  const afterGenerationCode = new RegExp(`\\([^()]*?[A-Za-z0-9-]*\\d[A-Za-z0-9-]*\\s*,\\s*${year}(?!\\d)[^()]*\\)`)
+  const y = yearSource(year)
+  const afterGenerationCode = new RegExp(`\\([^()]*?[A-Za-z0-9-]*\\d[A-Za-z0-9-]*\\s*,\\s*${y}(?!\\d)[^()]*\\)`)
   // Flickr imports: "Range Rover Velar D300 (2024) (54732316186).jpg" — the lone year is followed by the photo id.
-  const beforeFlickrId = new RegExp(`\\(${year}\\)\\s*\\(\\d{6,}\\)`)
-  return new RegExp(`^${year}(?![\\d-])`).test(name) || afterGenerationCode.test(name) || beforeFlickrId.test(name)
+  const beforeFlickrId = new RegExp(`\\(${y}\\)\\s*\\(\\d{6,}\\)`)
+  return new RegExp(`^${y}(?![\\d-])`).test(name) || afterGenerationCode.test(name) || beforeFlickrId.test(name)
 }
 
 /** Title-only half of the score (no image metadata needed): null = reject, higher is better. The pre-warm script

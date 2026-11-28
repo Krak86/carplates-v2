@@ -342,7 +342,9 @@ export function catalogIndexSeoBlock(makes: CatalogMakeSummary[], lang: Lang): s
 
 /** Puts the block into the empty `#root` of index.html (React 19 clears it on the first render). */
 export function injectRoot(html: string, block: string): string {
-  return html.replace(/<div id="root">\s*<\/div>/, `<div id="root">${block}</div>`)
+  // A replacer function: a string would read `$&` / `$'` in the block as replacement patterns
+  // (CodeQL js/reflected-xss, CWE-79/116).
+  return html.replace(/<div id="root">\s*<\/div>/, () => `<div id="root">${block}</div>`)
 }
 
 /** The page's data as a JSON script (not executed, so CSP-neutral); `<` is escaped so no value can close the element. */

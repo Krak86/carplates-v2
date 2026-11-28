@@ -15,7 +15,9 @@ export const NOINDEX = new Set(['/news'])
 /** Indexable static paths — same set that gets a canonical (non-noindex) meta block. Plate/VIN pages are noindex. */
 export const sitemapPaths = (): string[] => Object.keys(STATIC_PAGES).filter(p => !EXCLUDED.has(p) && !NOINDEX.has(p))
 
-const esc = (s: string): string => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+// Quotes are escaped too: the result is used inside `href="…"` (CodeQL js/incomplete-html-attribute-sanitization, CWE-20/79/116).
+const esc = (s: string): string =>
+  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;')
 
 /** The sitemap files, listed by the index at `/sitemap.xml` (each stays far below the 50,000-URL and IndexNow 10,000-URL limits). */
 export const SITEMAP_FILES = ['/sitemap-pages.xml', '/sitemap-cars.xml'] as const

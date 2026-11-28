@@ -223,7 +223,8 @@ async function run(db: Db, args: Args): Promise<void> {
   let models = [...byModel.entries()]
   if (args.only) {
     const want = args.only.replace(/\s+/g, '')
-    models = models.filter(([k]) => k.replace('|', '') === want)
+    // replaceAll: `replace('|', '')` removed only the first pipe (CodeQL js/incomplete-sanitization, CWE-20/116).
+    models = models.filter(([k]) => k.replaceAll('|', '') === want)
   }
   models = models.slice(0, args.limit)
   if (models.length === 0) return log('no matching models in registry.model_generations (run ingest:generations first)')

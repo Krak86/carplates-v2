@@ -67,7 +67,12 @@ export function qualifyingCandidates(hits: CandidateHit[], model: string): Candi
       height: info.thumbheight ?? height,
       photoYear: candidatePhotoYear(title),
       titleScore,
-      author: meta?.Artist?.value.replace(/<[^>]+>/g, '').trim() || null,
+      // Stray `<` / `>` dropped after the tags (CodeQL js/incomplete-multi-character-sanitization, CWE-20/80/116).
+      author:
+        meta?.Artist?.value
+          .replace(/<[^>]*>/g, '')
+          .replace(/[<>]/g, '')
+          .trim() || null,
       license: meta?.LicenseShortName?.value ?? null,
       licenseUrl: meta?.LicenseUrl?.value ?? null
     })

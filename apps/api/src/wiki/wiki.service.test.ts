@@ -73,11 +73,14 @@ const yearPayload = {
   }
 }
 
+// Routes on the parsed host, not a URL substring (CodeQL js/incomplete-url-substring-sanitization, CWE-20).
+const hostOf = (url: string): string => new URL(url).hostname
+
 /** Routes by request shape: Wikipedia text, Wikipedia lead image, Commons year search, Commons attribution. */
 function routeFetch(overrides: { year?: () => Response; lead?: () => Response } = {}): void {
   vi.mocked(fetch).mockImplementation(async input => {
     const url = String(input)
-    if (url.includes('commons.wikimedia.org')) {
+    if (hostOf(url) === 'commons.wikimedia.org') {
       return url.includes('titles=')
         ? jsonResponse(attributionPayload)
         : (overrides.year?.() ?? jsonResponse({ query: {} }))
@@ -161,9 +164,9 @@ describe('WikiService', () => {
   it('falls back to the English article when the UI-language edition has none', async () => {
     vi.mocked(fetch).mockImplementation(async input => {
       const url = String(input)
-      if (url.includes('commons.wikimedia.org')) return jsonResponse({ query: {} })
+      if (hostOf(url) === 'commons.wikimedia.org') return jsonResponse({ query: {} })
       if (url.includes('pithumbsize')) return jsonResponse(leadPayload)
-      return url.includes('en.wikipedia.org') ? jsonResponse(textPayload) : jsonResponse({ query: {} })
+      return hostOf(url) === 'en.wikipedia.org' ? jsonResponse(textPayload) : jsonResponse({ query: {} })
     })
     const { service } = makeService()
 
@@ -179,9 +182,9 @@ describe('WikiService', () => {
   it('tries uk, then ru, then en for a Ukrainian UI and takes the first edition with the article', async () => {
     vi.mocked(fetch).mockImplementation(async input => {
       const url = String(input)
-      if (url.includes('commons.wikimedia.org')) return jsonResponse({ query: {} })
+      if (hostOf(url) === 'commons.wikimedia.org') return jsonResponse({ query: {} })
       if (url.includes('pithumbsize')) return jsonResponse(leadPayload)
-      return url.includes('ru.wikipedia.org') ? jsonResponse(textPayload) : jsonResponse({ query: {} })
+      return hostOf(url) === 'ru.wikipedia.org' ? jsonResponse(textPayload) : jsonResponse({ query: {} })
     })
     const { service } = makeService()
 

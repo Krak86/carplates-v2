@@ -89,6 +89,8 @@ function args(inner: string): { pos: string[]; named: Record<string, string> } {
 export function cleanIpa(raw: string): string | null {
   const s = raw
     .replace(/<[^>]+>/g, '')
+    // Stray `<` / `>` dropped so removing one tag cannot leave another behind (CodeQL js/incomplete-multi-character-sanitization).
+    .replace(/[<>]/g, '')
     .replace(/\[\[(?:[^\]|]*\|)?([^\]]*)\]\]/g, '$1')
     .replace(/^[[/]+|[\]/]+$/g, '')
     .trim()

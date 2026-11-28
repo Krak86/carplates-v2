@@ -452,7 +452,13 @@ export function shapeWikiExtract(raw: string): { intro: string; more: string | n
   return { intro, more: more || null }
 }
 
-export const stripHtml = (value: string | undefined): string | null => value?.replace(/<[^>]+>/g, '').trim() || null
+// Stray `<` / `>` are dropped after the tags, so `<<b>script>` cannot reassemble into a tag
+// (CodeQL js/incomplete-multi-character-sanitization, CWE-20/80/116).
+export const stripHtml = (value: string | undefined): string | null =>
+  value
+    ?.replace(/<[^>]*>/g, '')
+    .replace(/[<>]/g, '')
+    .trim() || null
 
 export function attributionFromMeta(meta: ExtMetadata | undefined): WikiImageAttribution | null {
   if (!meta) return null

@@ -827,9 +827,10 @@ const VALUE_NOTE: Record<Lang, (range: string) => string> = {
 /** `?section=value` share link: the plate text with the estimated-value range put first. */
 export function valuePageText(lang: Lang, base: PageText, lowEur: number, highEur: number): PageText {
   const fmt = (n: number): string => n.toLocaleString('en-US')
+  // `LANGS.includes` guard: an unknown key would call `undefined(...)` (CodeQL js/unvalidated-dynamic-method-call, CWE-754).
   return {
     title: base.title,
-    description: `${VALUE_NOTE[lang](`~€${fmt(lowEur)}–${fmt(highEur)}`)} ${base.description}`
+    description: `${VALUE_NOTE[LANGS.includes(lang) ? lang : DEFAULT_LANG](`~€${fmt(lowEur)}–${fmt(highEur)}`)} ${base.description}`
   }
 }
 

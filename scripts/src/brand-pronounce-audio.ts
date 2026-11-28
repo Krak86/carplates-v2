@@ -83,9 +83,12 @@ export function fileLang(name: string): string | null {
 const stripHtml = (s: string): string =>
   s
     .replace(/<[^>]*>/g, '')
-    .replace(/&amp;/g, '&')
+    // Stray `<` / `>` dropped so removing one tag cannot leave another behind (CodeQL js/incomplete-multi-character-sanitization).
+    .replace(/[<>]/g, '')
     .replace(/&quot;/g, '"')
     .replace(/&#0?39;/g, "'")
+    // Last, or `&amp;quot;` would be unescaped twice (CodeQL js/double-escaping, CWE-20/116).
+    .replace(/&amp;/g, '&')
     .replace(/\s+/g, ' ')
     .trim()
 
