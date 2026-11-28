@@ -1,9 +1,9 @@
 name: CI
 
+# No `push` trigger: `check` is a required status check on PRs into main (ruleset), so everything on main already passed it, and a
+# deploying push runs it again through deploy.yml (workflow_call) on the merged result, right before anything is built.
 on:
   pull_request:
-  push:
-    branches: [main]
   workflow_call:
 
 permissions:

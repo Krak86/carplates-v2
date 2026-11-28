@@ -1,0 +1,205 @@
+name: Deploy
+
+# One ordered production deploy (docs/deploy.md "Deploy order"):
+#   changes -> ci (once) -> build every changed image/bundle in parallel -> deploy api -> ingest -> alpr -> web, stopping at the first failure.
+# Nothing reaches the VPS unless every build passed, and the web goes last so it never goes live in front of an api that failed to deploy.
+# Each step is still atomic on its own (api blue/green, web symlink swap); forward-only: no automatic rollback, so api/db/ingest changes
+# must stay backward compatible with the previous release (expand/contract migrations, additive API changes).
+# The component workflows (deploy-api / -ingest / -alpr / -web .yml) are reusable and run with a `phase` input: build, then deploy.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/api/**'
+      - 'apps/web/**'
+      - 'packages/shared/**'
+      - 'packages/db/**'
+      - 'scripts/**'
+      - 'services/alpr/**'
+      - 'infra/**'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - '.github/workflows/deploy*.yml'
+      - '.github/actions/**'
+  workflow_dispatch:
+    inputs:
+      components:
+        description: 'What to deploy. auto = whatever changed since the last successful push deploy; all = everything'
+        type: choice
+        options: [auto, all, api, web, ingest, alpr]
+        default: auto
+      sync_only:
+        description: 'First setup: copy compose files + secrets and start only Postgres (restore the DB dump, then run again without this). Api only'
+        type: boolean
+        default: false
+      image_tag:
+        description: 'Api rollback: an earlier image tag (a full commit SHA already in ghcr.io). Skips CI and the build and runs the blue/green switch with that image. Empty = deploy this commit'
+        type: string
+        default: ''
+
+# One production deploy at a time across all components. A newer push replaces a queued (not yet started) run; that is safe because
+# `changes` diffs against the last SUCCESSFUL push run, so what the replaced run would have shipped is picked up by the next one.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  changes:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      api: ${{ steps.detect.outputs.api }}
+      web: ${{ steps.detect.outputs.web }}
+      ingest: ${{ steps.detect.outputs.ingest }}
+      alpr: ${{ steps.detect.outputs.alpr }}
+      any: ${{ steps.detect.outputs.any }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # the diff base can be several commits back
+      - id: detect
+        env:
+          GH_TOKEN: ${{ github.token }}
+          COMPONENTS: ${{ inputs.components }}
+          IMAGE_TAG: ${{ inputs.image_tag }}
+        run: |
+          set -euo pipefail
+          api=false web=false ingest=false alpr=false
+
+          if [ -n "$IMAGE_TAG" ]; then
+            api=true # a rollback is the api switch only
+            echo "mode: rollback of api to $IMAGE_TAG"
+          elif [ -n "$COMPONENTS" ] && [ "$COMPONENTS" != auto ]; then
+            echo "mode: manual ($COMPONENTS)"
+            case "$COMPONENTS" in
+              all) api=true web=true ingest=true alpr=true ;;
+              api) api=true ;;
+              web) web=true ;;
+              ingest) ingest=true ;;
+              alpr) alpr=true ;;
+              *) echo "::error::unknown components value '$COMPONENTS'"; exit 1 ;;
+            esac
+          else
+            # Base = the last successful PUSH run of this workflow, not github.event.before: a failed or replaced run leaves its
+            # components undeployed, and the next run must pick them up. No successful run yet (or the commit is gone): deploy all.
+            base=$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/deploy.yml/runs?branch=main&event=push&status=success&per_page=1" \
+              --jq '.workflow_runs[0].head_sha // empty' || true)
+            if [ -z "$base" ] || ! git cat-file -e "${base}^{commit}" 2>/dev/null; then
+              echo "mode: auto, no usable base (last successful push run: '${base:-none}'): deploying everything"
+              api=true web=true ingest=true alpr=true
+            else
+              echo "mode: auto, diff ${base:0:8}..${GITHUB_SHA:0:8}"
+              files=$(git diff --name-only "$base" "$GITHUB_SHA")
+              printf '%s\n' "$files"
+              # Same path lists the four workflows had as push filters. The ingest image ignores the release/version file.
+              ingest_files=$(printf '%s\n' "$files" | grep -v '^packages/shared/src/releases\.ts$' || true)
+              if grep -Eq '^\.github/workflows/deploy\.yml$' <<<"$files"; then
+                api=true web=true ingest=true alpr=true
+              fi
+              grep -Eq '^(apps/api/|packages/shared/|packages/db/|infra/|pnpm-lock\.yaml$|pnpm-workspace\.yaml$|\.github/actions/|\.github/workflows/deploy-api\.yml$)' <<<"$files" && api=true
+              grep -Eq '^(apps/web/|packages/shared/|pnpm-lock\.yaml$|pnpm-workspace\.yaml$|\.github/actions/|\.github/workflows/deploy-web\.yml$)' <<<"$files" && web=true
+              grep -Eq '^(scripts/|packages/shared/|packages/db/|pnpm-lock\.yaml$|pnpm-workspace\.yaml$|infra/vps/(run-ingest|ingest-status|deploy-ingest|lib)\.sh$|infra/vps/ingest\.cron$|infra/ci/lib\.sh$|\.github/actions/|\.github/workflows/deploy-ingest\.yml$)' <<<"$ingest_files" && ingest=true
+              grep -Eq '^(services/alpr/|infra/vps/(deploy-alpr|lib)\.sh$|\.github/actions/|\.github/workflows/deploy-alpr\.yml$)' <<<"$files" && alpr=true
+            fi
+          fi
+
+          any=false
+          if [ "$api" = true ] || [ "$web" = true ] || [ "$ingest" = true ] || [ "$alpr" = true ]; then any=true; fi
+          {
+            echo "api=$api"; echo "web=$web"; echo "ingest=$ingest"; echo "alpr=$alpr"; echo "any=$any"
+          } >> "$GITHUB_OUTPUT"
+          {
+            echo "### Deploy plan"
+            echo "| api | web | ingest | alpr |"
+            echo "| --- | --- | --- | --- |"
+            echo "| $api | $web | $ingest | $alpr |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  ci:
+    needs: changes
+    if: ${{ needs.changes.outputs.any == 'true' && !inputs.image_tag }}
+    uses: ./.github/workflows/ci.yml
+
+  # Phase 1: build everything that changed. Any failure here means nothing is deployed.
+  build-api:
+    needs: [changes, ci]
+    if: ${{ !cancelled() && !contains(needs.*.result, 'failure') && needs.changes.outputs.api == 'true' && !inputs.image_tag }}
+    permissions:
+      contents: read
+      packages: write
+    uses: ./.github/workflows/deploy-api.yml
+    with:
+      phase: build
+    secrets: inherit
+
+  build-ingest:
+    needs: [changes, ci]
+    if: ${{ !cancelled() && !contains(needs.*.result, 'failure') && needs.changes.outputs.ingest == 'true' }}
+    permissions:
+      contents: read
+      packages: write
+    uses: ./.github/workflows/deploy-ingest.yml
+    with:
+      phase: build
+    secrets: inherit
+
+  build-alpr:
+    needs: [changes, ci]
+    if: ${{ !cancelled() && !contains(needs.*.result, 'failure') && needs.changes.outputs.alpr == 'true' }}
+    permissions:
+      contents: read
+      packages: write
+    uses: ./.github/workflows/deploy-alpr.yml
+    with:
+      phase: build
+    secrets: inherit
+
+  build-web:
+    needs: [changes, ci]
+    if: ${{ !cancelled() && !contains(needs.*.result, 'failure') && needs.changes.outputs.web == 'true' }}
+    uses: ./.github/workflows/deploy-web.yml
+    with:
+      phase: build
+    secrets: inherit
+
+  # Phase 2: deploy in dependency order. Each job lists every earlier job in `needs`, so one failure anywhere upstream skips the rest
+  # (a skipped component, one that did not change, does not block the chain).
+  deploy-api:
+    needs: [changes, build-api, build-ingest, build-alpr, build-web]
+    if: ${{ !cancelled() && !contains(needs.*.result, 'failure') && needs.changes.outputs.api == 'true' }}
+    uses: ./.github/workflows/deploy-api.yml
+    with:
+      phase: deploy
+      sync_only: ${{ inputs.sync_only == true }}
+      image_tag: ${{ inputs.image_tag || '' }}
+    secrets: inherit
+
+  deploy-ingest:
+    needs: [changes, build-api, build-ingest, build-alpr, build-web, deploy-api]
+    if: ${{ !cancelled() && !contains(needs.*.result, 'failure') && needs.changes.outputs.ingest == 'true' }}
+    uses: ./.github/workflows/deploy-ingest.yml
+    with:
+      phase: deploy
+    secrets: inherit
+
+  deploy-alpr:
+    needs: [changes, build-api, build-ingest, build-alpr, build-web, deploy-api, deploy-ingest]
+    if: ${{ !cancelled() && !contains(needs.*.result, 'failure') && needs.changes.outputs.alpr == 'true' }}
+    uses: ./.github/workflows/deploy-alpr.yml
+    with:
+      phase: deploy
+    secrets: inherit
+
+  deploy-web:
+    needs: [changes, build-api, build-ingest, build-alpr, build-web, deploy-api, deploy-ingest, deploy-alpr]
+    if: ${{ !cancelled() && !contains(needs.*.result, 'failure') && needs.changes.outputs.web == 'true' }}
+    uses: ./.github/workflows/deploy-web.yml
+    with:
+      phase: deploy
+    secrets: inherit

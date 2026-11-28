@@ -49,7 +49,27 @@ Two separate TLS connections: browser to Cloudflare (Universal edge cert, Let's 
 expires 2041, Full strict). Only Caddy publishes ports; the VPS firewall currently accepts 80/443 from any source, so the origin is not yet locked to
 Cloudflare. Details, the open hardening steps and the PgBouncer/Redis decisions: [origin-hardening-plan.md](origin-hardening-plan.md).
 
-One branch (`main`), three workflows that each run **only when their paths change** (+ a manual "Run workflow" button on each):
+One branch (`main`), one entry workflow, `deploy.yml` ("Deploy"), which decides **which components changed** and runs the component workflows below
+in a fixed order (+ a manual "Run workflow" button on it: `components`, `sync_only`, `image_tag`). The component workflows are reusable
+(`workflow_call`, no triggers of their own) and run twice, with `phase: build` and then `phase: deploy`.
+
+### Deploy order
+
+```
+changes -> ci (once) -> build api | ingest | alpr | web (parallel) -> deploy api -> ingest -> alpr -> web
+```
+
+- **All builds before any deploy.** CI runs once; every changed image / the web bundle is built first. A failed build (or CI) means nothing reaches the VPS.
+- **Dependency order, stop at the first failure.** The api goes first (it applies the migrations the ingest jobs rely on), the web goes last (a new SPA never goes
+  live in front of an api that failed to deploy). Each deploy job lists every earlier job in `needs`, so one failure skips all later ones; a component that did not change is skipped without blocking the chain.
+- **Each step is atomic on its own** (api blue/green, web symlink swap, ingest crontab install); the chain as a whole is **forward-only**: there is no automatic rollback of
+  the steps that already succeeded. That is safe only because releases stay backward compatible: migrations expand/contract, API changes additive, and the api already serves old web builds (open tabs, PWA).
+- **What counts as changed.** `auto` (push, or manual `auto`) diffs against the last **successful push** run of `deploy.yml`, not against the previous commit, so
+  components a failed or replaced run never shipped are picked up by the next run. No successful run yet, or the commit is gone: everything is deployed. The path lists
+  are the old per-workflow filters and live in the `changes` job of `deploy.yml` (editing a `deploy-<component>.yml` redeploys that component, editing `deploy.yml` redeploys all).
+- **One production deploy at a time**: concurrency group `deploy-production` (a newer push replaces a queued run; the next run's diff covers it).
+- **Manual runs**: `components` = `auto` / `all` / `api` / `web` / `ingest` / `alpr`; `image_tag` = api rollback (see "Rollback"); `sync_only` = first-setup api step.
+  After a run with failed jobs, "Re-run failed jobs" continues the same chain; a fresh `auto` run redeploys the components that did not finish.
 
 | Workflow          | Triggers on                                                                 | Does                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ----------------- | --------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -209,8 +229,8 @@ variables: `BACKUP_BUCKET` … `VPS_USER`); `VITE_API_BASE` is optional and not 
 
 Migrations are backward compatible (blue/green rule), so the previous image runs against the current schema.
 
-- **API, by tag (no revert commit, no CI, no build):** GitHub Actions → "Deploy API" → Run workflow, set `image_tag` to the full 40-character commit SHA of the
-  last good deploy (the sha-tagged image is in `ghcr.io/<owner>/carsua-api`; `git log` or an earlier "Deploy API" run shows it). It rewrites the env files
+- **API, by tag (no revert commit, no CI, no build):** GitHub Actions → "Deploy" → Run workflow, set `image_tag` to the full 40-character commit SHA of the
+  last good deploy (the sha-tagged image is in `ghcr.io/<owner>/carsua-api`; `git log` or an earlier "Deploy" run shows it). Only the api is switched (`components` is ignored). It rewrites the env files
   (`GIT_SHA` = that tag), runs the normal blue/green switch with that image, and purges the Cloudflare cache. A bad tag fails the pull and the live colour keeps serving.
   Afterwards the live commit differs from `main`: fix forward, or run the workflow again with an empty `image_tag` to redeploy `main`.
   Compose files and the Caddyfile still come from the commit you run it on (`main`), only the image is old.
@@ -415,7 +435,7 @@ Not worth tuning at current traffic (Cloudflare cache + per-IP limits sit in fro
 7. **Secrets hygiene (rotation skipped by choice 2026-10-28).** Dev values were visible in screenshots/chat during the first deploy: rotate `POSTHOG_PERSONAL_API_KEY` and any other key you consider exposed.
    The production `AUTH_SECRET` and `POSTGRES_PASSWORD` are separate from the dev ones. Optional secrets still unset: `SENTRY_DSN` (only `VITE_SENTRY_DSN` is set, so
    server errors are not tracked), `PLATE_RECOGNIZER_CLOUD_TOKEN`. `TURNSTILE_*` is set (2026-10-27).
-8. **Ingest cron (live 2026-10-28).** `deploy-ingest.yml` (path-filtered: `scripts/**`, shared, db, `infra/vps/*ingest*`) builds `scripts/Dockerfile`, pulls it on the VPS,
+8. **Ingest cron (live 2026-10-28).** `deploy-ingest.yml` (runs when `scripts/**`, shared, db, `infra/vps/*ingest*` change, after the api deploy) builds `scripts/Dockerfile`, pulls it on the VPS,
    writes `/opt/carsua/env/ingest.env` (`DATABASE_URL`, `HC_PING_*`), syncs `run-ingest.sh` / `ingest-status.sh` / the compose file and installs
    `infra/vps/ingest.cron` as the `deploy` user's crontab (replaces it; it was empty). Jobs: `news`, `social`, `wanted` + `wanted-plates` (Garpun, 04:45) + `auctions` (SETAM lots, 04:55) + `prozorro-auctions` (Prozorro.Sale vehicle auctions, 05:05) daily, `auction-proceedings` (debtors register, reasons for SETAM lots, Sunday 02:10, ~800 MB download), `dtp-patrol` (road-crash XLSX, 5th of the month 05:35) and `dtp-hazards` (hazardous sections, 10 Feb 05:45), `rdw-recalls` (2nd of the month 05:55) and `ca-recalls` (3rd of Jan/Apr/Jul/Oct 06:15, ~200 MB download), `plates` Tue + Fri
    (crontab times are the VPS's local time, CET). Details, the first-load procedure and gotchas: SCHEDULE.md. Check: `crontab -l`,

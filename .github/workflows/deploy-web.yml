@@ -1,33 +1,24 @@
 name: Deploy Web
 
+# Reusable: called only by deploy.yml, which orders every component (build all, then deploy api -> ingest -> alpr -> web).
+# The build phase uploads apps/web/dist as an artifact; the deploy phase (last in the chain) ships it, so a new web build never
+# goes live in front of an api that failed to deploy. No triggers and no concurrency group of its own: deploy.yml holds the lock.
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'apps/web/**'
-      - 'packages/shared/**'
-      - 'pnpm-lock.yaml'
-      - 'pnpm-workspace.yaml'
-      - '.github/workflows/deploy-web.yml'
-      - '.github/actions/**'
-  workflow_dispatch:
-
-concurrency:
-  group: deploy-web
-  cancel-in-progress: false
+  workflow_call:
+    inputs:
+      phase:
+        description: 'build = build the SPA and keep it as a run artifact; deploy = upload it to the VPS and switch'
+        type: string
+        required: true
 
 permissions:
   contents: read
 
 jobs:
-  ci:
-    uses: ./.github/workflows/ci.yml
-
-  deploy:
-    needs: ci
+  build:
+    if: ${{ inputs.phase == 'build' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 20
-    environment: production
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -57,6 +48,25 @@ jobs:
           VITE_GOOGLE_MAPS_EMBED_KEY: ${{ vars.VITE_GOOGLE_MAPS_EMBED_KEY }}
         run: pnpm --filter @carplates/web build
 
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: web-dist
+          path: apps/web/dist
+          include-hidden-files: true # public/.well-known
+          if-no-files-found: error
+          retention-days: 3
+
+  deploy:
+    if: ${{ inputs.phase == 'deploy' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    environment: production
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: web-dist
+          path: apps/web/dist
       - uses: ./.github/actions/ssh-setup
         with:
           host: ${{ secrets.VPS_HOST }}

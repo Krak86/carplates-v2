@@ -1,36 +1,29 @@
 name: Deploy ALPR
 
+# Reusable: called only by deploy.yml, which orders every component (build all, then deploy api -> ingest -> alpr -> web).
+# No triggers and no concurrency group of its own: deploy.yml holds the single `deploy-production` lock.
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'services/alpr/**'
-      - 'infra/vps/deploy-alpr.sh'
-      - 'infra/vps/lib.sh'
-      - '.github/actions/**'
-      - '.github/workflows/deploy-alpr.yml'
-  workflow_dispatch:
-
-concurrency:
-  group: deploy-alpr
-  cancel-in-progress: false
+  workflow_call:
+    inputs:
+      phase:
+        description: 'build = push the image to GHCR; deploy = roll the container on the VPS'
+        type: string
+        required: true
 
 permissions:
   contents: read
 
 jobs:
   build:
+    if: ${{ inputs.phase == 'build' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     permissions:
       contents: read
       packages: write
-    outputs:
-      owner: ${{ steps.meta.outputs.owner }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - id: meta
-        uses: ./.github/actions/build-image
+      - uses: ./.github/actions/build-image
         with:
           image: carsua-alpr
           context: services/alpr
@@ -38,7 +31,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
   deploy:
-    needs: build
+    if: ${{ inputs.phase == 'deploy' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     environment: production

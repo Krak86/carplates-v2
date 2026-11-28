@@ -36,7 +36,7 @@ export default function AdminRoute(): ReactNode {
 
       <h1 className="mb-3 text-2xl font-bold">{t('admin.title')}</h1>
 
-      <div role="tablist" className="mb-4 flex gap-2">
+      <div role="tablist" className="mb-4 flex flex-wrap gap-2">
         {ADMIN_TABS.map(id => (
           <button
             key={id}
