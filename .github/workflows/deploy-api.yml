@@ -1,19 +1,16 @@
 name: Deploy API
 
+# Reusable: called only by deploy.yml, which decides when this component changed (the path list lives in its `changes` job), runs CI once,
+# builds every image first and deploys api -> ingest -> alpr -> web. The api goes first because it applies the migrations the others rely on.
+# No triggers and no concurrency group of its own: deploy.yml holds the single `deploy-production` lock. Run it by hand from
+# deploy.yml's "Run workflow" (components, sync_only, image_tag).
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'apps/api/**'
-      - 'packages/shared/**'
-      - 'packages/db/**'
-      - 'infra/**'
-      - 'pnpm-lock.yaml'
-      - 'pnpm-workspace.yaml'
-      - '.github/workflows/deploy-api.yml'
-      - '.github/actions/**'
-  workflow_dispatch:
+  workflow_call:
     inputs:
+      phase:
+        description: 'build = push the image to GHCR; deploy = sync, migrate and switch blue/green on the VPS'
+        type: string
+        required: true
       sync_only:
         description: 'First setup: copy compose files + secrets and start only Postgres (restore the DB dump, then run again without this)'
         type: boolean
@@ -23,21 +20,12 @@ on:
         type: string
         default: ''
 
-concurrency:
-  group: deploy-api
-  cancel-in-progress: false
-
 permissions:
   contents: read
 
 jobs:
-  ci:
-    if: ${{ !inputs.image_tag }}
-    uses: ./.github/workflows/ci.yml
-
   build:
-    needs: ci
-    if: ${{ !inputs.image_tag }}
+    if: ${{ inputs.phase == 'build' && !inputs.image_tag }}
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     permissions:
@@ -52,9 +40,8 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
   deploy:
-    needs: build
-    # A rollback skips ci + build, and a skipped need would skip this job too: run unless a need failed or the run was cancelled.
-    if: ${{ !cancelled() && !contains(needs.*.result, 'failure') }}
+    # deploy.yml only starts this phase once every build passed (a rollback skips ci + build).
+    if: ${{ inputs.phase == 'deploy' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     environment: production # restricted to main; add required reviewers there if you want a click-to-deploy gate

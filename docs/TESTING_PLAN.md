@@ -8,7 +8,7 @@ _"do TESTING_PLAN.md step N"_ and tick its box when done.
 - ~300 Vitest files today: web 117 (jsdom + Testing Library), api 70, shared 60, scripts 53, db 0.
 - Two api tests boot a real Nest/Fastify app (`apps/api/src/spa/spa.controller.test.ts`, `shares/shares.controller.test.ts`) but stub the DB.
 - **No browser tests and no tests against a real Postgres.**
-- `.github/workflows/ci.yml` (type-check, lint, test, audit) gates `deploy-web.yml` and `deploy-api.yml` through `workflow_call`.
+- `.github/workflows/ci.yml` (type-check, lint, test, audit) gates every deploy: `deploy.yml` calls it once through `workflow_call`, before any image is built.
 - `infra/vps/deploy-api.sh` only waits for the Docker `healthz` before the blue/green switch.
 - GitHub runners cannot reach prod (Cloudflare Bot Fight Mode returns 403), so no post-deploy e2e against prod.
 - The last browser check was manual (`docs/deploy.md`, "Browser smoke test", 2026-10-28).

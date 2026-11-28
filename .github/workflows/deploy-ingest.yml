@@ -1,56 +1,37 @@
 name: Deploy ingest
 
+# Reusable: called only by deploy.yml, which decides when this component changed (the path list lives in its `changes` job: scripts/**,
+# shared except releases.ts, db, lockfile, the infra/vps ingest scripts) and runs it after the api deploy, so the migration is in first.
+# No triggers and no concurrency group of its own: deploy.yml holds the single `deploy-production` lock.
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'scripts/**'
-      - 'packages/shared/**'
-      - '!packages/shared/src/releases.ts'
-      - 'packages/db/**'
-      - 'pnpm-lock.yaml'
-      - 'pnpm-workspace.yaml'
-      - 'infra/vps/run-ingest.sh'
-      - 'infra/vps/ingest-status.sh'
-      - 'infra/vps/ingest.cron'
-      - 'infra/vps/deploy-ingest.sh'
-      - 'infra/vps/lib.sh'
-      - 'infra/ci/lib.sh'
-      - '.github/actions/**'
-      - '.github/workflows/deploy-ingest.yml'
-  workflow_dispatch:
-
-concurrency:
-  group: deploy-ingest
-  cancel-in-progress: false
+  workflow_call:
+    inputs:
+      phase:
+        description: 'build = push the image to GHCR; deploy = write the env, pull the image and install the crontab on the VPS'
+        type: string
+        required: true
 
 permissions:
   contents: read
 
 jobs:
-  ci:
-    uses: ./.github/workflows/ci.yml
-
   build:
-    needs: ci
+    if: ${{ inputs.phase == 'build' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     permissions:
       contents: read
       packages: write
-    outputs:
-      owner: ${{ steps.meta.outputs.owner }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - id: meta
-        uses: ./.github/actions/build-image
+      - uses: ./.github/actions/build-image
         with:
           image: carsua-ingest
           file: scripts/Dockerfile
           token: ${{ secrets.GITHUB_TOKEN }}
 
   deploy:
-    needs: build
+    if: ${{ inputs.phase == 'deploy' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     environment: production
